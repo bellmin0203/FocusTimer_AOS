@@ -1,4 +1,7 @@
 pluginManagement {
+
+    includeBuild("build-logic")
+
     repositories {
         google {
             content {
@@ -16,9 +19,28 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
-rootProject.name = "Focus Timer"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+rootProject.name = "FocusTimer"
 include(":app")
- 
+
+// core
+include(
+    ":core:designsystem",
+    ":core:ui",
+    ":core:data",
+    ":core:domain",
+    ":core:util",
+    ":core:common"
+)
+
+// feature
+include(
+    ":feature:timer",
+    ":feature:stats",
+    ":feature:setting",
+)
