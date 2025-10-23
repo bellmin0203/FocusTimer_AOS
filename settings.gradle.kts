@@ -35,7 +35,11 @@ include(
     ":core:data",
     ":core:domain",
     ":core:util",
-    ":core:common"
+    ":core:common",
+    ":core:datastore",
+    ":core:datastore:api",
+    ":core:datastore:impl",
+    ":core:database"
 )
 
 // feature

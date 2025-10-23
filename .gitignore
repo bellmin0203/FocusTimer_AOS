@@ -32,5 +32,7 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
 /focus_timer.md
 /focus_timer_requirements.md
+/design

@@ -1,4 +1,3 @@
-import com.jm.focustimer.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
@@ -15,9 +14,6 @@ class AndroidPresentationUiPlugin : Plugin<Project> {
             }
 
             dependencies {
-                "implementation"(libs.findBundle("compose").get())
-                "debugImplementation"(libs.findBundle("compose.debug").get())
-
                 "implementation"(project(":core:ui"))
                 "implementation"(project(":core:designsystem"))
                 "implementation"(project(":core:domain"))
