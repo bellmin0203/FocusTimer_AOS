@@ -1,0 +1,46 @@
+package com.jm.focustimer.designsystem.icon
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Leaderboard
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.ui.graphics.vector.ImageVector
+
+/**
+ * Focus Timer 앱에서 사용되는 Material Icons
+ * Material Symbols Outlined과 매핑
+ */
+object FocusTimerIcons {
+    // Navigation Icons
+    val Timer: ImageVector = Icons.Outlined.Timer
+    val BarChart: ImageVector = Icons.Outlined.BarChart
+    val ListAlt: ImageVector = Icons.AutoMirrored.Filled.ListAlt
+    val Settings: ImageVector = Icons.Filled.Settings
+    val Leaderboard: ImageVector = Icons.Outlined.Leaderboard
+
+    // Action Icons
+    val PlayArrow: ImageVector = Icons.Filled.PlayArrow
+    val Pause: ImageVector = Icons.Filled.Pause
+    val RestartAlt: ImageVector = Icons.Filled.RestartAlt
+    val Close: ImageVector = Icons.Filled.Close
+    val Add: ImageVector = Icons.Filled.Add
+    val ChevronRight: ImageVector = Icons.Filled.ChevronRight
+    val ArrowBack: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
+    val KeyboardArrowRight: ImageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
+
+    // Session Type Icons
+    val Psychology: ImageVector = Icons.Filled.Psychology  // Focus 아이콘
+    val Coffee: ImageVector = Icons.Filled.LocalCafe       // Break 아이콘
+}

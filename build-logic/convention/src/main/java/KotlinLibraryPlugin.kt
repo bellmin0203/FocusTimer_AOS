@@ -1,5 +1,5 @@
 import com.jm.focustimer.convention.configureCoroutineKotlin
-import com.jm.focustimer.convention.configureKotlin
+import com.jm.focustimer.convention.configureKotlinJvm
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -10,7 +10,7 @@ class KotlinLibraryPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("org.jetbrains.kotlin.jvm")
 
-                configureKotlin()
+                configureKotlinJvm()
                 configureCoroutineKotlin()
             }
             println(">>> KotlinLibraryPlugin done")
