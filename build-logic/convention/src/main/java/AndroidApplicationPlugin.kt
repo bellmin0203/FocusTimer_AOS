@@ -1,6 +1,7 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.jm.focustimer.convention.ExtensionType
 import com.jm.focustimer.convention.configureBuildTypes
+import com.jm.focustimer.convention.configureKotestAndroid
 import com.jm.focustimer.convention.configureKotlinAndroid
 import com.jm.focustimer.convention.libs
 import org.gradle.api.Plugin
@@ -26,8 +27,8 @@ class AndroidApplicationPlugin : Plugin<Project> {
                 }
 
                 configureKotlinAndroid()
-
                 configureBuildTypes(ExtensionType.APPLICATION)
+                configureKotestAndroid()
             }
 
             println(">>> AndroidApplicationPlugin done")
