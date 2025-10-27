@@ -1,5 +1,3 @@
-package com.jm.focustimer.ui.util
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,8 +33,8 @@ object TimeFormatter {
         val secs = absSeconds % 60
 
         return when {
-            hours > 0 -> String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs)
-            else -> String.format(Locale.getDefault(), "%d:%02d", minutes, secs)
+            hours > 0 -> String.Companion.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs)
+            else -> String.Companion.format(Locale.getDefault(), "%d:%02d", minutes, secs)
         }
     }
 
@@ -63,7 +61,7 @@ object TimeFormatter {
         val absSeconds = abs(seconds)
         val minutes = absSeconds / 60
         val secs = absSeconds % 60
-        return String.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
+        return String.Companion.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
     }
 
     /**
@@ -78,13 +76,17 @@ object TimeFormatter {
      */
     fun secondsToMinutes(seconds: Int): String {
         val minutes = seconds / 60.0
-        return String.format(Locale.getDefault(), "%.1f", minutes)
+        return String.Companion.format(Locale.getDefault(), "%.1f", minutes)
     }
 
     /**
      * 퍼센트 포맷팅
      */
     fun formatPercentage(value: Float): String {
-        return String.format(Locale.getDefault(), "%.0f%%", value * 100)
+        return String.Companion.format(Locale.getDefault(), "%.0f%%", value * 100)
     }
+
+    fun Int.SECONDS(): Long = this * 1000L
+    fun Int.MINUTES(): Long = this * 60 * 1000L
+    fun Int.HOURS(): Long = this * 60 * 60 * 1000L
 }
