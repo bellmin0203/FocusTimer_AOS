@@ -8,18 +8,20 @@ import kotlin.math.abs
  */
 object TimeFormatter {
     /**
-     * 초를 "1h 30m" 형식으로 변환
+     * 초를 "HH시간 MM분 SS초" 형식으로 변환
      */
     fun formatDuration(seconds: Int): String {
         val absSeconds = abs(seconds)
         val hours = absSeconds / 3600
         val minutes = (absSeconds % 3600) / 60
+        val seconds = absSeconds % 3600 % 60
 
         return when {
-            hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
-            hours > 0 -> "${hours}h"
-            minutes > 0 -> "${minutes}m"
-            else -> "${absSeconds}s"
+            hours > 0 && minutes > 0 && seconds > 0 -> "${hours}시간 ${minutes}분 ${seconds}초"
+            hours > 0 && minutes > 0 -> "${hours}시간 ${minutes}분"
+            hours > 0 -> "${hours}시간"
+            minutes > 0 -> "${minutes}분"
+            else -> "${seconds}초"
         }
     }
 
@@ -86,7 +88,7 @@ object TimeFormatter {
         return String.Companion.format(Locale.getDefault(), "%.0f%%", value * 100)
     }
 
-    fun Int.SECONDS(): Long = this * 1000L
-    fun Int.MINUTES(): Long = this * 60 * 1000L
-    fun Int.HOURS(): Long = this * 60 * 60 * 1000L
+    fun Int.seconds(): Long = this * 1000L
+    fun Int.minutes(): Long = this * 60 * 1.seconds()
+    fun Int.hours(): Long = this * 60 * 1.minutes()
 }

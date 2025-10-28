@@ -134,3 +134,36 @@ fun FocusCenterAlignedTopBarWithoutNavIconPreview() {
         FocusCenterAlignedTopBar(title = "Sessions")
     }
 }
+
+/**
+ * 타이머 화면 전용 상단 바
+ * 중앙: 앱 이름만 표시 (심플한 디자인)
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimerTopBar(
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = "Focus Timer",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        modifier = modifier,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            scrolledContainerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface
+        )
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TimerTopBarPreview() {
+    FocusTimerTheme {
+        TimerTopBar()
+    }
+}
