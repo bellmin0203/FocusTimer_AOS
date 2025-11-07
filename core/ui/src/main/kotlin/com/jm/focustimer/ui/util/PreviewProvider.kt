@@ -1,7 +1,9 @@
 package com.jm.focustimer.ui.util
 
+import com.jm.focustimer.domain.model.Preset
 import com.jm.focustimer.ui.component.ChartData
-import com.jm.focustimer.ui.component.Preset
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Compose Preview용 샘플 데이터 제공자
@@ -13,21 +15,21 @@ object PreviewProvider {
     val samplePresets = listOf(
         Preset(
             id = 1,
-            title = "Focus",
-            duration = 25,
-            unit = "min"
+            name = "Focus",
+            duration = 25.minutes,
+            createdAt = Instant.now()
         ),
         Preset(
             id = 2,
-            title = "Short Break",
-            duration = 5,
-            unit = "min"
+            name = "Short Break",
+            duration = 5.minutes,
+            createdAt = Instant.now()
         ),
         Preset(
             id = 3,
-            title = "Long Break",
-            duration = 15,
-            unit = "min"
+            name = "Long Break",
+            duration = 15.minutes,
+            createdAt = Instant.now()
         )
     )
 

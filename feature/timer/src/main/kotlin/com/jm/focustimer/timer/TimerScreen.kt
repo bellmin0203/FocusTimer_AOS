@@ -1,8 +1,8 @@
 package com.jm.focustimer.timer
 
-import TimeFormatter
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,17 +39,22 @@ import com.jm.focustimer.designsystem.component.FocusPrimaryButton
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
+import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.timer.component.QuickTimeButtons
+import com.jm.focustimer.timer.component.TimeInputBottomSheet
 import com.jm.focustimer.timer.model.HapticPattern
 import com.jm.focustimer.timer.model.TimerIntent
 import com.jm.focustimer.timer.model.TimerSideEffect
 import com.jm.focustimer.timer.model.TimerUiState
-import com.jm.focustimer.ui.component.Preset
 import com.jm.focustimer.ui.component.PresetsBottomSheet
 import com.jm.focustimer.ui.component.TimerTopBar
+import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun TimerScreen(
@@ -84,8 +89,10 @@ fun TimerScreen(
                     }
                 }
                 is TimerSideEffect.ShowReminder -> {
-                    val message =
-                        "${TimeFormatter.formatDuration(effect.remainingSeconds)} 남았습니다."
+                    val message = effect.remainingTime.toComponents { _, minutes, seconds, _ ->
+                        "${minutes}분 ${seconds}초 남았습니다."
+                    }
+
                     scope.launch {
                         snackbarHostState.showSnackbar(message)
                     }
@@ -130,6 +137,7 @@ private fun TimerScreen(
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showPresets by remember { mutableStateOf(false) }
+    var showTimeInput by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -162,21 +170,31 @@ private fun TimerScreen(
                         .background(
                             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
                         )
-                        .padding(vertical = 8.dp, horizontal = 16.dp),
+                        .clickable(enabled = !uiState.isActive) {
+                            showTimeInput = true
+                        }
+                        .padding(vertical = 6.dp, horizontal = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // HH:MM:SS 형식으로 시간 표시
+                    val timeText = uiState.formattedTime
+
                     Text(
-                        text = "${uiState.timeInSeconds / 60}",
-                        style = MaterialTheme.typography.displayLarge,
+                        text = timeText,
+                        style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "minutes",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
+
+            // 빠른 시간 설정 버튼
+            QuickTimeButtons(
+                onTimeSelected = { time ->
+                    onIntent(TimerIntent.SetTime(time))
+                },
+                enabled = !uiState.isActive,
+                modifier = Modifier.padding(top = 24.dp)
+            )
 
             // 하단 컨트롤 영역
             Column(
@@ -202,14 +220,16 @@ private fun TimerScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
 
-                    // 리셋 버튼
-                    FocusIconButton(
-                        onClick = {
-                            onIntent(TimerIntent.Stop)
-                        },
-                        icon = FocusTimerIcons.RestartAlt,
-                        contentDescription = "Reset"
-                    )
+                    if (uiState.isActive) {
+                        // 리셋 버튼
+                        FocusIconButton(
+                            onClick = {
+                                onIntent(TimerIntent.Stop)
+                            },
+                            icon = FocusTimerIcons.RestartAlt,
+                            contentDescription = "Reset"
+                        )
+                    }
                 }
 
                 // 프리셋 & 설정 버튼
@@ -251,8 +271,7 @@ private fun TimerScreen(
                 },
                 presets = presets,
                 onPresetClick = { preset ->
-                    val timeInMillis = preset.duration * 60 * 1000L
-                    onIntent(TimerIntent.SetTime(timeInMillis))
+                    onIntent(TimerIntent.SetTime( preset.duration))
                     scope.launch {
                         sheetState.hide()
                         showPresets = false
@@ -267,6 +286,35 @@ private fun TimerScreen(
                 }
             )
         }
+
+        // PickerState 생성
+        val hourPickerState = rememberPickerState()
+        val minutePickerState = rememberPickerState()
+        val secondPickerState = rememberPickerState()
+
+        // 시간 입력 Bottom Sheet
+        if (showTimeInput) {
+            TimeInputBottomSheet(
+                initialTime = uiState.remainingTime,
+                hourPickerState = hourPickerState,
+                minutePickerState = minutePickerState,
+                secondPickerState = secondPickerState,
+                onDismissRequest = {
+                    val hours = hourPickerState.selectedItem.toIntOrNull() ?: 0
+                    val minutes = minutePickerState.selectedItem.toIntOrNull() ?: 0
+                    val seconds = secondPickerState.selectedItem.toIntOrNull() ?: 0
+
+                    val setTime = hours.hours + minutes.minutes + seconds.seconds
+                    if (setTime > 0.seconds) onIntent(TimerIntent.SetTime(setTime))
+                    showTimeInput = false
+                },
+                onConfirm = { time ->
+                    onIntent(TimerIntent.SetTime(time))
+                    onIntent(TimerIntent.Start)
+                    showTimeInput = false
+                }
+            )
+        }
     }
 }
 
@@ -276,7 +324,7 @@ fun TimerScreenPreview() {
     // 샘플 프리셋 데이터
     val presets = remember { PreviewProvider.samplePresets }
     val mockUiState = TimerUiState(
-        timeInSeconds = 1500, // 25 minutes
+        remainingTime = 25.minutes, // 25 minutes
         isRunning = false,
         progress = 0f
     )

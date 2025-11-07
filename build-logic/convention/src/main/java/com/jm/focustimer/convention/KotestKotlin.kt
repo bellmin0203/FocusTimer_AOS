@@ -29,6 +29,8 @@ internal fun Project.configureJUnit() {
     // JUnit5 플랫폼 설정 (Kotest는 JUnit5 위에서 실행됨)
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        // Byte Buddy 에이전트 경고를 숨기기 위해 동적 에이전트 로딩을 허용한다
+        jvmArgs("-XX:+EnableDynamicAgentLoading")
     }
 
     println(">>> configureJUnit done")

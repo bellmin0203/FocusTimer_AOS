@@ -5,6 +5,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * 카운트다운 타이머 UseCase
@@ -19,19 +21,19 @@ import javax.inject.Inject
 class CountdownTimerUseCase @Inject constructor() {
 
     operator fun invoke(
-        durationMillis: Long,
-        reminderThresholds: List<Long> = emptyList()
+        totalDuration: Duration,
+        reminderThresholds: List<Duration> = emptyList()
     ): Flow<TimerEvent> = flow {
-        require(durationMillis > 0) { "Duration must be positive" }
-        require(reminderThresholds.all { it > 0 }) { "All reminder thresholds must be positive" }
+        require(totalDuration > 0.seconds) { "Duration must be positive" }
+        require(reminderThresholds.all { it > 0.seconds }) { "All reminder thresholds must be positive" }
 
         // 리마인더 임계값을 정렬하여 중복 제거
         val sortedThresholds = reminderThresholds.distinct().sorted()
         val reminderSet = sortedThresholds.toMutableSet()
 
-        var remainingTime = durationMillis
+        var remainingTime = totalDuration
 
-        while (remainingTime > 0) {
+        while (remainingTime > 0.seconds) {
             // 현재 남은 시간에 대한 Tick 이벤트 발생
             emit(TimerEvent.Tick(remainingTime))
 
@@ -54,6 +56,6 @@ class CountdownTimerUseCase @Inject constructor() {
     }
 
     companion object {
-        private const val TICK_INTERVAL = 1000L // 1초
+        private val TICK_INTERVAL = 1.seconds // 1초
     }
 }

@@ -1,5 +1,7 @@
 package com.jm.focustimer.timer.model
 
+import kotlin.time.Duration
+
 /**
  * 타이머 화면에서 발생하는 사용자 액션을 나타내는 Intent
  *
@@ -9,9 +11,9 @@ sealed interface TimerIntent {
 
     /**
      * 타이머 시간 설정
-     * @param timeInMillis 설정할 시간 (밀리초)
+     * @param totalTime 설정할 시간
      */
-    data class SetTime(val timeInMillis: Long) : TimerIntent
+    data class SetTime(val totalTime: Duration) : TimerIntent
 
     /**
      * 타이머 시작

@@ -1,5 +1,7 @@
 package com.jm.focustimer.timer.model
 
+import kotlin.time.Duration
+
 sealed interface TimerSideEffect {
     /**
      * 에러 메시지 표시 (Snackbar)
@@ -19,9 +21,9 @@ sealed interface TimerSideEffect {
 
     /**
      * 리마인더 알림
-     * @param remainingSeconds 남은 시간 (초)
+     * @param remainingTime 남은 시간 (초)
      */
-    data class ShowReminder(val remainingSeconds: Int) : TimerSideEffect
+    data class ShowReminder(val remainingTime: Duration) : TimerSideEffect
 }
 
 enum class HapticPattern {

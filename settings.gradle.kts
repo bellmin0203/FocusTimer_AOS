@@ -39,7 +39,8 @@ include(
     ":core:datastore",
     ":core:datastore:api",
     ":core:datastore:impl",
-    ":core:database"
+    ":core:database",
+    ":core:testing"
 )
 
 // feature

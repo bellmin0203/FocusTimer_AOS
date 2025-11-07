@@ -1,7 +1,5 @@
 package com.jm.focustimer.timer
 
-import TimeFormatter.minutes
-import TimeFormatter.seconds
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.focustimer.timer.model.HapticPattern
@@ -25,6 +23,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * 타이머 화면의 ViewModel
@@ -49,15 +51,12 @@ class TimerViewModel @Inject constructor(
     // 초기 설정 시간 (밀리초)
     private var initialTimeInMillis: Long = 0L
 
-    // 타이머 완료 후 초과 시간 추적용 시작 시간
-    private var completedAtMillis: Long = 0L
-
     /**
      * 사용자 Intent 처리
      */
     fun onIntent(intent: TimerIntent) {
         when (intent) {
-            is TimerIntent.SetTime -> handleSetTime(intent.timeInMillis)
+            is TimerIntent.SetTime -> handleSetTime(intent.totalTime)
             is TimerIntent.Start -> handleStart()
             is TimerIntent.Pause -> handlePause()
             is TimerIntent.Resume -> handleResume()
@@ -69,26 +68,29 @@ class TimerViewModel @Inject constructor(
     /**
      * 타이머 시간 설정
      */
-    private fun handleSetTime(timeInMillis: Long) {
+    private fun handleSetTime(totalTime: Duration) {
         // 타이머가 실행 중이 아닐 때만 시간 설정 가능
         if (_uiState.value.isActive) {
             sendSideEffect(TimerSideEffect.ShowError("타이머 실행 중에는 시간을 변경할 수 없습니다."))
             return
         }
 
+        val timeInMillis = totalTime.inWholeMilliseconds
         // 유효성 검사
-        if (timeInMillis <= 0) {
+        if (totalTime <= 0.seconds) {
             sendSideEffect(TimerSideEffect.ShowError("시간은 0보다 커야 합니다."))
             return
         }
 
         initialTimeInMillis = timeInMillis
-        val timeInSeconds = (timeInMillis / 1000).toInt()
+
+        // 최대 60분을 기준으로 progress 계산
+        val progress = (timeInMillis.toFloat() / MAX_TIME.inWholeMilliseconds).coerceIn(0f, 1f)
 
         _uiState.update {
             it.copy(
-                timeInSeconds = timeInSeconds,
-                progress = 1f,
+                remainingTime = totalTime,
+                progress = progress,
                 error = null
             )
         }
@@ -104,7 +106,7 @@ class TimerViewModel @Inject constructor(
         if (currentState.isRunning) return
 
         // 시간이 설정되지 않았으면 에러
-        if (currentState.timeInSeconds <= 0) {
+        if (currentState.remainingTime <= 0.seconds) {
             sendSideEffect(TimerSideEffect.ShowError("시간을 설정해주세요."))
             return
         }
@@ -152,23 +154,20 @@ class TimerViewModel @Inject constructor(
 
         // progress를 시간으로 변환 (1~60분)
         // progress가 0에 가까울 때는 최소 1분, 1에 가까울 때는 최대 60분
-        val minutes = if (newProgress < 0.01f) {
+        val updatedMinutes = if (newProgress < 0.01f) {
             0
         } else {
             (newProgress * 60).toInt().coerceIn(1, 60)
         }
 
-        val timeInMillis = minutes.minutes()
-        initialTimeInMillis = timeInMillis
-        val timeInSeconds = (timeInMillis / 1000).toInt()
+        initialTimeInMillis = updatedMinutes.minutes.inWholeMilliseconds
 
         val newState = _uiState.value.copy(
-            timeInSeconds = timeInSeconds,
+            remainingTime = updatedMinutes.minutes,
             progress = newProgress,
             error = null
         )
         _uiState.value = newState
-        saveState(newState)
     }
 
     /**
@@ -178,50 +177,52 @@ class TimerViewModel @Inject constructor(
         // 이전 타이머 취소
         timerJob?.cancel()
 
-        val currentTimeInMillis = _uiState.value.timeInSeconds.seconds()
+        val remainingTime = _uiState.value.remainingTime
 
         _uiState.update {
             it.copy(
                 isRunning = true,
                 isPaused = false,
                 isCompleted = false,
-                overtimeInSeconds = 0,
+                overtime = 0.seconds,
                 error = null
             )
         }
 
         timerJob = viewModelScope.launch {
-            countdownTimerUseCase(durationMillis = currentTimeInMillis)
+            countdownTimerUseCase(totalDuration = remainingTime)
                 .onEach { event ->
                     when (event) {
                         is TimerEvent.Tick -> {
                             // 타이머 진행 중
-                            val remainingSeconds = (event.remainingTimeMillis / 1000).toInt()
+                            val remainingTime = event.remainingTime
                             val progress = if (initialTimeInMillis > 0) {
-                                event.remainingTimeMillis.toFloat() / initialTimeInMillis
+                                remainingTime.inWholeMilliseconds.toFloat() / MAX_TIME.inWholeMilliseconds.toFloat()
                             } else {
                                 0f
                             }
 
                             _uiState.update {
                                 it.copy(
-                                    timeInSeconds = remainingSeconds,
+                                    remainingTime = remainingTime,
                                     progress = progress
                                 )
                             }
 
                             // 마지막 5초는 햅틱 피드백
-                            if (remainingSeconds in 1..5) {
+                            if (remainingTime in 1.seconds..5.seconds) {
                                 sendSideEffect(TimerSideEffect.HapticFeedback(HapticPattern.TICK))
                             }
                         }
 
                         is TimerEvent.Completed -> {
+                            // 이미 완료 상태면 중복 처리 방지
+                            if (_uiState.value.isCompleted) return@onEach
+
                             // 타이머 완료
-                            completedAtMillis = System.currentTimeMillis()
                             _uiState.update {
                                 it.copy(
-                                    timeInSeconds = 0,
+                                    remainingTime = 0.seconds,
                                     isCompleted = true,
                                     isRunning = false,
                                     progress = 0f
@@ -238,8 +239,8 @@ class TimerViewModel @Inject constructor(
                         is TimerEvent.Reminder -> {
                             // 리마인더 이벤트 처리 (필요 시 구현)
                             // 예: 알림 표시, 햅틱 피드백 등
-                            val remainingSeconds = (event.remainingTimeMillis / 1000).toInt()
-                            sendSideEffect(TimerSideEffect.ShowReminder(remainingSeconds))
+                            val remainingTime = event.remainingTime
+                            sendSideEffect(TimerSideEffect.ShowReminder(remainingTime))
                             sendSideEffect(TimerSideEffect.HapticFeedback(HapticPattern.REMINDER))
                         }
                     }
@@ -256,18 +257,19 @@ class TimerViewModel @Inject constructor(
      * 타이머 완료 후 초과 시간 추적
      */
     private fun startOvertimeTracking() {
+        // 기존 Job 취소 (중복 실행 방지)
+        timerJob?.cancel()
+
         timerJob = viewModelScope.launch {
             flow {
                 while (true) {
-                    delay(1.seconds())
-                    val overtimeSeconds =
-                        ((System.currentTimeMillis() - completedAtMillis) / 1000).toInt()
-                    emit(overtimeSeconds)
+                    delay(1.seconds)
+                    emit(_uiState.value.overtime + 1.seconds)
                 }
             }
-                .onEach { overtimeSeconds ->
+                .onEach { newOvertime ->
                     _uiState.update {
-                        it.copy(overtimeInSeconds = overtimeSeconds)
+                        it.copy(overtime = newOvertime)
                     }
                 }
                 .catch { exception ->
@@ -302,13 +304,13 @@ class TimerViewModel @Inject constructor(
      */
     private fun stopTimer() {
         timerJob?.cancel()
-        completedAtMillis = 0L
 
-        val timeInSeconds = (initialTimeInMillis / 1000).toInt()
+        val progress = (initialTimeInMillis.toFloat() / MAX_TIME.inWholeMilliseconds.toFloat()).coerceIn(0f, 1f)
+
         _uiState.update {
             TimerUiState(
-                timeInSeconds = timeInSeconds,
-                progress = 1f
+                remainingTime = initialTimeInMillis.milliseconds,
+                progress = progress
             )
         }
     }
@@ -329,5 +331,9 @@ class TimerViewModel @Inject constructor(
         super.onCleared()
         timerJob?.cancel()
         _sideEffect.close() // Channel 정리
+    }
+
+    companion object {
+        val MAX_TIME = 60.minutes
     }
 }

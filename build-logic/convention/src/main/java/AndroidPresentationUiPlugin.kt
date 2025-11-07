@@ -1,4 +1,3 @@
-import com.jm.focustimer.convention.configureRobolectric
 import com.jm.focustimer.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -24,9 +23,9 @@ class AndroidPresentationUiPlugin : Plugin<Project> {
                 "implementation"(project(":core:domain"))
                 "implementation"(project(":core:data"))
                 "implementation"(project(":core:util"))
-            }
 
-            configureRobolectric()
+                "testImplementation"(project(":core:testing"))
+            }
         }
         println(">>> AndroidPresentationUiPlugin done")
     }

@@ -7,6 +7,10 @@ import kotlin.math.abs
  * 시간 포맷팅 유틸리티
  */
 object TimeFormatter {
+    const val SECONDS_PER_MINUTE = 60L
+    const val SECONDS_PER_HOUR = 3600L
+    const val MILLIS_PER_SECOND = 1000L
+
     /**
      * 초를 "HH시간 MM분 SS초" 형식으로 변환
      */
@@ -26,7 +30,7 @@ object TimeFormatter {
     }
 
     /**
-     * 초를 "1:30:00" 형식으로 변환
+     * 초를 "01:30:00" 형식으로 변환
      */
     fun formatDurationWithColon(seconds: Int): String {
         val absSeconds = abs(seconds)
@@ -35,8 +39,8 @@ object TimeFormatter {
         val secs = absSeconds % 60
 
         return when {
-            hours > 0 -> String.Companion.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs)
-            else -> String.Companion.format(Locale.getDefault(), "%d:%02d", minutes, secs)
+            hours > 0 -> String.Companion.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs)
+            else -> String.Companion.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
         }
     }
 
@@ -49,10 +53,10 @@ object TimeFormatter {
     }
 
     /**
-     * Timestamp를 "Oct 20, 2025" 형식으로 변환
+     * Timestamp를 "2025년 10월 25일" 형식으로 변환
      */
     fun formatDate(timestamp: Long): String {
-        val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val formatter = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
         return formatter.format(Date(timestamp))
     }
 
@@ -67,28 +71,14 @@ object TimeFormatter {
     }
 
     /**
-     * 분을 "25 min" 형식으로 변환
-     */
-    fun formatMinutes(minutes: Int): String {
-        return "$minutes min"
-    }
-
-    /**
-     * 초를 분 단위로 변환 (소수점 첫째자리)
-     */
-    fun secondsToMinutes(seconds: Int): String {
-        val minutes = seconds / 60.0
-        return String.Companion.format(Locale.getDefault(), "%.1f", minutes)
-    }
-
-    /**
      * 퍼센트 포맷팅
      */
     fun formatPercentage(value: Float): String {
         return String.Companion.format(Locale.getDefault(), "%.0f%%", value * 100)
     }
 
-    fun Int.seconds(): Long = this * 1000L
-    fun Int.minutes(): Long = this * 60 * 1.seconds()
-    fun Int.hours(): Long = this * 60 * 1.minutes()
+
+    fun Int.secondsToMillis(): Long = this * 1000L
+    fun Int.minutesToMillis(): Long = this * 60 * 1.secondsToMillis()
+    fun Int.hoursToMillis(): Long = this * 60 * 1.minutesToMillis()
 }

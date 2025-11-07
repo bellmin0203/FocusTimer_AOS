@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * CountdownTimerUseCase 테스트
@@ -28,7 +29,10 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
         val events = mutableListOf<TimerEvent>()
         val useCase = CountdownTimerUseCase()
         val job = launch {
-            useCase(durationMillis, reminderThresholds).collect { events.add(it) }
+            useCase(
+                durationMillis.milliseconds,
+                reminderThresholds.map { it.milliseconds }
+            ).collect { events.add(it) }
         }
         advanceTimeBy(durationMillis)
         advanceUntilIdle()
@@ -58,11 +62,11 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
 
             Then("Tick 이벤트는 5초부터 1초까지 카운트다운 해야 한다") {
                 val tickEvents = events.filterIsInstance<TimerEvent.Tick>()
-                tickEvents[0].remainingTimeMillis shouldBe FIVE_SECONDS
-                tickEvents[1].remainingTimeMillis shouldBe FOUR_SECONDS
-                tickEvents[2].remainingTimeMillis shouldBe THREE_SECONDS
-                tickEvents[3].remainingTimeMillis shouldBe TWO_SECONDS
-                tickEvents[4].remainingTimeMillis shouldBe ONE_SECOND
+                tickEvents[0].remainingTime shouldBe FIVE_SECONDS.milliseconds
+                tickEvents[1].remainingTime shouldBe FOUR_SECONDS.milliseconds
+                tickEvents[2].remainingTime shouldBe THREE_SECONDS.milliseconds
+                tickEvents[3].remainingTime shouldBe TWO_SECONDS.milliseconds
+                tickEvents[4].remainingTime shouldBe ONE_SECOND.milliseconds
             }
 
             Then("마지막 이벤트는 Completed 이벤트여야 한다") {
@@ -87,14 +91,14 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
             Then("5초 남았을 때 Reminder 이벤트가 발생해야 한다") {
                 val reminderEvents = events.filterIsInstance<TimerEvent.Reminder>()
                 reminderEvents.size shouldBe 1
-                reminderEvents[0].remainingTimeMillis shouldBe FIVE_SECONDS
+                reminderEvents[0].remainingTime shouldBe FIVE_SECONDS.milliseconds
             }
 
             Then("Reminder 이벤트는 해당 Tick 이벤트 직후에 발생해야 한다") {
                 val reminderIndex = events.indexOfFirst { it is TimerEvent.Reminder }
                 val previousEvent = events[reminderIndex - 1]
                 previousEvent.shouldBeInstanceOf<TimerEvent.Tick>()
-                (previousEvent as TimerEvent.Tick).remainingTimeMillis shouldBe FIVE_SECONDS
+                (previousEvent as TimerEvent.Tick).remainingTime shouldBe FIVE_SECONDS.milliseconds
             }
         }
     }
@@ -110,9 +114,9 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
 
                     val reminderEvents = events.filterIsInstance<TimerEvent.Reminder>()
                     reminderEvents.size shouldBe 3
-                    reminderEvents[0].remainingTimeMillis shouldBe TEN_SECONDS
-                    reminderEvents[1].remainingTimeMillis shouldBe FIVE_SECONDS
-                    reminderEvents[2].remainingTimeMillis shouldBe THREE_SECONDS
+                    reminderEvents[0].remainingTime shouldBe TEN_SECONDS.milliseconds
+                    reminderEvents[1].remainingTime shouldBe FIVE_SECONDS.milliseconds
+                    reminderEvents[2].remainingTime shouldBe THREE_SECONDS.milliseconds
                 }
             }
         }
@@ -129,8 +133,8 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
 
                     val reminderEvents = events.filterIsInstance<TimerEvent.Reminder>()
                     reminderEvents.size shouldBe 2
-                    reminderEvents[0].remainingTimeMillis shouldBe FIVE_SECONDS
-                    reminderEvents[1].remainingTimeMillis shouldBe THREE_SECONDS
+                    reminderEvents[0].remainingTime shouldBe FIVE_SECONDS.milliseconds
+                    reminderEvents[1].remainingTime shouldBe THREE_SECONDS.milliseconds
                 }
             }
         }
@@ -171,7 +175,7 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
                 runTest {
                     val useCase = CountdownTimerUseCase()
                     val result = runCatching {
-                        useCase(durationMillis).collect { }
+                        useCase(durationMillis.milliseconds).collect { }
                     }
                     result.isFailure shouldBe true
                     result.exceptionOrNull().shouldBeInstanceOf<IllegalArgumentException>()
@@ -189,7 +193,10 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
                 runTest {
                     val useCase = CountdownTimerUseCase()
                     val result = runCatching {
-                        useCase(durationMillis, reminderThresholds).collect { }
+                        useCase(
+                            durationMillis.milliseconds,
+                            reminderThresholds.map { it.milliseconds }
+                        ).collect { }
                     }
                     result.isFailure shouldBe true
                     result.exceptionOrNull().shouldBeInstanceOf<IllegalArgumentException>()
@@ -223,8 +230,8 @@ class CountdownTimerUseCaseTest : BehaviorSpec({
 
             Then("1분과 30초에 Reminder가 발생해야 한다") {
                 val reminderEvents = events.filterIsInstance<TimerEvent.Reminder>()
-                reminderEvents[0].remainingTimeMillis shouldBe ONE_MINUTE
-                reminderEvents[1].remainingTimeMillis shouldBe THIRTY_SECONDS
+                reminderEvents[0].remainingTime shouldBe ONE_MINUTE.milliseconds
+                reminderEvents[1].remainingTime shouldBe THIRTY_SECONDS.milliseconds
             }
         }
     }
