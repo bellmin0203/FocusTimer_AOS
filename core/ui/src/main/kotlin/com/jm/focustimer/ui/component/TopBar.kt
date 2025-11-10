@@ -142,7 +142,8 @@ fun FocusCenterAlignedTopBarWithoutNavIconPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimerTopBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMenuClick: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -152,6 +153,14 @@ fun TimerTopBar(
             )
         },
         modifier = modifier,
+        navigationIcon = {
+            IconButton(onClick = onMenuClick) {
+                Icon(
+                    imageVector = FocusTimerIcons.Menu,
+                    contentDescription = "메뉴 열기"
+                )
+            }
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
             scrolledContainerColor = MaterialTheme.colorScheme.surface,

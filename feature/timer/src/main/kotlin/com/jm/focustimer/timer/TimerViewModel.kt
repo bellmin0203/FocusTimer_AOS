@@ -2,6 +2,10 @@ package com.jm.focustimer.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jm.focustimer.domain.usecase.AddPresetUseCase
+import com.jm.focustimer.domain.usecase.DeletePresetUseCase
+import com.jm.focustimer.domain.usecase.GetAllPresetsUseCase
+import com.jm.focustimer.domain.usecase.UpdatePresetUseCase
 import com.jm.focustimer.timer.model.HapticPattern
 import com.jm.focustimer.timer.model.TimerEvent
 import com.jm.focustimer.timer.model.TimerIntent
@@ -36,6 +40,10 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     private val countdownTimerUseCase: CountdownTimerUseCase,
+    private val getAllPresetsUseCase: GetAllPresetsUseCase,
+    private val addPresetUseCase: AddPresetUseCase,
+    private val updatePresetUseCase: UpdatePresetUseCase,
+    private val deletePresetUseCase: DeletePresetUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -51,6 +59,22 @@ class TimerViewModel @Inject constructor(
     // 초기 설정 시간 (밀리초)
     private var initialTimeInMillis: Long = 0L
 
+    init {
+        // 프리셋 목록 관찰
+        observePresets()
+    }
+
+    /**
+     * 프리셋 목록을 관찰하여 UI 상태에 반영
+     */
+    private fun observePresets() {
+        getAllPresetsUseCase()
+            .onEach { presets ->
+                _uiState.update { it.copy(presets = presets) }
+            }
+            .launchIn(viewModelScope)
+    }
+
     /**
      * 사용자 Intent 처리
      */
@@ -62,6 +86,14 @@ class TimerViewModel @Inject constructor(
             is TimerIntent.Resume -> handleResume()
             is TimerIntent.Stop -> handleStop()
             is TimerIntent.DragProgress -> handleDragProgress(intent.progress)
+            is TimerIntent.SelectPreset -> handleSelectPreset(intent.presetId)
+            is TimerIntent.SaveAsPreset -> handleSaveAsPreset(intent.name)
+            is TimerIntent.DeletePreset -> handleDeletePreset(intent.presetId)
+            is TimerIntent.UpdatePreset -> handleUpdatePreset(
+                intent.presetId,
+                intent.name,
+                intent.duration
+            )
         }
     }
 
@@ -165,9 +197,100 @@ class TimerViewModel @Inject constructor(
         val newState = _uiState.value.copy(
             remainingTime = updatedMinutes.minutes,
             progress = newProgress,
-            error = null
+            error = null,
+            selectedPresetId = null // 수동 조정 시 프리셋 선택 해제
         )
         _uiState.value = newState
+    }
+
+    /**
+     * 프리셋 선택 처리
+     */
+    private fun handleSelectPreset(presetId: Int) {
+        // 타이머가 실행 중이면 무시
+        if (_uiState.value.isActive) {
+            sendSideEffect(TimerSideEffect.ShowError("타이머 실행 중에는 프리셋을 변경할 수 없습니다."))
+            return
+        }
+
+        viewModelScope.launch {
+            val preset = _uiState.value.presets.find { it.id == presetId }
+            if (preset != null) {
+                handleSetTime(preset.duration)
+                _uiState.update { it.copy(selectedPresetId = presetId) }
+                sendSideEffect(TimerSideEffect.ShowSnackbar("프리셋 '${preset.name}' 선택됨"))
+            }
+        }
+    }
+
+    /**
+     * 현재 시간을 프리셋으로 저장
+     */
+    private fun handleSaveAsPreset(name: String) {
+        val currentTime = _uiState.value.remainingTime
+
+        if (currentTime <= 0.seconds) {
+            sendSideEffect(TimerSideEffect.ShowError("시간을 설정한 후 프리셋으로 저장할 수 있습니다."))
+            return
+        }
+
+        viewModelScope.launch {
+            val result = addPresetUseCase(name, currentTime)
+            result.fold(
+                onSuccess = { id ->
+                    sendSideEffect(TimerSideEffect.ShowSnackbar("프리셋 '${name}' 저장 완료"))
+                    _uiState.update { it.copy(selectedPresetId = id.toInt()) }
+                },
+                onFailure = { error ->
+                    sendSideEffect(TimerSideEffect.ShowError(error.message ?: "프리셋 저장 실패"))
+                }
+            )
+        }
+    }
+
+    /**
+     * 프리셋 삭제 처리
+     */
+    private fun handleDeletePreset(presetId: Int) {
+        viewModelScope.launch {
+            val preset = _uiState.value.presets.find { it.id == presetId }
+            if (preset != null) {
+                val result = deletePresetUseCase(preset)
+                result.fold(
+                    onSuccess = {
+                        sendSideEffect(TimerSideEffect.ShowSnackbar("프리셋 '${preset.name}' 삭제됨"))
+                        // 삭제된 프리셋이 선택되어 있었다면 선택 해제
+                        if (_uiState.value.selectedPresetId == presetId) {
+                            _uiState.update { it.copy(selectedPresetId = null) }
+                        }
+                    },
+                    onFailure = { error ->
+                        sendSideEffect(TimerSideEffect.ShowError(error.message ?: "프리셋 삭제 실패"))
+                    }
+                )
+            }
+        }
+    }
+
+    /**
+     * 프리셋 수정 처리
+     */
+    private fun handleUpdatePreset(presetId: Int, name: String, duration: Duration) {
+        viewModelScope.launch {
+            val preset = _uiState.value.presets.find { it.id == presetId }
+            if (preset != null) {
+                val updatedPreset = preset.copy(name = name, duration = duration)
+                val result = updatePresetUseCase(updatedPreset)
+                result.fold(
+                    onSuccess = {
+                        sendSideEffect(TimerSideEffect.ShowSnackbar("프리셋 '${name}' 수정 완료"))
+                    },
+                    onFailure = { error ->
+                        sendSideEffect(TimerSideEffect.ShowError(error.message ?: "프리셋 수정 실패"))
+                    }
+                )
+            }
+        }
     }
 
     /**
@@ -310,7 +433,9 @@ class TimerViewModel @Inject constructor(
         _uiState.update {
             TimerUiState(
                 remainingTime = initialTimeInMillis.milliseconds,
-                progress = progress
+                progress = progress,
+                presets = it.presets, // 프리셋 목록 유지
+                selectedPresetId = it.selectedPresetId // 선택된 프리셋 유지
             )
         }
     }

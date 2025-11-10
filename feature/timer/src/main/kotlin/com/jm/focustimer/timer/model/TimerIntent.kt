@@ -40,4 +40,31 @@ sealed interface TimerIntent {
      * @param progress 드래그된 비율
      */
     data class DragProgress(val progress: Float) : TimerIntent
+
+    /**
+     * 프리셋 선택 - 프리셋의 시간으로 타이머 설정
+     * @param presetId 선택한 프리셋 ID
+     */
+    data class SelectPreset(val presetId: Int) : TimerIntent
+
+    /**
+     * 현재 시간을 프리셋으로 저장
+     * @param name 프리셋 이름
+     */
+    data class SaveAsPreset(val name: String) : TimerIntent
+
+    /**
+     * 프리셋 삭제
+     * @param presetId 삭제할 프리셋 ID
+     */
+    data class DeletePreset(val presetId: Int) : TimerIntent
+
+    /**
+     * 프리셋 수정
+     * @param presetId 수정할 프리셋 ID
+     * @param name 새 이름
+     * @param duration 새 시간
+     */
+    data class UpdatePreset(val presetId: Int, val name: String, val duration: Duration) :
+        TimerIntent
 }

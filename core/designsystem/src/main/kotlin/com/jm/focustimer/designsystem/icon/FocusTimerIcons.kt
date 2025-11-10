@@ -8,7 +8,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
@@ -31,6 +34,7 @@ object FocusTimerIcons {
     val ListAlt: ImageVector = Icons.AutoMirrored.Filled.ListAlt
     val Settings: ImageVector = Icons.Filled.Settings
     val Leaderboard: ImageVector = Icons.Outlined.Leaderboard
+    val Menu: ImageVector = Icons.Filled.Menu
 
     // Action Icons
     val PlayArrow: ImageVector = Icons.Filled.PlayArrow
@@ -38,6 +42,8 @@ object FocusTimerIcons {
     val RestartAlt: ImageVector = Icons.Filled.RestartAlt
     val Close: ImageVector = Icons.Filled.Close
     val Add: ImageVector = Icons.Filled.Add
+    val Edit: ImageVector = Icons.Filled.Edit
+    val Delete: ImageVector = Icons.Filled.Delete
     val ChevronRight: ImageVector = Icons.Filled.ChevronRight
     val ArrowBack: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
     val KeyboardArrowRight: ImageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight

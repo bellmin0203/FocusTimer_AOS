@@ -31,7 +31,6 @@ fun PresetEntity.toPreset(): Preset {
 
 fun Preset.toPresetEntity(): PresetEntity {
     return PresetEntity(
-        id = id,
         name = name,
         duration = duration.inWholeMilliseconds,
         createdAt = createdAt.toEpochMilli()

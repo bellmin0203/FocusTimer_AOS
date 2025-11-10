@@ -1,6 +1,7 @@
 package com.jm.focustimer.timer.model
 
 import androidx.compose.runtime.Immutable
+import com.jm.focustimer.domain.model.Preset
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -14,6 +15,8 @@ import kotlin.time.Duration.Companion.seconds
  * @property overtime 타이머 완료 후 경과한 초과 시간 (초 단위)
  * @property progress 타이머 진행률 (0.0 ~ 1.0)
  * @property error 에러 메시지 (에러가 없으면 null)
+ * @property presets 저장된 프리셋 목록
+ * @property selectedPresetId 현재 선택된 프리셋 ID (선택되지 않았으면 null)
  */
 @Immutable
 data class TimerUiState(
@@ -23,7 +26,9 @@ data class TimerUiState(
     val isCompleted: Boolean = false,
     val overtime: Duration = 0.seconds,
     val progress: Float = 0f,
-    val error: String? = null
+    val error: String? = null,
+    val presets: List<Preset> = emptyList(),
+    val selectedPresetId: Int? = null
 ) {
     /**
      * 타이머가 유휴 상태인지 (시작되지 않은 상태)
@@ -66,4 +71,10 @@ data class TimerUiState(
      */
     val hasError: Boolean
         get() = error != null
+
+    /**
+     * 프리셋을 추가할 수 있는지 여부 (최대 10개 제한)
+     */
+    val canAddPreset: Boolean
+        get() = presets.size < 10
 }

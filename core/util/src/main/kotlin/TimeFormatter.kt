@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.time.Duration
 
 /**
  * 시간 포맷팅 유틸리티
@@ -10,6 +11,16 @@ object TimeFormatter {
     const val SECONDS_PER_MINUTE = 60L
     const val SECONDS_PER_HOUR = 3600L
     const val MILLIS_PER_SECOND = 1000L
+
+    fun formatDuration(duration: Duration): String {
+        duration.toComponents { hours, minutes, seconds, _ ->
+            val formattedHours = if (hours > 0) "${hours}시간 " else ""
+            val formattedMinutes = if (minutes > 0) "${minutes}분 " else ""
+            val formattedSeconds = if (seconds > 0) "${seconds}초" else ""
+            return "$formattedHours$formattedMinutes$formattedSeconds"
+        }
+    }
+
 
     /**
      * 초를 "HH시간 MM분 SS초" 형식으로 변환
