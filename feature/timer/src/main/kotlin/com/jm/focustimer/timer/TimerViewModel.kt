@@ -297,9 +297,9 @@ class TimerViewModel @Inject constructor(
         }
 
         // 프리셋 최대 개수 체크
-        if (_uiState.value.presets.size >= 5) {
+        if (_uiState.value.presets.size >= AddPresetUseCase.MAX_PRESET_COUNT) {
             LogUtil.w("handleSaveAsPreset: 프리셋 최대 개수 초과")
-            sendSideEffect(TimerSideEffect.ShowError("프리셋은 최대 5개까지 저장할 수 있습니다."))
+            sendSideEffect(TimerSideEffect.ShowError("프리셋은 최대 ${AddPresetUseCase.MAX_PRESET_COUNT}개까지 저장할 수 있습니다."))
             return
         }
 

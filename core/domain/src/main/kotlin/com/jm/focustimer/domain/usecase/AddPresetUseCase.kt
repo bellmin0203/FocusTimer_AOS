@@ -9,7 +9,7 @@ import javax.inject.Singleton
 /**
  * 새로운 프리셋을 추가하는 UseCase
  *
- * 프리셋은 최대 10개까지만 저장 가능합니다.
+ * 프리셋은 최대 5개까지만 저장 가능합니다.
  */
 @Singleton
 class AddPresetUseCase @Inject constructor(
@@ -74,7 +74,7 @@ class AddPresetUseCase @Inject constructor(
     }
 
     companion object {
-        const val MAX_PRESET_COUNT = 10
+        const val MAX_PRESET_COUNT = 5
         const val MAX_NAME_LENGTH = 20
     }
 }

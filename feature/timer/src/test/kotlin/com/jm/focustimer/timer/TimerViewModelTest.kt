@@ -47,7 +47,13 @@ class TimerViewModelTest {
     private fun createViewModelWithMockUseCase(flow: Flow<TimerEvent>): TimerViewModel {
         val useCase = mockk<CountdownTimerUseCase>()
         coEvery { useCase(any()) } returns flow
-        return TimerViewModel(useCase)
+        return TimerViewModel(
+            useCase,
+            getAllPresetsUseCase = TODO(),
+            addPresetUseCase = TODO(),
+            updatePresetUseCase = TODO(),
+            deletePresetUseCase = TODO()
+        )
     }
 
     // 안전한 테스트 실행을 위한 래퍼 함수
@@ -68,7 +74,13 @@ class TimerViewModelTest {
 
     @BeforeEach
     fun setup() {
-        this.viewModel = TimerViewModel(countdownTimerUseCase)
+        this.viewModel = TimerViewModel(
+            countdownTimerUseCase,
+            getAllPresetsUseCase = TODO(),
+            addPresetUseCase = TODO(),
+            updatePresetUseCase = TODO(),
+            deletePresetUseCase = TODO()
+        )
     }
 
     @AfterEach
@@ -629,7 +641,13 @@ class TimerViewModelTest {
             @Test
             fun `타이머 Job이 null일 때 Stop을 호출해도 안전한지 확인`() = runTest {
                 // Given: 타이머를 시작하지 않은 상태
-                val testViewModel = TimerViewModel(countdownTimerUseCase)
+                val testViewModel = TimerViewModel(
+                    countdownTimerUseCase,
+                    getAllPresetsUseCase = TODO(),
+                    addPresetUseCase = TODO(),
+                    updatePresetUseCase = TODO(),
+                    deletePresetUseCase = TODO()
+                )
                 testViewModel.onIntent(TimerIntent.SetTime(10.seconds))
 
                 // When: Stop 호출
