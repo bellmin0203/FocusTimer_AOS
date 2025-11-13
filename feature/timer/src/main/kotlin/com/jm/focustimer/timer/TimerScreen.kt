@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -252,7 +253,7 @@ private fun TimerScreen(
 
                         Text(
                             text = timeText,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.displaySmall,
                             color = if (uiState.isCompleted) {
                                 MaterialTheme.colorScheme.onTertiaryContainer
                             } else {
@@ -264,7 +265,7 @@ private fun TimerScreen(
                         if (uiState.isCompleted) {
                             Text(
                                 text = "타이머 완료!",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.tertiary
                             )
                         }
@@ -290,8 +291,8 @@ private fun TimerScreen(
                                 },
                                 icon = FocusTimerIcons.Check,
                                 contentDescription = "Complete",
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                containerColor = presetColors.progressColor,
+                                contentColor = Color.White
                             )
                         } else {
                             // 재생/일시정지 버튼
@@ -304,7 +305,7 @@ private fun TimerScreen(
                                 icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
                                 contentDescription = if (uiState.isRunning) "Pause" else "Play",
                                 containerColor = presetColors.progressColor,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                contentColor = Color.White
                             )
 
                             if (uiState.isActive) {
@@ -464,6 +465,31 @@ fun TimerScreenIdlePreview() {
         isRunning = true,
         isPaused = false,
         isCompleted = false,
+        selectedPresetId = presets.first().id, // 첫번째 프리셋 선택
+        presets = presets,
+    )
+
+    FocusTimerTheme {
+        TimerScreen(
+            onIntent = {}, // 미리보기: 인텐트 기본 처리
+            uiState = idleUiState,
+            drawerState = rememberDrawerState(DrawerValue.Closed)
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+fun TimerScreenCompletePreview() {
+    // 샘플 프리셋: UI 확인용 목업 데이터 (실제 데이터 구조로 기입)
+    val presets = remember { PreviewProvider.samplePresets }
+    // Idle 상태의 UI State 예시
+    val idleUiState = TimerUiState(
+        remainingTime = 0.minutes,
+        progress = 0f,
+        isRunning = true,
+        isPaused = false,
+        isCompleted = true,
         selectedPresetId = presets.first().id, // 첫번째 프리셋 선택
         presets = presets,
     )
