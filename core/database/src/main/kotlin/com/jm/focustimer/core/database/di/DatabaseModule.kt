@@ -33,6 +33,7 @@ object DatabaseModule {
             FocusTimerDatabase::class.java,
             "focus_timer_database"
         )
+            .addMigrations(FocusTimerDatabase.MIGRATION_1_2)
             .fallbackToDestructiveMigration(false) // 개발 단계에서 스키마 변경 시 데이터 삭제
             .build()
     }

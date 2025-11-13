@@ -262,12 +262,16 @@ private fun DrawScope.drawBackgroundCircle(
     diameter: Float,
     innerCircleInset: Float
 ) {
+    val radius = diameter / 2
+    val startX = center.x - radius + innerCircleInset
+    val startY = center.y - radius + innerCircleInset
+
     drawArc(
         color = backgroundColor,
         startAngle = 0f,
         sweepAngle = CircularTimerConstants.FULL_CIRCLE_DEGREES,
         useCenter = false,
-        topLeft = Offset(innerCircleInset, innerCircleInset),
+        topLeft = Offset(startX, startY),
         size = Size(diameter - innerCircleInset * 2, diameter - innerCircleInset * 2),
         style = Fill
     )
@@ -282,12 +286,16 @@ private fun DrawScope.drawProgressArc(
     diameter: Float,
     innerCircleInset: Float
 ) {
+    val radius = diameter / 2
+    val startX = center.x - radius + innerCircleInset
+    val startY = center.y - radius + innerCircleInset
+
     drawArc(
         color = color,
         startAngle = -CircularTimerConstants.QUARTER_CIRCLE_DEGREES,
         sweepAngle = CircularTimerConstants.FULL_CIRCLE_DEGREES * progress,
         useCenter = true,
-        topLeft = Offset(innerCircleInset, innerCircleInset),
+        topLeft = Offset(startX, startY),
         size = Size(diameter - innerCircleInset * 2, diameter - innerCircleInset * 2),
         style = Fill
     )

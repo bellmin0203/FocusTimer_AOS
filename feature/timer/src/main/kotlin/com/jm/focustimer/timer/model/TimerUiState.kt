@@ -17,6 +17,7 @@ import kotlin.time.Duration.Companion.seconds
  * @property error 에러 메시지 (에러가 없으면 null)
  * @property presets 저장된 프리셋 목록
  * @property selectedPresetId 현재 선택된 프리셋 ID (선택되지 않았으면 null)
+ * @property initialTime 처음 설정된 타이머 시간 (완료 후 총 시간 계산용)
  */
 @Immutable
 data class TimerUiState(
@@ -28,7 +29,8 @@ data class TimerUiState(
     val progress: Float = 0f,
     val error: String? = null,
     val presets: List<Preset> = emptyList(),
-    val selectedPresetId: Int? = null
+    val selectedPresetId: Int? = null,
+    val initialTime: Duration = 0.seconds
 ) {
     /**
      * 타이머가 유휴 상태인지 (시작되지 않은 상태)
@@ -43,28 +45,33 @@ data class TimerUiState(
         get() = isRunning || isPaused
 
     /**
-     * 표시할 총 시간 (타이머 시간 + 초과 시간)
-     */
-    val totalRunningTime: Duration
-        get() = remainingTime + overtime
-
-    /**
-     * 분 단위 시간
-     */
-    val minutes: Long
-        get() = remainingTime.toComponents { minutes, _, _ -> minutes }
-
-    /**
-     * 초 단위 시간 (분을 제외한 나머지)
-     */
-    val seconds: Int
-        get() = remainingTime.toComponents { _, _, seconds, _ -> seconds }
-
-    /**
-     * 시간 형식으로 포맷팅 (MM:SS)
+     * 시간 형식으로 포맷팅 (HH:MM:SS)
+     * 완료 상태일 때는 총 시간과 초과 시간을 함께 표시
      */
     val formattedTime: String
-        get() = String.format("%02d:%02d", minutes, seconds)
+        get() = if (isCompleted && overtime > 0.seconds) {
+            // 타이머 완료 후: "총시간 (+초과시간)" 형식
+            val totalTime = initialTime + overtime
+            val overtimeFormatted = overtime.formatDuration()
+            val totalTimeFormatted = totalTime.formatDuration()
+            "$totalTimeFormatted (+$overtimeFormatted)"
+        } else {
+            // 일반 상태: 남은 시간만 표시
+            remainingTime.formatDuration()
+        }
+
+    /**
+     * Duration을 HH:MM:SS 또는 MM:SS 형식의 문자열로 변환하는 내부 헬퍼 함수.
+     */
+    private fun Duration.formatDuration(): String {
+        return toComponents { hours, minutes, seconds, _ ->
+            if (hours > 0) {
+                String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            } else {
+                String.format("%02d:%02d", minutes, seconds)
+            }
+        }
+    }
 
     /**
      * 에러가 있는지 여부
@@ -73,8 +80,8 @@ data class TimerUiState(
         get() = error != null
 
     /**
-     * 프리셋을 추가할 수 있는지 여부 (최대 10개 제한)
+     * 프리셋을 추가할 수 있는지 여부 (최대 5개 제한)
      */
     val canAddPreset: Boolean
-        get() = presets.size < 10
+        get() = presets.size < 5
 }

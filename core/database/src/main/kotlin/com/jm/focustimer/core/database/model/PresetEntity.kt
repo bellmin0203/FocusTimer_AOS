@@ -16,6 +16,9 @@ data class PresetEntity(
 
     val duration: Long,
 
+    @ColumnInfo(name = "color_index")
+    val colorIndex: Int = 0,
+
     @ColumnInfo(name = "created_at")
     val createdAt: Long
 )
@@ -25,14 +28,17 @@ fun PresetEntity.toPreset(): Preset {
         id = id,
         name = name,
         duration = duration.milliseconds,
+        colorIndex = colorIndex,
         createdAt = Instant.ofEpochMilli(createdAt)
     )
 }
 
 fun Preset.toPresetEntity(): PresetEntity {
     return PresetEntity(
+        id = id,
         name = name,
         duration = duration.inWholeMilliseconds,
+        colorIndex = colorIndex,
         createdAt = createdAt.toEpochMilli()
     )
 }

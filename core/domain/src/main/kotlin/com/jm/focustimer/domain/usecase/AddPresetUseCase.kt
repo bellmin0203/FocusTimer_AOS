@@ -19,10 +19,15 @@ class AddPresetUseCase @Inject constructor(
      * 프리셋을 추가합니다.
      *
      * @param name 프리셋 이름
-     * @param duration 타이머 지속 시간 (밀리초)
+     * @param duration 타이머 지속 시간
+     * @param colorIndex 타이머 컬러 인덱스
      * @return 성공 시 생성된 프리셋 ID, 실패 시 null
      */
-    suspend operator fun invoke(name: String, duration: kotlin.time.Duration): Result<Long> {
+    suspend operator fun invoke(
+        name: String,
+        duration: kotlin.time.Duration,
+        colorIndex: Int = 0
+    ): Result<Long> {
         // 프리셋 개수 확인
         val currentCount = presetRepository.getTotalPresetCount()
         if (currentCount >= MAX_PRESET_COUNT) {
@@ -47,10 +52,16 @@ class AddPresetUseCase @Inject constructor(
             return Result.failure(IllegalArgumentException("타이머 시간은 0보다 커야 합니다."))
         }
 
+        // 컬러 인덱스 유효성 검사
+        if (colorIndex !in 0..5) {
+            return Result.failure(IllegalArgumentException("컬러 인덱스는 0에서 5 사이여야 합니다."))
+        }
+
         val preset = Preset(
             id = 0, // Auto-generated
             name = name.trim(),
             duration = duration,
+            colorIndex = colorIndex,
             createdAt = Instant.now()
         )
 

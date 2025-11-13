@@ -17,18 +17,21 @@ object PreviewProvider {
             id = 1,
             name = "Focus",
             duration = 25.minutes,
+            colorIndex = 0,
             createdAt = Instant.now()
         ),
         Preset(
             id = 2,
             name = "Short Break",
             duration = 5.minutes,
+            colorIndex = 1,
             createdAt = Instant.now()
         ),
         Preset(
             id = 3,
             name = "Long Break",
             duration = 15.minutes,
+            colorIndex = 2,
             createdAt = Instant.now()
         )
     )

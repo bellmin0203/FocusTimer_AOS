@@ -6,12 +6,14 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backspace
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
@@ -44,11 +46,14 @@ object FocusTimerIcons {
     val Add: ImageVector = Icons.Filled.Add
     val Edit: ImageVector = Icons.Filled.Edit
     val Delete: ImageVector = Icons.Filled.Delete
+    val Check: ImageVector = Icons.Filled.Check
     val ChevronRight: ImageVector = Icons.Filled.ChevronRight
     val ArrowBack: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
     val KeyboardArrowRight: ImageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
     val Refresh: ImageVector = Icons.Filled.Refresh
     val Backspace: ImageVector = Icons.Filled.Backspace
+    val MoreVert: ImageVector = Icons.Filled.MoreVert
+
 
     // Session Type Icons
     val Psychology: ImageVector = Icons.Filled.Psychology  // Focus 아이콘

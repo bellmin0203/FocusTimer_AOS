@@ -137,18 +137,18 @@ private class PresetListProvider : PreviewParameterProvider<List<Preset>> {
     override val values = sequenceOf(
         // 기본 3개 프리셋
         listOf(
-            Preset(1, "Focus", 25.minutes, Instant.now()),
-            Preset(2, "Short Break", 5.minutes, Instant.now()),
-            Preset(3, "Long Break", 15.minutes, Instant.now())
+            Preset(1, "Focus", 25.minutes, 0, Instant.now()),
+            Preset(2, "Short Break", 5.minutes, 1, Instant.now()),
+            Preset(3, "Long Break", 15.minutes, 2, Instant.now())
         ),
         // 많은 프리셋
         listOf(
-            Preset(1, "Focus", 25.minutes, Instant.now()),
-            Preset(2, "Short Break", 5.minutes, Instant.now()),
-            Preset(3, "Long Break", 15.minutes, Instant.now()),
-            Preset(4, "Deep Work", 90.minutes, Instant.now()),
-            Preset(5, "Quick Break", 2.minutes, Instant.now()),
-            Preset(6, "Pomodoro", 25.minutes, Instant.now())
+            Preset(1, "Focus", 25.minutes, 0, Instant.now()),
+            Preset(2, "Short Break", 5.minutes, 1, Instant.now()),
+            Preset(3, "Long Break", 15.minutes, 2, Instant.now()),
+            Preset(4, "Deep Work", 90.minutes, 3, Instant.now()),
+            Preset(5, "Quick Break", 2.minutes, 4, Instant.now()),
+            Preset(6, "Pomodoro", 25.minutes, 5, Instant.now())
         ),
         // 빈 리스트
         emptyList()
@@ -167,9 +167,9 @@ private fun PresetsBottomSheetPreview() {
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
             presets = listOf(
-                Preset(1, "Focus", 25.minutes, Instant.now()),
-                Preset(2, "Short Break", 5.minutes, Instant.now()),
-                Preset(3, "Long Break", 15.minutes, Instant.now())
+                Preset(1, "Focus", 25.minutes, 0, Instant.now()),
+                Preset(2, "Short Break", 5.minutes, 1, Instant.now()),
+                Preset(3, "Long Break", 15.minutes, 2, Instant.now())
             ),
             onPresetClick = {},
             onAddPreset = {}
@@ -189,14 +189,14 @@ private fun PresetsBottomSheetManyPresetsPreview() {
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
             presets = listOf(
-                Preset(1, "Focus", 25.minutes, Instant.now()),
-                Preset(2, "Short Break", 5.minutes, Instant.now()),
-                Preset(3, "Long Break", 15.minutes, Instant.now()),
-                Preset(4, "Deep Work", 90.minutes, Instant.now()),
-                Preset(5, "Quick Break", 2.minutes, Instant.now()),
-                Preset(6, "Pomodoro", 25.minutes, Instant.now()),
-                Preset(7, "Study", 50.minutes, Instant.now()),
-                Preset(8, "Rest", 10.minutes, Instant.now())
+                Preset(1, "Focus", 25.minutes, 0, Instant.now()),
+                Preset(2, "Short Break", 5.minutes, 1, Instant.now()),
+                Preset(3, "Long Break", 15.minutes, 2, Instant.now()),
+                Preset(4, "Deep Work", 90.minutes, 3, Instant.now()),
+                Preset(5, "Quick Break", 2.minutes, 4, Instant.now()),
+                Preset(6, "Pomodoro", 25.minutes, 5, Instant.now()),
+                Preset(7, "Study", 50.minutes, 0, Instant.now()),
+                Preset(8, "Rest", 10.minutes, 1, Instant.now())
             ),
             onPresetClick = {},
             onAddPreset = {}
@@ -234,11 +234,11 @@ private fun PresetsBottomSheetCustomPreview() {
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
             presets = listOf(
-                Preset(1, "Ultra Focus", 120.minutes, Instant.now()),
-                Preset(2, "Micro Break", 1.minutes, Instant.now()),
-                Preset(3, "Power Nap", 20.minutes, Instant.now()),
-                Preset(4, "Sprint", 15.minutes, Instant.now()),
-                Preset(5, "Marathon", 180.minutes, Instant.now())
+                Preset(1, "Ultra Focus", 120.minutes, 0, Instant.now()),
+                Preset(2, "Micro Break", 1.minutes, 1, Instant.now()),
+                Preset(3, "Power Nap", 20.minutes, 2, Instant.now()),
+                Preset(4, "Sprint", 15.minutes, 3, Instant.now()),
+                Preset(5, "Marathon", 180.minutes, 4, Instant.now())
             ),
             onPresetClick = {},
             onAddPreset = {}

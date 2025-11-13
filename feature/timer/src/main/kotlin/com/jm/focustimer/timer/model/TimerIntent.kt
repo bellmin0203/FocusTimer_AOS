@@ -1,5 +1,6 @@
 package com.jm.focustimer.timer.model
 
+import com.jm.focustimer.domain.model.Preset
 import kotlin.time.Duration
 
 /**
@@ -36,6 +37,11 @@ sealed interface TimerIntent {
     object Stop : TimerIntent
 
     /**
+     * 타이머 완료 확인 (초과 시간 추적 종료 및 초기화)
+     */
+    object Complete : TimerIntent
+
+    /**
      * 드래그를 통한 시간 조정
      * @param progress 드래그된 비율
      */
@@ -50,8 +56,14 @@ sealed interface TimerIntent {
     /**
      * 현재 시간을 프리셋으로 저장
      * @param name 프리셋 이름
+     * @param duration 프리셋 시간
+     * @param colorIndex 타이머 컬러 인덱스
      */
-    data class SaveAsPreset(val name: String) : TimerIntent
+    data class SaveAsPreset(
+        val name: String,
+        val duration: Duration,
+        val colorIndex: Int
+    ) : TimerIntent
 
     /**
      * 프리셋 삭제
@@ -61,10 +73,9 @@ sealed interface TimerIntent {
 
     /**
      * 프리셋 수정
-     * @param presetId 수정할 프리셋 ID
-     * @param name 새 이름
-     * @param duration 새 시간
+     * @param preset 프리셋
      */
-    data class UpdatePreset(val presetId: Int, val name: String, val duration: Duration) :
-        TimerIntent
+    data class UpdatePreset(
+        val preset: Preset
+    ) : TimerIntent
 }

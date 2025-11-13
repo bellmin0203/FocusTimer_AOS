@@ -6,12 +6,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,19 +25,27 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
+import com.jm.focustimer.designsystem.theme.TimerColorPresets
 import com.jm.focustimer.domain.model.Preset
 import java.time.Instant
 import kotlin.time.Duration
@@ -62,7 +73,7 @@ fun PresetSection(
     onPresetClick: (Int) -> Unit,
     onAddPreset: () -> Unit,
     onEditPreset: (Preset) -> Unit,
-    onDeletePreset: (Int) -> Unit,
+    onDeletePreset: (Preset) -> Unit,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -83,13 +94,13 @@ fun PresetSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "프리셋",
+                    text = "나의 시간",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
-                    text = "${presets.size}/10",
+                    text = "${presets.size}/5",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -120,6 +131,8 @@ fun PresetSection(
                         preset = preset,
                         isSelected = preset.id == selectedPresetId,
                         onClick = { onPresetClick(preset.id) },
+                        onEdit = onEditPreset,
+                        onDelete = onDeletePreset,
                     )
                 }
             }
@@ -138,8 +151,8 @@ private fun AddPresetCard(
     Card(
         onClick = onClick,
         modifier = modifier
-            .width(120.dp)
-            .height(50.dp),
+            .width(50.dp)
+            .height(80.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -148,8 +161,7 @@ private fun AddPresetCard(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -171,56 +183,125 @@ private fun PresetCard(
     preset: Preset,
     isSelected: Boolean,
     onClick: () -> Unit,
+    onEdit: (Preset) -> Unit,
+    onDelete: (Preset) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier
-            .width(140.dp)
-            .height(50.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 4.dp else 2.dp
-        )
-    ) {
-        // 프리셋 이름
-        // 수정/삭제 버튼
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Text(
-                text = preset.name,
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+    // 드롭다운 메뉴 표시 여부
+    var showDropdownMenu by remember { mutableStateOf(false) }
 
-            // 시간 표시
-            Text(
-                text = formatDuration(preset.duration),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimary
+    // 컬러 인덱스에 해당하는 컬러 가져오기
+    val colorScheme = TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
+        ?: TimerColorPresets.lightPresets[0]
+
+    Box {
+        Card(
+            modifier = modifier
+                .width(120.dp)
+                .height(80.dp)
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = { showDropdownMenu = true }
+                ),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isSelected) {
+                    colorScheme.progressColor
                 } else {
-                    MaterialTheme.colorScheme.onSurface
+                    MaterialTheme.colorScheme.surfaceVariant
+                }
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = if (isSelected) 4.dp else 2.dp
+            )
+        ) {
+            // 프리셋 이름
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 프리셋 이름
+                    Text(
+                        text = preset.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isSelected) {
+                            Color.White
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    // 더 보기 버튼
+                    Icon(
+                        imageVector = FocusTimerIcons.MoreVert,
+                        contentDescription = "더 보기",
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clickable { showDropdownMenu = true },
+                        tint = if (isSelected) {
+                            Color.White
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.height(8.dp))
+                // 시간 표시
+                Text(
+                    text = formatDuration(preset.duration),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            }
+        }
+
+        // 드롭다운 메뉴
+        DropdownMenu(
+            expanded = showDropdownMenu,
+            onDismissRequest = { showDropdownMenu = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("수정") },
+                onClick = {
+                    showDropdownMenu = false
+                    onEdit(preset)
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = FocusTimerIcons.Edit,
+                        contentDescription = "수정"
+                    )
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("삭제", color = MaterialTheme.colorScheme.error) },
+                onClick = {
+                    showDropdownMenu = false
+                    onDelete(preset)
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = FocusTimerIcons.Delete,
+                        contentDescription = "삭제",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             )
         }
@@ -243,10 +324,16 @@ private fun formatDuration(duration: Duration): String {
 
 // Preview용 샘플 데이터
 private val samplePresets = listOf(
-    Preset(id = 1, name = "집중", duration = 25.minutes, createdAt = Instant.now()),
-    Preset(id = 2, name = "짧은 휴식", duration = 5.minutes, createdAt = Instant.now()),
-    Preset(id = 3, name = "긴 휴식", duration = 15.minutes, createdAt = Instant.now()),
-    Preset(id = 4, name = "딥워크", duration = 50.minutes + 30.seconds, createdAt = Instant.now())
+    Preset(id = 1, name = "집중", duration = 25.minutes, colorIndex = 0, createdAt = Instant.now()),
+    Preset(id = 2, name = "짧은 휴식", duration = 5.minutes, colorIndex = 1, createdAt = Instant.now()),
+    Preset(id = 3, name = "긴 휴식", duration = 15.minutes, colorIndex = 2, createdAt = Instant.now()),
+    Preset(
+        id = 4,
+        name = "딥워크",
+        duration = 50.minutes + 30.seconds,
+        colorIndex = 3,
+        createdAt = Instant.now()
+    )
 )
 
 @Preview(showBackground = true)
@@ -288,15 +375,16 @@ private fun PresetSectionEmptyPreview() {
 private fun PresetSectionMaxPresetsPreview() {
     FocusTimerTheme {
         PresetSection(
-            presets = List(10) { index ->
+            presets = List(5) { index ->
                 Preset(
                     id = index,
                     name = "프리셋 ${index + 1}",
                     duration = (index + 1).minutes,
+                    colorIndex = index % TimerColorPresets.lightPresets.size,
                     createdAt = Instant.now()
                 )
             },
-            selectedPresetId = 5,
+            selectedPresetId = 2,
             canAddPreset = false,
             onPresetClick = {},
             onAddPreset = {},
@@ -327,21 +415,27 @@ private fun PresetCardPreview() {
                 preset = Preset(
                     id = 1,
                     name = "집중",
-                    duration = 25.minutes,
+                    duration = 25.minutes + 30.seconds,
+                    colorIndex = 0,
                     createdAt = Instant.now()
                 ),
                 isSelected = false,
                 onClick = {},
+                onEdit = {},
+                onDelete = {},
             )
             PresetCard(
                 preset = Preset(
                     id = 2,
                     name = "짧은 휴식",
                     duration = 5.minutes,
+                    colorIndex = 1,
                     createdAt = Instant.now()
                 ),
                 isSelected = true,
                 onClick = {},
+                onEdit = {},
+                onDelete = {},
             )
         }
     }
@@ -356,10 +450,13 @@ private fun PresetCardLongNamePreview() {
                 id = 1,
                 name = "매우 긴 프리셋 이름 테스트",
                 duration = 50.minutes + 30.seconds,
+                colorIndex = 0,
                 createdAt = Instant.now()
             ),
             isSelected = false,
             onClick = {},
+            onEdit = {},
+            onDelete = {},
         )
     }
 }

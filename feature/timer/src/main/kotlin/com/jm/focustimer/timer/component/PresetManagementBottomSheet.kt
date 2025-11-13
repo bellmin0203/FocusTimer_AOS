@@ -256,12 +256,30 @@ private fun PresetManagementBottomSheetPreview() {
     FocusTimerTheme {
         PresetManagementBottomSheet(
             sheetState = rememberModalBottomSheetState(
-                skipPartiallyExpanded = false
+                skipPartiallyExpanded = true
             ),
             presets = listOf(
-                Preset(id = 1, name = "짧은 집중", duration = 25.minutes, createdAt = Instant.now()),
-                Preset(id = 2, name = "긴 집중", duration = 50.minutes, createdAt = Instant.now()),
-                Preset(id = 3, name = "휴식 시간", duration = 5.minutes, createdAt = Instant.now())
+                Preset(
+                    id = 1,
+                    name = "짧은 집중",
+                    duration = 25.minutes,
+                    colorIndex = 0,
+                    createdAt = Instant.now()
+                ),
+                Preset(
+                    id = 2,
+                    name = "긴 집중",
+                    duration = 50.minutes,
+                    colorIndex = 1,
+                    createdAt = Instant.now()
+                ),
+                Preset(
+                    id = 3,
+                    name = "휴식 시간",
+                    duration = 5.minutes,
+                    colorIndex = 2,
+                    createdAt = Instant.now()
+                )
             ),
             canAddPreset = true,
             onDismiss = {},
@@ -280,7 +298,7 @@ private fun PresetManagementBottomSheetEmptyPreview() {
     FocusTimerTheme {
         PresetManagementBottomSheet(
             sheetState = rememberModalBottomSheetState(
-                skipPartiallyExpanded = false
+                skipPartiallyExpanded = true
             ),
             presets = emptyList(),
             canAddPreset = true,
@@ -300,13 +318,14 @@ private fun PresetManagementBottomSheetFullPreview() {
     FocusTimerTheme {
         PresetManagementBottomSheet(
             sheetState = rememberModalBottomSheetState(
-                skipPartiallyExpanded = false
+                skipPartiallyExpanded = true
             ),
             presets = List(10) { index ->
                 Preset(
                     id = index,
                     name = "프리셋 ${index + 1}",
                     duration = (25 + index * 5).minutes,
+                    colorIndex = index % 6,
                     createdAt = Instant.now()
                 )
             },
@@ -329,6 +348,7 @@ private fun PresetManagementCardPreview() {
                 id = 1,
                 name = "포모도로",
                 duration = 25.minutes,
+                colorIndex = 0,
                 createdAt = Instant.now()
             ),
             onClick = {},
@@ -347,6 +367,7 @@ private fun PresetManagementCardLongNamePreview() {
                 id = 1,
                 name = "매우 긴 프리셋 이름을 가진 포모도로 타이머 설정",
                 duration = 50.minutes + 30.seconds,
+                colorIndex = 0,
                 createdAt = Instant.now()
             ),
             onClick = {},
