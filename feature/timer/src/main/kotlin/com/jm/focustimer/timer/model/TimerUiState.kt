@@ -1,9 +1,9 @@
 package com.jm.focustimer.timer.model
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Immutable
 import com.jm.focustimer.domain.model.Preset
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * 타이머 화면의 UI 상태를 나타내는 불변 데이터 클래스
@@ -21,17 +21,18 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Immutable
 data class TimerUiState(
-    val remainingTime: Duration = 0.seconds,
+    val initialTime: Duration = Duration.ZERO,
+    val remainingTime: Duration = Duration.ZERO,
     val isRunning: Boolean = false,
     val isPaused: Boolean = false,
     val isCompleted: Boolean = false,
-    val overtime: Duration = 0.seconds,
+    val overtime: Duration = Duration.ZERO,
     val progress: Float = 0f,
     val error: String? = null,
     val presets: List<Preset> = emptyList(),
     val selectedPresetId: Int? = null,
-    val initialTime: Duration = 0.seconds
 ) {
+
     /**
      * 타이머가 유휴 상태인지 (시작되지 않은 상태)
      */
@@ -44,17 +45,17 @@ data class TimerUiState(
     val isActive: Boolean
         get() = isRunning || isPaused
 
+    val isOvertime: Boolean = overtime > Duration.ZERO
+
     /**
      * 시간 형식으로 포맷팅 (HH:MM:SS)
      * 완료 상태일 때는 총 시간과 초과 시간을 함께 표시
      */
     val formattedTime: String
-        get() = if (isCompleted && overtime > 0.seconds) {
+        get() = if (isCompleted && isOvertime) {
             // 타이머 완료 후: "총시간 (+초과시간)" 형식
-            val totalTime = initialTime + overtime
             val overtimeFormatted = overtime.formatDuration()
-            val totalTimeFormatted = totalTime.formatDuration()
-            "$totalTimeFormatted (+$overtimeFormatted)"
+            "${initialTime.formatDuration()} (+$overtimeFormatted)"
         } else {
             // 일반 상태: 남은 시간만 표시
             remainingTime.formatDuration()
@@ -63,6 +64,7 @@ data class TimerUiState(
     /**
      * Duration을 HH:MM:SS 또는 MM:SS 형식의 문자열로 변환하는 내부 헬퍼 함수.
      */
+    @SuppressLint("DefaultLocale")
     private fun Duration.formatDuration(): String {
         return toComponents { hours, minutes, seconds, _ ->
             if (hours > 0) {

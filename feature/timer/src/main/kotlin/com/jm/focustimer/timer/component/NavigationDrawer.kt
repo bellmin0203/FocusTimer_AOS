@@ -18,9 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
+import com.jm.focustimer.timer.R
 import kotlinx.coroutines.launch
 
 /**
@@ -62,17 +64,17 @@ fun NavigationDrawerContent(
     val menuItems = listOf(
         DrawerMenuItem(
             icon = FocusTimerIcons.ListAlt,
-            label = "프리셋 관리",
+            label = stringResource(R.string.preset_management_text),
             onClick = onPresetsClick
         ),
         DrawerMenuItem(
             icon = FocusTimerIcons.BarChart,
-            label = "통계",
+            label = stringResource(R.string.statistics_text),
             onClick = onStatsClick
         ),
         DrawerMenuItem(
             icon = FocusTimerIcons.Settings,
-            label = "설정",
+            label = stringResource(R.string.setting_text),
             onClick = onSettingsClick
         )
     )
@@ -86,7 +88,7 @@ fun NavigationDrawerContent(
             // 헤더
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Focus Timer",
+                text = stringResource(R.string.navigation_drawer_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp)

@@ -1,13 +1,20 @@
 package com.jm.focustimer.timer.model
 
+import androidx.annotation.StringRes
+import com.jm.focustimer.ui.util.UiText
 import kotlin.time.Duration
 
 sealed interface TimerSideEffect {
     /**
      * 에러 메시지 표시 (Snackbar)
      */
-    data class ShowError(val message: String) : TimerSideEffect
-    data class ShowSnackbar(val message: String) : TimerSideEffect
+    data class ShowError(val errorType: TimerError) : TimerSideEffect
+    data class ShowSnackbar(
+        @param:StringRes val msgResId: Int,
+        val msgArgs: List<Any> = emptyList()
+    ) : TimerSideEffect {
+        fun toUiText(): UiText = UiText.StringResource(msgResId, msgArgs)
+    }
 
     /**
      * 타이머 완료 알림

@@ -19,7 +19,7 @@ sealed interface TimerIntent {
     /**
      * 타이머 시작
      */
-    object Start : TimerIntent
+    data class Start(val reminderThresholds: List<Duration> = emptyList()) : TimerIntent
 
     /**
      * 타이머 일시정지

@@ -2,10 +2,10 @@ package com.jm.focustimer.designsystem.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
@@ -51,7 +51,7 @@ object FocusTimerIcons {
     val ArrowBack: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
     val KeyboardArrowRight: ImageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
     val Refresh: ImageVector = Icons.Filled.Refresh
-    val Backspace: ImageVector = Icons.Filled.Backspace
+    val Backspace: ImageVector = Icons.AutoMirrored.Filled.Backspace
     val MoreVert: ImageVector = Icons.Filled.MoreVert
 
 

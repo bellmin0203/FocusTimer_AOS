@@ -30,7 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,6 +54,7 @@ import com.jm.focustimer.timer.model.HapticPattern
 import com.jm.focustimer.timer.model.TimerIntent
 import com.jm.focustimer.timer.model.TimerSideEffect
 import com.jm.focustimer.timer.model.TimerUiState
+import com.jm.focustimer.timer.model.toUiText
 import com.jm.focustimer.ui.component.TimerTopBar
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
@@ -71,6 +74,7 @@ fun TimerScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val view = LocalView.current
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     LaunchedEffect(viewModel) {
@@ -80,7 +84,7 @@ fun TimerScreen(
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
                         snackbarHostState.showSnackbar(
-                            message = effect.message,
+                            message = effect.errorType.toUiText().asString(context),
                             withDismissAction = true
                         )
                     }
@@ -89,14 +93,14 @@ fun TimerScreen(
                 is TimerSideEffect.ShowSnackbar -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(effect.message)
+                        snackbarHostState.showSnackbar(effect.toUiText().asString(context))
                     }
                 }
 
                 is TimerSideEffect.ShowTimerCompleted -> {
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar("타이머가 완료되었습니다! \uD83C\uDF89")
+                        snackbarHostState.showSnackbar(context.getString(R.string.timer_is_completed_text))
                     }
                 }
 
@@ -264,7 +268,7 @@ private fun TimerScreen(
                         // 완료 상태일 때 안내 메시지 표시
                         if (uiState.isCompleted) {
                             Text(
-                                text = "타이머 완료!",
+                                text = stringResource(R.string.timer_completed_label),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.tertiary
                             )
@@ -298,7 +302,7 @@ private fun TimerScreen(
                             // 재생/일시정지 버튼
                             FocusIconButton(
                                 onClick = {
-                                    if (!uiState.isRunning) onIntent(TimerIntent.Start)
+                                    if (!uiState.isRunning) onIntent(TimerIntent.Start())
                                     else if (uiState.isPaused) onIntent(TimerIntent.Resume)
                                     else onIntent(TimerIntent.Pause)
                                 },
@@ -346,7 +350,7 @@ private fun TimerScreen(
                     },
                     onConfirm = { time ->
                         onIntent(TimerIntent.SetTime(time))
-                        onIntent(TimerIntent.Start)
+                        onIntent(TimerIntent.Start())
                         showTimeInput = false
                     }
                 )
@@ -438,8 +442,8 @@ fun TimerScreenPreview() {
     // 샘플 프리셋 데이터
     val presets = remember { PreviewProvider.samplePresets }
     val mockUiState = TimerUiState(
-        remainingTime = 25.minutes, // 25 minutes
-        isRunning = false,
+        initialTime = 25.minutes,
+        remainingTime = 25.minutes,
         progress = 0f,
         presets = presets
     )
@@ -460,11 +464,9 @@ fun TimerScreenIdlePreview() {
     val presets = remember { PreviewProvider.samplePresets }
     // Idle 상태의 UI State 예시
     val idleUiState = TimerUiState(
-        remainingTime = 30.minutes, // 시작 전 or 대기 상태
+        initialTime = 25.minutes,
+        remainingTime = 25.minutes,
         progress = 0.5f,
-        isRunning = true,
-        isPaused = false,
-        isCompleted = false,
         selectedPresetId = presets.first().id, // 첫번째 프리셋 선택
         presets = presets,
     )
@@ -485,11 +487,10 @@ fun TimerScreenCompletePreview() {
     val presets = remember { PreviewProvider.samplePresets }
     // Idle 상태의 UI State 예시
     val idleUiState = TimerUiState(
-        remainingTime = 0.minutes,
-        progress = 0f,
-        isRunning = true,
-        isPaused = false,
+        initialTime = 25.minutes,
         isCompleted = true,
+        overtime = 5.minutes,
+        progress = 0f,
         selectedPresetId = presets.first().id, // 첫번째 프리셋 선택
         presets = presets,
     )

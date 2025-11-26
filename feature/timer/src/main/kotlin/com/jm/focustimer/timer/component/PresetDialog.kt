@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,8 @@ import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.designsystem.theme.TimerColorPresets
 import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.usecase.AddPresetUseCase
+import com.jm.focustimer.timer.R
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 
@@ -75,7 +78,7 @@ fun AddPresetDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "프리셋 저장")
+            Text(text = stringResource(R.string.add_preset_dialog_title))
         },
         text = {
             Column {
@@ -88,13 +91,13 @@ fun AddPresetDialog(
                             isError = false
                         }
                     },
-                    label = { Text("프리셋 이름") },
-                    placeholder = { Text("예: 집중 시간") },
+                    label = { Text(stringResource(R.string.preset_dialog_preset_name_label)) },
+                    placeholder = { Text(stringResource(R.string.preset_dialog_preset_name_placeholder)) },
                     isError = isError,
                     supportingText = if (isError) {
                         { Text(errorMessage) }
                     } else {
-                        { Text("${presetName.length}/20") }
+                        { Text("${presetName.length}/${AddPresetUseCase.MAX_NAME_LENGTH}") }
                     },
                     singleLine = true,
                     modifier = Modifier
@@ -109,7 +112,7 @@ fun AddPresetDialog(
 
                 // 시간 설정
                 Text(
-                    text = "시간 설정",
+                    text = stringResource(R.string.preset_dialog_set_time_text),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -131,8 +134,8 @@ fun AddPresetDialog(
                                 minutes = 0
                             }
                         },
-                        label = { Text("분") },
-                        suffix = { Text("분") },
+                        label = { Text(stringResource(R.string.preset_dialog_time_minutes_label)) },
+                        suffix = { Text(stringResource(R.string.preset_dialog_time_minutes_label)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next
@@ -152,8 +155,8 @@ fun AddPresetDialog(
                                 seconds = 0
                             }
                         },
-                        label = { Text("초") },
-                        suffix = { Text("초") },
+                        label = { Text(stringResource(R.string.preset_dialog_time_seconds_label)) },
+                        suffix = { Text(stringResource(R.string.preset_dialog_time_seconds_label)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
@@ -167,7 +170,7 @@ fun AddPresetDialog(
 
                 // 컬러 선택
                 Text(
-                    text = "타이머 컬러",
+                    text = stringResource(R.string.preset_dialog_timer_color_text),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -181,22 +184,28 @@ fun AddPresetDialog(
             }
         },
         confirmButton = {
+            val blankNameErrorMessage =
+                stringResource(R.string.preset_dialog_preset_name_blank_error)
+            val nameLengthErrorMessage =
+                stringResource(R.string.preset_dialog_preset_name_length_error)
+            val timeErrorMessage = stringResource(R.string.preset_dialog_preset_time_error)
+
             TextButton(
                 onClick = {
                     when {
                         presetName.isBlank() -> {
                             isError = true
-                            errorMessage = "프리셋 이름을 입력해주세요"
+                            errorMessage = blankNameErrorMessage
                         }
 
                         presetName.length > 20 -> {
                             isError = true
-                            errorMessage = "프리셋 이름은 최대 20자입니다"
+                            errorMessage = nameLengthErrorMessage
                         }
 
                         minutes == 0 && seconds == 0 -> {
                             isError = true
-                            errorMessage = "시간을 설정해주세요"
+                            errorMessage = timeErrorMessage
                         }
 
                         else -> {
@@ -205,12 +214,12 @@ fun AddPresetDialog(
                     }
                 }
             ) {
-                Text("저장")
+                Text(stringResource(R.string.add_preset_dialog_save_text))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("취소")
+                Text(stringResource(R.string.preset_dialog_cancel_text))
             }
         }
     )
@@ -305,7 +314,7 @@ fun EditPresetDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "프리셋 수정")
+            Text(text = stringResource(R.string.edit_preset_dialog_title))
         },
         text = {
             Column {
@@ -318,12 +327,12 @@ fun EditPresetDialog(
                             isError = false
                         }
                     },
-                    label = { Text("프리셋 이름") },
+                    label = { Text(stringResource(R.string.preset_dialog_preset_name_label)) },
                     isError = isError,
                     supportingText = if (isError) {
                         { Text(errorMessage) }
                     } else {
-                        { Text("${presetName.length}/20") }
+                        { Text("${presetName.length}/${AddPresetUseCase.MAX_NAME_LENGTH}") }
                     },
                     singleLine = true,
                     modifier = Modifier
@@ -338,7 +347,7 @@ fun EditPresetDialog(
 
                 // 시간 설정
                 Text(
-                    text = "시간 설정",
+                    text = stringResource(R.string.preset_dialog_set_time_text),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -360,8 +369,8 @@ fun EditPresetDialog(
                                 minutes = 0
                             }
                         },
-                        label = { Text("분") },
-                        suffix = { Text("분") },
+                        label = { Text(stringResource(R.string.preset_dialog_time_minutes_label)) },
+                        suffix = { Text(stringResource(R.string.preset_dialog_time_minutes_label)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next
@@ -381,8 +390,8 @@ fun EditPresetDialog(
                                 seconds = 0
                             }
                         },
-                        label = { Text("초") },
-                        suffix = { Text("초") },
+                        label = { Text(stringResource(R.string.preset_dialog_time_seconds_label)) },
+                        suffix = { Text(stringResource(R.string.preset_dialog_time_seconds_label)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
@@ -396,7 +405,7 @@ fun EditPresetDialog(
 
                 // 컬러 선택
                 Text(
-                    text = "타이머 컬러",
+                    text = stringResource(R.string.preset_dialog_timer_color_text),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -410,22 +419,28 @@ fun EditPresetDialog(
             }
         },
         confirmButton = {
+            val blankNameErrorMessage =
+                stringResource(R.string.preset_dialog_preset_name_blank_error)
+            val nameLengthErrorMessage =
+                stringResource(R.string.preset_dialog_preset_name_length_error)
+            val timeErrorMessage = stringResource(R.string.preset_dialog_preset_time_error)
+
             TextButton(
                 onClick = {
                     when {
                         presetName.isBlank() -> {
                             isError = true
-                            errorMessage = "프리셋 이름을 입력해주세요"
+                            errorMessage = blankNameErrorMessage
                         }
 
                         presetName.length > 20 -> {
                             isError = true
-                            errorMessage = "프리셋 이름은 최대 20자입니다"
+                            errorMessage = nameLengthErrorMessage
                         }
 
                         minutes == 0 && seconds == 0 -> {
                             isError = true
-                            errorMessage = "시간을 설정해주세요"
+                            errorMessage = timeErrorMessage
                         }
 
                         else -> {
@@ -434,12 +449,12 @@ fun EditPresetDialog(
                     }
                 }
             ) {
-                Text("수정")
+                Text(stringResource(R.string.preset_dialog_modify_text))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("취소")
+                Text(stringResource(R.string.preset_dialog_cancel_text))
             }
         }
     )
@@ -461,7 +476,7 @@ fun DeletePresetDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "프리셋 삭제")
+            Text(text = stringResource(R.string.delete_preset_dialog_title))
         },
         text = {
             Text(text = "'$presetName' 프리셋을 삭제하시겠습니까?")
@@ -474,14 +489,14 @@ fun DeletePresetDialog(
                 }
             ) {
                 Text(
-                    "삭제",
+                    stringResource(R.string.preset_dialog_delete_text),
                     color = MaterialTheme.colorScheme.error
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("취소")
+                Text(stringResource(R.string.preset_dialog_cancel_text))
             }
         }
     )

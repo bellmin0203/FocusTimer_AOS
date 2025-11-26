@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +48,8 @@ import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.designsystem.theme.TimerColorPresets
 import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.usecase.AddPresetUseCase
+import com.jm.focustimer.timer.R
 import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -94,13 +97,13 @@ fun PresetSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "나의 시간",
+                    text = stringResource(R.string.preset_section_header),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
-                    text = "${presets.size}/5",
+                    text = "${presets.size}/${AddPresetUseCase.MAX_PRESET_COUNT}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -278,7 +281,7 @@ private fun PresetCard(
             onDismissRequest = { showDropdownMenu = false }
         ) {
             DropdownMenuItem(
-                text = { Text("수정") },
+                text = { Text(stringResource(R.string.dropdown_menu_modify_text)) },
                 onClick = {
                     showDropdownMenu = false
                     onEdit(preset)
@@ -291,7 +294,7 @@ private fun PresetCard(
                 }
             )
             DropdownMenuItem(
-                text = { Text("삭제", color = MaterialTheme.colorScheme.error) },
+                text = { Text(stringResource(R.string.dropdown_menu_delete_text), color = MaterialTheme.colorScheme.error) },
                 onClick = {
                     showDropdownMenu = false
                     onDelete(preset)

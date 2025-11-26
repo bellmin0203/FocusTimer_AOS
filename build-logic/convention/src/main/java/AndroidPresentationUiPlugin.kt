@@ -23,6 +23,7 @@ class AndroidPresentationUiPlugin : Plugin<Project> {
                 "implementation"(project(":core:domain"))
                 "implementation"(project(":core:data"))
                 "implementation"(project(":core:util"))
+                "implementation"(project(":core:common"))
 
                 "testImplementation"(project(":core:testing"))
             }
