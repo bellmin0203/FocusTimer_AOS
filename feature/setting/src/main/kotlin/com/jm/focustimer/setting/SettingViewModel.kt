@@ -3,6 +3,7 @@ package com.jm.focustimer.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import com.jm.focustimer.setting.model.SettingCategory
 import com.jm.focustimer.setting.model.SettingType
@@ -25,6 +26,15 @@ class SettingViewModel @Inject constructor(
             category = SettingCategory.APPEARANCE
         ),
         // 알림
+        SettingType.Selector(
+            title = "완료 알림 소리",
+            description = "타이머 완료 시 재생될 알림 소리를 선택합니다.",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = settingsDataSource.notificationSoundTypeFlow,
+            options = NotificationSoundType.entries.filterNot { it == NotificationSoundType.CUSTOM },
+            displayName = { it.displayName },
+            onSelect = ::updateNotificationSoundType
+        ),
         SettingType.Toggle(
             title = "알림 진동",
             description = "알림 발생 시 진동을 사용할지 설정합니다.",
@@ -91,6 +101,10 @@ class SettingViewModel @Inject constructor(
 
     fun updateIsDarkTheme(value: Boolean) = updateSetting {
         settingsDataSource.updateIsDarkTheme(value)
+    }
+
+    fun updateNotificationSoundType(soundType: NotificationSoundType) = updateSetting {
+        settingsDataSource.updateNotificationSoundType(soundType)
     }
 
     fun updateIsNotificationVibrate(value: Boolean) = updateSetting {

@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.TimeUnit
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -23,6 +25,13 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         preferences[KEY_IS_DARK_THEME] ?: false
     }
 
+    override val notificationSoundTypeFlow: Flow<NotificationSoundType> =
+        dataStore.data.map { preferences ->
+            val soundTypeString =
+                preferences[KEY_NOTIFICATION_SOUND_TYPE] ?: NotificationSoundType.DEFAULT.name
+            NotificationSoundType.fromString(soundTypeString)
+    }
+
     override val isNotificationVibrateFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[KEY_IS_NOTIFICATION_VIBRATE] ?: false
     }
@@ -36,8 +45,8 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         preferences[KEY_IS_REMEMBER_LAST_SESSION] ?: true
     }
 
-    override val timeUnitFlow: Flow<String> = dataStore.data.map { preferences ->
-        preferences[KEY_TIME_UNIT] ?: "minute"
+    override val timeUnitFlow: Flow<TimeUnit> = dataStore.data.map { preferences ->
+        TimeUnit.fromString(preferences[KEY_TIME_UNIT] ?: TimeUnit.MINUTE.name)
     }
 
     override val isScreenOnFlow: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -66,6 +75,12 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
+    override suspend fun updateNotificationSoundType(soundType: NotificationSoundType) {
+        dataStore.edit { preferences ->
+            preferences[KEY_NOTIFICATION_SOUND_TYPE] = soundType.name
+        }
+    }
+
     override suspend fun updateIsNotificationVibrate(isVibrate: Boolean) {
         dataStore.edit { preferences ->
             preferences[KEY_IS_NOTIFICATION_VIBRATE] = isVibrate
@@ -90,9 +105,9 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
-    override suspend fun updateTimeUnit(timeUnit: String) {
+    override suspend fun updateTimeUnit(timeUnit: TimeUnit) {
         dataStore.edit { preferences ->
-            preferences[KEY_TIME_UNIT] = timeUnit
+            preferences[KEY_TIME_UNIT] = timeUnit.name
         }
     }
 
@@ -101,6 +116,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
             preferences[KEY_IS_SCREEN_ON] = isScreenOn
         }
     }
+
 
     override suspend fun updateIsRemainingTimeDisplay(isRemainingTimeDisplay: Boolean) {
         dataStore.edit { preferences ->
@@ -132,6 +148,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
 
     companion object {
         private val KEY_IS_DARK_THEME = booleanPreferencesKey("is_dark_theme")
+        private val KEY_NOTIFICATION_SOUND_TYPE = stringPreferencesKey("notification_sound_type")
         private val KEY_IS_NOTIFICATION_VIBRATE = booleanPreferencesKey("is_notification_vibrate")
         private val KEY_IS_TICK_SOUND = booleanPreferencesKey("is_tick_sound")
         private val KEY_DEFAULT_SESSION_DURATION = longPreferencesKey("default_session_duration")

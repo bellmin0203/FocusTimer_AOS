@@ -61,3 +61,5 @@ node_modules/
 
 # Task files
 /.taskmaster/
+
+/.gemini/

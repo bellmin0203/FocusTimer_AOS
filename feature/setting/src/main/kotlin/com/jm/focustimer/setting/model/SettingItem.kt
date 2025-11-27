@@ -27,6 +27,25 @@ sealed class SettingType {
         val stateFlow: Flow<Boolean>,
         val onToggle: (Boolean) -> Unit
     ) : SettingType()
+
+    /**
+     * 드롭다운 선택이 있는 설정 항목
+     *
+     * @param T 선택 가능한 값의 타입
+     * @param stateFlow 현재 선택된 값의 Flow
+     * @param options 선택 가능한 옵션 목록
+     * @param displayName 옵션을 화면에 표시할 때 사용할 함수
+     * @param onSelect 옵션 선택 시 호출될 콜백 함수
+     */
+    data class Selector<T>(
+        override val title: String,
+        override val description: String? = null,
+        override val category: SettingCategory,
+        val stateFlow: Flow<T>,
+        val options: List<T>,
+        val displayName: (T) -> String,
+        val onSelect: (T) -> Unit
+    ) : SettingType()
 }
 
 /**

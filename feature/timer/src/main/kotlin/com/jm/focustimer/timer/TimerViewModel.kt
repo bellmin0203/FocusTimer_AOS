@@ -2,6 +2,7 @@ package com.jm.focustimer.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import com.jm.focustimer.domain.model.Preset
 import com.jm.focustimer.domain.usecase.AddPresetUseCase
 import com.jm.focustimer.domain.usecase.DeletePresetUseCase
@@ -18,6 +19,7 @@ import com.jm.focustimer.timer.model.TimerSideEffect.ShowError
 import com.jm.focustimer.timer.model.TimerSideEffect.ShowReminder
 import com.jm.focustimer.timer.model.TimerUiState
 import com.jm.focustimer.timer.usecase.TimerStatus
+import com.jm.focustimer.util.NotificationSoundPlayer
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -47,6 +50,8 @@ class TimerViewModel @Inject constructor(
     private val updatePresetUseCase: UpdatePresetUseCase,
     private val deletePresetUseCase: DeletePresetUseCase,
     private val timerManager: TimerManager,
+    private val settingsDataSource: SettingsPreferencesDataSource,
+    private val notificationSoundPlayer: NotificationSoundPlayer,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -162,6 +167,8 @@ class TimerViewModel @Inject constructor(
                         if (!timerState.isOvertime) {
                             sendSideEffect(TimerSideEffect.ShowTimerCompleted)
                             sendSideEffect(HapticFeedback(HapticPattern.COMPLETED))
+                            // 알림 소리 및 진동 재생
+                            playNotificationSound()
                         }
                     }
                 }
@@ -548,6 +555,26 @@ class TimerViewModel @Inject constructor(
     }
 
     /**
+     * 알림 소리 및 진동 재생
+     */
+    private fun playNotificationSound() {
+        viewModelScope.launch {
+            try {
+                // 설정에서 알림 소리 타입과 진동 설정 가져오기
+                val soundType = settingsDataSource.notificationSoundTypeFlow.first()
+                val isVibrate = settingsDataSource.isNotificationVibrateFlow.first()
+
+                LogUtil.d("알림 재생: soundType=$soundType, isVibrate=$isVibrate")
+
+                // 알림 소리 및 진동 재생
+                notificationSoundPlayer.play(soundType, isVibrate)
+            } catch (e: Exception) {
+                LogUtil.e("알림 재생 실패", e)
+            }
+        }
+    }
+
+    /**
      * Side Effect 전송
      */
     private fun sendSideEffect(sideEffect: TimerSideEffect) {
@@ -570,6 +597,7 @@ class TimerViewModel @Inject constructor(
         super.onCleared()
         LogUtil.d("ViewModel 정리 중")
         timerManager.cancelAll()
+        notificationSoundPlayer.stop() // 알림 소리 정지
         _sideEffect.close() // Channel 정리
     }
 

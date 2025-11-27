@@ -1,10 +1,14 @@
 package com.jm.focustimer.core.datastore.api
 
+import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
 
 interface SettingsPreferencesDataSource {
     val isDarkThemeFlow: Flow<Boolean>
+
+    val notificationSoundTypeFlow: Flow<NotificationSoundType>
 
     val isNotificationVibrateFlow: Flow<Boolean>
 
@@ -14,7 +18,7 @@ interface SettingsPreferencesDataSource {
 
     val isRememberLastSessionFlow: Flow<Boolean>
 
-    val timeUnitFlow: Flow<String>
+    val timeUnitFlow: Flow<TimeUnit>
 
     val isScreenOnFlow: Flow<Boolean>
 
@@ -32,6 +36,8 @@ interface SettingsPreferencesDataSource {
 
     suspend fun updateIsDarkTheme(isDarkTheme: Boolean)
 
+    suspend fun updateNotificationSoundType(soundType: NotificationSoundType)
+
     suspend fun updateIsNotificationVibrate(isVibrate: Boolean)
 
     suspend fun updateIsTickSound(isTickSound: Boolean)
@@ -40,7 +46,7 @@ interface SettingsPreferencesDataSource {
 
     suspend fun updateIsRememberLastSession(isRememberLastSession: Boolean)
 
-    suspend fun updateTimeUnit(timeUnit: String)
+    suspend fun updateTimeUnit(timeUnit: TimeUnit)
 
     suspend fun updateIsScreenOn(isScreenOn: Boolean)
 

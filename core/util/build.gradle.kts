@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.my.android.library)
+    alias(libs.plugins.my.hilt)
 }
 
 android {
@@ -8,4 +9,5 @@ android {
 
 dependencies {
     api(libs.jmlog)
+    implementation(projects.core.common)
 }

@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.jm.focustimer.core.datastore.api"
 }
+
+dependencies {
+    implementation(projects.core.common)
+}
