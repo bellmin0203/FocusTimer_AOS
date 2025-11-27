@@ -68,11 +68,11 @@ import kotlin.time.Duration.Companion.seconds
 fun TimerScreen(
     onSettingsClick: () -> Unit = {},
     onStatsClick: () -> Unit = {},
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: TimerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val view = LocalView.current
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)

@@ -157,7 +157,7 @@ fun TimerTopBar(
             IconButton(onClick = onMenuClick) {
                 Icon(
                     imageVector = FocusTimerIcons.Menu,
-                    contentDescription = "메뉴 열기"
+                    contentDescription = "Menu"
                 )
             }
         },

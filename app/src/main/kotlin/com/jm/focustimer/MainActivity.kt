@@ -5,12 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.compose.rememberNavController
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
-import com.jm.focustimer.timer.TimerScreen
+import com.jm.focustimer.navigation.FocusTimerNavHost
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -18,25 +19,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val scope = rememberCoroutineScope()
-            val snackbarHostState = remember { SnackbarHostState() }
-
-            FocusTimerTheme {
-                TimerScreen(
-                    onSettingsClick = {
-                        // TODO: 설정 화면으로 네비게이션
-                        scope.launch {
-                            snackbarHostState.showSnackbar("설정 화면으로 이동 (구현 예정)")
-                        }
-                    },
-                    onStatsClick = {
-                        // TODO: 통계 화면으로 네비게이션
-                        scope.launch {
-                            snackbarHostState.showSnackbar("통계 화면으로 이동 (구현 예정)")
-                        }
-                    }
-                )
-            }
+            FocusTimerApp()
         }
+    }
+}
+
+/**
+ * FocusTimer 앱의 메인 컴포저블
+ * 네비게이션과 전역 상태를 관리
+ */
+@Composable
+private fun FocusTimerApp() {
+    val navController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    FocusTimerTheme {
+        FocusTimerNavHost(
+            navController = navController,
+            snackbarHostState = snackbarHostState,
+            scope = scope
+        )
     }
 }

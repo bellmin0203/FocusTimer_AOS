@@ -40,7 +40,8 @@ include(
     ":core:datastore:api",
     ":core:datastore:impl",
     ":core:database",
-    ":core:testing"
+    ":core:testing",
+    ":core:ui-test-hilt"
 )
 
 // feature
