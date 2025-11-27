@@ -1,11 +1,13 @@
 package com.jm.focustimer.core.datastore.impl
 
+
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -34,6 +36,26 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         preferences[KEY_IS_REMEMBER_LAST_SESSION] ?: true
     }
 
+    override val timeUnitFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[KEY_TIME_UNIT] ?: "minute"
+    }
+
+    override val isScreenOnFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_SCREEN_ON] ?: false
+    }
+
+    override val isRemainingTimeDisplayFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_REMAINING_TIME_DISPLAY] ?: false
+    }
+
+    override val isHapticFeedbackFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_HAPTIC_FEEDBACK] ?: false
+    }
+
+    override val isMinimizedControlsFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_MINIMIZED_CONTROLS] ?: false
+    }
+
     override val defaultPresetIdFlow: Flow<Int?> = dataStore.data.map { preferences ->
         preferences[KEY_DEFAULT_PRESET_ID]
     }
@@ -57,7 +79,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
     }
 
     override suspend fun updateDefaultSessionDuration(duration: Duration) {
-        dataStore.edit { preferences -> 
+        dataStore.edit { preferences ->
             preferences[KEY_DEFAULT_SESSION_DURATION] = duration.inWholeMilliseconds
         }
     }
@@ -65,6 +87,36 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
     override suspend fun updateIsRememberLastSession(isRememberLastSession: Boolean) {
         dataStore.edit { preferences ->
             preferences[KEY_IS_REMEMBER_LAST_SESSION] = isRememberLastSession
+        }
+    }
+
+    override suspend fun updateTimeUnit(timeUnit: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_TIME_UNIT] = timeUnit
+        }
+    }
+
+    override suspend fun updateIsScreenOn(isScreenOn: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_SCREEN_ON] = isScreenOn
+        }
+    }
+
+    override suspend fun updateIsRemainingTimeDisplay(isRemainingTimeDisplay: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_REMAINING_TIME_DISPLAY] = isRemainingTimeDisplay
+        }
+    }
+
+    override suspend fun updateIsHapticFeedback(isHapticFeedback: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_HAPTIC_FEEDBACK] = isHapticFeedback
+        }
+    }
+
+    override suspend fun updateIsMinimizedControls(isMinimizedControls: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_MINIMIZED_CONTROLS] = isMinimizedControls
         }
     }
 
@@ -84,6 +136,11 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         private val KEY_IS_TICK_SOUND = booleanPreferencesKey("is_tick_sound")
         private val KEY_DEFAULT_SESSION_DURATION = longPreferencesKey("default_session_duration")
         private val KEY_IS_REMEMBER_LAST_SESSION = booleanPreferencesKey("is_remember_last_session")
+        private val KEY_TIME_UNIT = stringPreferencesKey("time_unit")
+        private val KEY_IS_SCREEN_ON = booleanPreferencesKey("is_screen_on")
+        private val KEY_IS_REMAINING_TIME_DISPLAY = booleanPreferencesKey("is_remaining_time_display")
+        private val KEY_IS_HAPTIC_FEEDBACK = booleanPreferencesKey("is_haptic_feedback")
+        private val KEY_IS_MINIMIZED_CONTROLS = booleanPreferencesKey("is_minimized_controls")
         private val KEY_DEFAULT_PRESET_ID = intPreferencesKey("default_preset_id")
 
     }
