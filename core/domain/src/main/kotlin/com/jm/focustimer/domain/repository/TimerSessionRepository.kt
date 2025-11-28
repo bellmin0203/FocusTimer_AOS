@@ -125,4 +125,28 @@ interface TimerSessionRepository {
      * @param presetId 프리셋 ID
      */
     suspend fun deleteSessionsByPresetId(presetId: Int)
+
+    /**
+     * 전체 세션의 평균 집중 시간을 조회합니다 (완료된 세션만).
+     * @return 평균 집중 시간 (밀리초)
+     */
+    suspend fun getAverageSessionLength(): Long?
+
+    /**
+     * 전체 완료된 세션의 총 집중 시간을 조회합니다.
+     * @return 총 집중 시간 (밀리초)
+     */
+    suspend fun getTotalFocusTime(): Long?
+
+    /**
+     * 날짜별로 그룹화된 완료된 세션의 날짜를 조회합니다 (연속 일수 계산용).
+     * @return 날짜 문자열 리스트 (yyyy-MM-dd 형식)
+     */
+    suspend fun getCompletedSessionDates(): List<String>
+
+    /**
+     * 일별 최대 집중 시간을 조회합니다.
+     * @return 일별 최대 집중 시간 (밀리초)
+     */
+    suspend fun getLongestDailyFocusTime(): Long?
 }

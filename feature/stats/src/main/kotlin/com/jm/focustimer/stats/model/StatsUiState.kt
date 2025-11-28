@@ -1,5 +1,6 @@
 package com.jm.focustimer.stats.model
 
+import com.jm.focustimer.domain.model.AchievementMetrics
 import com.jm.focustimer.domain.model.DailyStats
 import com.jm.focustimer.domain.model.MonthlyStats
 import com.jm.focustimer.domain.model.WeeklyStats
@@ -11,6 +12,7 @@ import com.jm.focustimer.domain.model.WeeklyStats
  * @param dailyStats 일간 통계
  * @param weeklyStats 주간 통계
  * @param monthlyStats 월간 통계
+ * @param achievementMetrics 성취 지표
  * @param isLoading 로딩 중 여부
  * @param error 에러 메시지
  */
@@ -19,6 +21,7 @@ data class StatsUiState(
     val dailyStats: DailyStats? = null,
     val weeklyStats: WeeklyStats? = null,
     val monthlyStats: MonthlyStats? = null,
+    val achievementMetrics: AchievementMetrics? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )

@@ -95,4 +95,20 @@ class TimerSessionRepositoryImpl @Inject constructor(
     override suspend fun deleteSessionsByPresetId(presetId: Int) {
         timerSessionDao.deleteSessionsByPresetId(presetId)
     }
+
+    override suspend fun getAverageSessionLength(): Long? {
+        return timerSessionDao.getAverageSessionLength()
+    }
+
+    override suspend fun getTotalFocusTime(): Long? {
+        return timerSessionDao.getTotalFocusTime()
+    }
+
+    override suspend fun getCompletedSessionDates(): List<String> {
+        return timerSessionDao.getCompletedSessionDates()
+    }
+
+    override suspend fun getLongestDailyFocusTime(): Long? {
+        return timerSessionDao.getLongestDailyFocusTime()
+    }
 }

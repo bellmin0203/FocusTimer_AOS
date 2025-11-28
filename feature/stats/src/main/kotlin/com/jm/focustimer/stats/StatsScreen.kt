@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.jm.focustimer.stats.component.AchievementMetricsContent
 import com.jm.focustimer.stats.component.DailyStatsContent
 import com.jm.focustimer.stats.component.MonthlyStatsContent
 import com.jm.focustimer.stats.component.WeeklyStatsContent
@@ -162,6 +163,12 @@ private fun StatsScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
+                    // 성취 지표 섹션
+                    uiState.achievementMetrics?.let { metrics ->
+                        AchievementMetricsContent(metrics = metrics)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
                     when (uiState.selectedPeriod) {
                         StatsPeriod.DAILY -> {
                             uiState.dailyStats?.let { stats ->

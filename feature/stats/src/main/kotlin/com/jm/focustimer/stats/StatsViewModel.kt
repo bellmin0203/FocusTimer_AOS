@@ -2,6 +2,7 @@ package com.jm.focustimer.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jm.focustimer.domain.usecase.GetAchievementMetricsUseCase
 import com.jm.focustimer.domain.usecase.GetDailyStatsUseCase
 import com.jm.focustimer.domain.usecase.GetMonthlyStatsUseCase
 import com.jm.focustimer.domain.usecase.GetWeeklyStatsUseCase
@@ -25,7 +26,8 @@ import javax.inject.Inject
 class StatsViewModel @Inject constructor(
     private val getDailyStatsUseCase: GetDailyStatsUseCase,
     private val getWeeklyStatsUseCase: GetWeeklyStatsUseCase,
-    private val getMonthlyStatsUseCase: GetMonthlyStatsUseCase
+    private val getMonthlyStatsUseCase: GetMonthlyStatsUseCase,
+    private val getAchievementMetricsUseCase: GetAchievementMetricsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StatsUiState())
@@ -36,6 +38,7 @@ class StatsViewModel @Inject constructor(
 
     init {
         LogUtil.d("StatsViewModel initialized")
+        loadAchievementMetrics()
         loadStats()
     }
 
@@ -130,8 +133,7 @@ class StatsViewModel @Inject constructor(
                         val dailyStats = getDailyStatsUseCase(currentDate)
                         _uiState.update {
                             it.copy(
-                                dailyStats = dailyStats,
-                                isLoading = false
+                                dailyStats = dailyStats, isLoading = false
                             )
                         }
                         LogUtil.d("Daily stats loaded: ${dailyStats.totalFocusTime}, ${dailyStats.completedSessions} sessions")
@@ -141,8 +143,7 @@ class StatsViewModel @Inject constructor(
                         val weeklyStats = getWeeklyStatsUseCase(currentDate)
                         _uiState.update {
                             it.copy(
-                                weeklyStats = weeklyStats,
-                                isLoading = false
+                                weeklyStats = weeklyStats, isLoading = false
                             )
                         }
                         LogUtil.d("Weekly stats loaded: ${weeklyStats.totalFocusTime}, ${weeklyStats.totalSessions} sessions")
@@ -152,8 +153,7 @@ class StatsViewModel @Inject constructor(
                         val monthlyStats = getMonthlyStatsUseCase(currentYearMonth)
                         _uiState.update {
                             it.copy(
-                                monthlyStats = monthlyStats,
-                                isLoading = false
+                                monthlyStats = monthlyStats, isLoading = false
                             )
                         }
                         LogUtil.d("Monthly stats loaded: ${monthlyStats.totalFocusTime}, ${monthlyStats.totalSessions} sessions")
@@ -163,10 +163,27 @@ class StatsViewModel @Inject constructor(
                 LogUtil.e("Failed to load stats", e)
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        error = "통계를 불러오는데 실패했습니다: ${e.message}"
+                        isLoading = false, error = "통계를 불러오는데 실패했습니다: ${e.message}"
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * 성취 지표 로드
+     */
+    private fun loadAchievementMetrics() {
+        viewModelScope.launch {
+            try {
+                val achievementMetrics = getAchievementMetricsUseCase()
+                _uiState.update {
+                    it.copy(achievementMetrics = achievementMetrics)
+                }
+                LogUtil.d("Achievement metrics loaded: focusRate=${achievementMetrics.focusRatePercent}%, consecutiveDays=${achievementMetrics.consecutiveFocusDays}")
+            } catch (e: Exception) {
+                LogUtil.e("Failed to load achievement metrics", e)
+                // 성취 지표 로드 실패는 에러로 표시하지 않음 (옵션)
             }
         }
     }

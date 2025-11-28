@@ -90,8 +90,6 @@ interface TimerSessionDao {
     @Query("SELECT * FROM timer_sessions WHERE start_time BETWEEN :startTime AND :endTime ORDER BY start_time DESC")
     fun getSessionsBetween(startTime: Long, endTime: Long): Flow<List<TimerSessionEntity>>
 
-
-
     /**
      * 최근 N개의 세션을 조회합니다.
      * @param limit 조회할 세션 개수
@@ -164,4 +162,45 @@ interface TimerSessionDao {
      */
     @Query("SELECT COUNT(*) FROM timer_sessions WHERE completed = 1 AND start_time BETWEEN :startTime AND :endTime")
     suspend fun getCompletedSessionCountBetween(startTime: Long, endTime: Long): Int
+
+    /**
+     * 전체 세션의 평균 집중 시간을 조회합니다 (완료된 세션만).
+     * @return 평균 집중 시간 (밀리초)
+     */
+    @Query("SELECT AVG(duration) FROM timer_sessions WHERE completed = 1")
+    suspend fun getAverageSessionLength(): Long?
+
+    /**
+     * 전체 완료된 세션의 총 집중 시간을 조회합니다.
+     * @return 총 집중 시간 (밀리초)
+     */
+    @Query("SELECT SUM(duration) FROM timer_sessions WHERE completed = 1")
+    suspend fun getTotalFocusTime(): Long?
+
+    /**
+     * 날짜별로 그룹화된 완료된 세션의 시작 시간을 조회합니다 (연속 일수 계산용).
+     * @return 날짜별 세션 시작 시간 리스트
+     */
+    @Query("""
+        SELECT DISTINCT DATE(start_time / 1000, 'unixepoch', 'localtime') as date 
+        FROM timer_sessions 
+        WHERE completed = 1 
+        ORDER BY date DESC
+        """)
+    suspend fun getCompletedSessionDates(): List<String>
+
+    /**
+     * 일별 최대 집중 시간을 조회합니다.
+     * @return 일별 최대 집중 시간 (밀리초)
+     */
+    @Query("""
+        SELECT MAX(daily_total) 
+        FROM (
+            SELECT DATE(start_time / 1000, 'unixepoch', 'localtime') as date, SUM(duration) as daily_total 
+            FROM timer_sessions 
+            WHERE completed = 1 
+            GROUP BY date
+        )
+        """)
+    suspend fun getLongestDailyFocusTime(): Long?
 }
