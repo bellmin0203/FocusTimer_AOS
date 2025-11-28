@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.jm.focustimer.setting.SettingScreen
+import com.jm.focustimer.stats.StatsScreen
 import com.jm.focustimer.timer.TimerScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ fun FocusTimerNavHost(
                     navController.navigate(Screen.Setting.route)
                 },
                 onStatsClick = {
-                    handleStatsClick(snackbarHostState, scope)
+                    navController.navigate(Screen.Stats.route)
                 }
             )
         }
@@ -39,6 +40,15 @@ fun FocusTimerNavHost(
         // 설정 화면
         composable(Screen.Setting.route) {
             SettingScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // 통계 화면
+        composable(Screen.Stats.route) {
+            StatsScreen(
                 onBackClick = {
                     navController.popBackStack()
                 }

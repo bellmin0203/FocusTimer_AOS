@@ -62,6 +62,15 @@ class TimerSessionRepositoryImpl @Inject constructor(
             .map { entities -> entities.map { it.toTimerSession() } }
     }
 
+    override fun getCompletedSessionsBetween(startTime: Long, endTime: Long): Flow<List<TimerSession>> {
+        return timerSessionDao.getCompletedSessionsBetween(startTime, endTime)
+            .map { entities -> entities.map { it.toTimerSession() } }
+    }
+
+    override suspend fun getTotalFocusTimeBetween(startTime: Long, endTime: Long): Long {
+        return timerSessionDao.getTotalFocusTimeBetween(startTime, endTime) ?: 0
+    }
+
     override fun getRecentSessions(limit: Int): Flow<List<TimerSession>> {
         return timerSessionDao.getRecentSessions(limit)
             .map { entities -> entities.map { it.toTimerSession() } }

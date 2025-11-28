@@ -74,6 +74,22 @@ interface TimerSessionRepository {
     fun getSessionsBetween(startTime: Long, endTime: Long): Flow<List<TimerSession>>
 
     /**
+     * 특정 기간의 완료된 세션만 조회합니다.
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 해당 기간의 완료된 세션들
+     */
+    fun getCompletedSessionsBetween(startTime: Long, endTime: Long): Flow<List<TimerSession>>
+
+    /**
+     * 특정 날짜의 총 집중 시간을 조회합니다.
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 총 집중 시간 (밀리초)
+     */
+    suspend fun getTotalFocusTimeBetween(startTime: Long, endTime: Long): Long
+
+    /**
      * 최근 N개의 세션을 조회합니다.
      * @param limit 조회할 세션 개수
      * @return 최근 세션들

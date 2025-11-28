@@ -90,6 +90,8 @@ interface TimerSessionDao {
     @Query("SELECT * FROM timer_sessions WHERE start_time BETWEEN :startTime AND :endTime ORDER BY start_time DESC")
     fun getSessionsBetween(startTime: Long, endTime: Long): Flow<List<TimerSessionEntity>>
 
+
+
     /**
      * 최근 N개의 세션을 조회합니다.
      * @param limit 조회할 세션 개수
@@ -132,4 +134,34 @@ interface TimerSessionDao {
      */
     @Query("DELETE FROM timer_sessions WHERE preset_id = :presetId")
     suspend fun deleteSessionsByPresetId(presetId: Int)
+
+    /**
+     * 특정 기간의 완료된 세션만 조회합니다.
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 해당 기간의 완료된 세션들
+     */
+    @Query("SELECT * FROM timer_sessions WHERE completed = 1 AND start_time BETWEEN :startTime AND :endTime ORDER BY start_time ASC")
+    fun getCompletedSessionsBetween(
+        startTime: Long,
+        endTime: Long
+    ): Flow<List<TimerSessionEntity>>
+
+    /**
+     * 특정 날짜의 총 집중 시간을 조회합니다.
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 총 집중 시간 (밀리초)
+     */
+    @Query("SELECT SUM(duration) FROM timer_sessions WHERE completed = 1 AND start_time BETWEEN :startTime AND :endTime")
+    suspend fun getTotalFocusTimeBetween(startTime: Long, endTime: Long): Long?
+
+    /**
+     * 특정 날짜의 완료된 세션 수를 조회합니다.
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 완료된 세션 개수
+     */
+    @Query("SELECT COUNT(*) FROM timer_sessions WHERE completed = 1 AND start_time BETWEEN :startTime AND :endTime")
+    suspend fun getCompletedSessionCountBetween(startTime: Long, endTime: Long): Int
 }

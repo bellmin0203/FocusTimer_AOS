@@ -5,3 +5,10 @@ plugins {
 android {
     namespace = "com.jm.focustimer.stats"
 }
+
+dependencies {
+    // Vico Chart
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.core)
+}
