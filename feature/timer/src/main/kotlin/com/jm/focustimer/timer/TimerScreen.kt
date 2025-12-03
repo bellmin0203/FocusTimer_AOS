@@ -1,6 +1,10 @@
 package com.jm.focustimer.timer
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.view.HapticFeedbackConstants
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -155,6 +160,23 @@ private fun TimerScreen(
     onSettingsClick: () -> Unit = {},
     onStatsClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val window = context.findActivity()?.window
+
+    // 타이머가 실행 중이고 설정이 활성화되어 있을 때 화면 켜짐 유지
+    DisposableEffect(uiState.isRunning, uiState.isScreenOnEnabled) {
+        if (uiState.isRunning && uiState.isScreenOnEnabled) {
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
+        onDispose {
+            // 컴포저블이 제거될 때 플래그 정리
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
     val presetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showPresets by remember { mutableStateOf(false) }
     var showTimeInput by remember { mutableStateOf(false) }
@@ -434,6 +456,12 @@ private fun TimerScreen(
             }
         }
     }
+}
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @ThemePreviews

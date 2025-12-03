@@ -18,6 +18,7 @@ import kotlin.time.Duration
  * @property presets 저장된 프리셋 목록
  * @property selectedPresetId 현재 선택된 프리셋 ID (선택되지 않았으면 null)
  * @property initialTime 처음 설정된 타이머 시간 (완료 후 총 시간 계산용)
+ * @property isScreenOnEnabled 화면 켜짐 유지 기능이 활성화되었는지 여부 (설정값)
  */
 @Immutable
 data class TimerUiState(
@@ -31,6 +32,7 @@ data class TimerUiState(
     val error: String? = null,
     val presets: List<Preset> = emptyList(),
     val selectedPresetId: Int? = null,
+    val isScreenOnEnabled: Boolean = false, // 화면 켜짐 유지 기능 활성화 여부
 ) {
 
     /**

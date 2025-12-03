@@ -72,6 +72,8 @@ class TimerViewModel @Inject constructor(
         observeTimer()
         // Intent 요청 관찰
         observeIntent()
+        // 화면 켜짐 설정 관찰
+        observeScreenOnSetting()
     }
 
     /**
@@ -83,6 +85,19 @@ class TimerViewModel @Inject constructor(
             .onEach { presets ->
                 LogUtil.d("프리셋 목록 업데이트, count=${presets.size}")
                 _uiState.update { it.copy(presets = presets) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    /**
+     * 화면 켜짐 유지 설정을 관찰하여 UI 상태에 반영
+     */
+    private fun observeScreenOnSetting() {
+        LogUtil.d("화면 켜짐 설정 관찰 시작")
+        settingsDataSource.isScreenOnFlow
+            .onEach { isScreenOnEnabled ->
+                LogUtil.d("화면 켜짐 설정 업데이트, isScreenOnEnabled=$isScreenOnEnabled")
+                _uiState.update { it.copy(isScreenOnEnabled = isScreenOnEnabled) }
             }
             .launchIn(viewModelScope)
     }
@@ -103,10 +118,12 @@ class TimerViewModel @Inject constructor(
                             it.copy(
                                 initialTime = initialTime,
                                 remainingTime = remainingTime,
-                                isRunning = isRunning,
-                                isPaused = isPaused,
-                                overtime = overtime,
-                                progress = progress
+                                isRunning = false,
+                                isPaused = false,
+                                isCompleted = false,
+                                overtime = Duration.ZERO,
+                                progress = progress,
+                                error = null,
                             )
                         }
                     }
@@ -444,7 +461,6 @@ class TimerViewModel @Inject constructor(
                             listOf(name)
                         )
                     )
-                    _uiState.update { it.copy(selectedPresetId = id.toInt()) }
                 },
                 onFailure = { error ->
                     LogUtil.e("프리셋 저장 실패", error)
