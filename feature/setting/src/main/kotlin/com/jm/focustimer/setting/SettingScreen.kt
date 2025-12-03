@@ -104,7 +104,7 @@ private fun SettingScreen(
                 items.forEach { item ->
                     when (item) {
                         is SettingType.Toggle -> {
-                            val checked by item.stateFlow.collectAsState(initial = false)
+                            val checked by item.stateFlow.collectAsState(initial = item.defaultValue)
                             ToggleSettingItem(
                                 title = item.title,
                                 description = item.description,
@@ -163,7 +163,7 @@ fun ToggleSettingItem(
  */
 @Composable
 fun <T> SelectorSettingItem(item: SettingType.Selector<T>) {
-    val selectedValue by item.stateFlow.collectAsState(initial = item.options.firstOrNull())
+    val selectedValue by item.stateFlow.collectAsState(initial = item.defaultValue)
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -234,7 +234,8 @@ fun PreviewSettingScreen() {
             description = "테스트 설명",
             category = SettingCategory.APPEARANCE,
             stateFlow = kotlinx.coroutines.flow.flowOf(false),
-            onToggle = {}
+            onToggle = {},
+            defaultValue = false
         ),
         SettingType.Selector(
             title = "완료 알림 소리",
@@ -243,14 +244,16 @@ fun PreviewSettingScreen() {
             stateFlow = kotlinx.coroutines.flow.flowOf("기본"),
             options = listOf("기본", "벨", "버저", "무음"),
             displayName = { it },
-            onSelect = {}
+            onSelect = {},
+            defaultValue = "기본"
         ),
         SettingType.Toggle(
             title = "알림 진동",
             description = "테스트 설명",
             category = SettingCategory.NOTIFICATION,
             stateFlow = kotlinx.coroutines.flow.flowOf(true),
-            onToggle = {}
+            onToggle = {},
+            defaultValue = true
         )
     )
 

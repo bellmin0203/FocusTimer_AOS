@@ -4,6 +4,7 @@ import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.common.model.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 interface SettingsPreferencesDataSource {
     val isDarkThemeFlow: Flow<Boolean>
@@ -61,4 +62,17 @@ interface SettingsPreferencesDataSource {
      * @param presetId 설정할 프리셋 ID (null인 경우 기본값 제거)
      */
     suspend fun updateDefaultPresetId(presetId: Int?)
+
+    companion object {
+        const val DEFAULT_IS_DARK_THEME = false
+        const val DEFAULT_IS_NOTIFICATION_VIBRATE = false
+        const val DEFAULT_IS_TICK_SOUND = false
+        val DEFAULT_SESSION_DURATION = 15.minutes
+        const val DEFAULT_IS_REMEMBER_LAST_SESSION = true
+        val DEFAULT_TIME_UNIT = TimeUnit.MINUTE
+        const val DEFAULT_IS_SCREEN_ON = false
+        const val DEFAULT_IS_REMAINING_TIME_DISPLAY = false
+        const val DEFAULT_IS_HAPTIC_FEEDBACK = false
+        const val DEFAULT_IS_MINIMIZED_CONTROLS = false
+    }
 }

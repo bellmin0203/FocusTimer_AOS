@@ -19,13 +19,15 @@ sealed class SettingType {
      *
      * @param stateFlow 설정 값의 StateFlow
      * @param onToggle 설정 값 변경 시 호출될 콜백 함수
+     * @param defaultValue 초기 로딩 시 보여줄 기본값
      */
     data class Toggle(
         override val title: String,
         override val description: String? = null,
         override val category: SettingCategory,
         val stateFlow: Flow<Boolean>,
-        val onToggle: (Boolean) -> Unit
+        val onToggle: (Boolean) -> Unit,
+        val defaultValue: Boolean
     ) : SettingType()
 
     /**
@@ -36,6 +38,7 @@ sealed class SettingType {
      * @param options 선택 가능한 옵션 목록
      * @param displayName 옵션을 화면에 표시할 때 사용할 함수
      * @param onSelect 옵션 선택 시 호출될 콜백 함수
+     * @param defaultValue 초기 로딩 시 보여줄 기본값
      */
     data class Selector<T>(
         override val title: String,
@@ -44,7 +47,8 @@ sealed class SettingType {
         val stateFlow: Flow<T>,
         val options: List<T>,
         val displayName: (T) -> String,
-        val onSelect: (T) -> Unit
+        val onSelect: (T) -> Unit,
+        val defaultValue: T
     ) : SettingType()
 }
 

@@ -5,6 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_DARK_THEME
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMAINING_TIME_DISPLAY
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_TICK_SOUND
 import com.jm.focustimer.setting.model.SettingCategory
 import com.jm.focustimer.setting.model.SettingType
 import com.jm.logutil.LogUtil
@@ -23,7 +31,8 @@ class SettingViewModel @Inject constructor(
             description = "앱의 전반적인 테마를 밝게 또는 어둡게 설정합니다.",
             stateFlow = settingsDataSource.isDarkThemeFlow,
             onToggle = ::updateIsDarkTheme,
-            category = SettingCategory.APPEARANCE
+            category = SettingCategory.APPEARANCE,
+            defaultValue = DEFAULT_IS_DARK_THEME
         ),
         // 알림
         SettingType.Selector(
@@ -33,21 +42,24 @@ class SettingViewModel @Inject constructor(
             stateFlow = settingsDataSource.notificationSoundTypeFlow,
             options = NotificationSoundType.entries.filterNot { it == NotificationSoundType.CUSTOM },
             displayName = { it.displayName },
-            onSelect = ::updateNotificationSoundType
+            onSelect = ::updateNotificationSoundType,
+            defaultValue = NotificationSoundType.DEFAULT
         ),
         SettingType.Toggle(
             title = "알림 진동",
             description = "알림 발생 시 진동을 사용할지 설정합니다.",
             stateFlow = settingsDataSource.isNotificationVibrateFlow,
             onToggle = ::updateIsNotificationVibrate,
-            category = SettingCategory.NOTIFICATION
+            category = SettingCategory.NOTIFICATION,
+            defaultValue = DEFAULT_IS_NOTIFICATION_VIBRATE
         ),
         SettingType.Toggle(
             title = "틱 사운드",
             description = "타이머 진행 중 틱톡 사운드를 사용할지 설정합니다.",
             stateFlow = settingsDataSource.isTickSoundFlow,
             onToggle = ::updateIsTickSound,
-            category = SettingCategory.NOTIFICATION
+            category = SettingCategory.NOTIFICATION,
+            defaultValue = DEFAULT_IS_TICK_SOUND
         ),
         // 타이머
         SettingType.Toggle(
@@ -55,21 +67,24 @@ class SettingViewModel @Inject constructor(
             description = "앱 종료 시 마지막 타이머 세션 설정을 기억합니다.",
             stateFlow = settingsDataSource.isRememberLastSessionFlow,
             onToggle = ::updateIsRememberLastSession,
-            category = SettingCategory.TIMER
+            category = SettingCategory.TIMER,
+            defaultValue = DEFAULT_IS_REMEMBER_LAST_SESSION
         ),
         SettingType.Toggle(
             title = "화면 켜짐 유지",
             description = "타이머가 실행되는 동안 화면이 계속 켜져 있도록 설정합니다.",
             stateFlow = settingsDataSource.isScreenOnFlow,
             onToggle = ::updateIsScreenOn,
-            category = SettingCategory.TIMER
+            category = SettingCategory.TIMER,
+            defaultValue = DEFAULT_IS_SCREEN_ON
         ),
         SettingType.Toggle(
             title = "남은 시간 표시",
             description = "타이머 화면에서 남은 시간을 표시할지 설정합니다.",
             stateFlow = settingsDataSource.isRemainingTimeDisplayFlow,
             onToggle = ::updateIsRemainingTimeDisplay,
-            category = SettingCategory.TIMER
+            category = SettingCategory.TIMER,
+            defaultValue = DEFAULT_IS_REMAINING_TIME_DISPLAY
         ),
         // 상호작용
         SettingType.Toggle(
@@ -77,14 +92,16 @@ class SettingViewModel @Inject constructor(
             description = "버튼 터치 시 햅틱 피드백을 제공할지 설정합니다.",
             stateFlow = settingsDataSource.isHapticFeedbackFlow,
             onToggle = ::updateIsHapticFeedback,
-            category = SettingCategory.INTERACTION
+            category = SettingCategory.INTERACTION,
+            defaultValue = DEFAULT_IS_HAPTIC_FEEDBACK
         ),
         SettingType.Toggle(
             title = "컨트롤 최소화",
             description = "타이머 화면에서 컨트롤 버튼을 최소화하여 표시합니다.",
             stateFlow = settingsDataSource.isMinimizedControlsFlow,
             onToggle = ::updateIsMinimizedControls,
-            category = SettingCategory.INTERACTION
+            category = SettingCategory.INTERACTION,
+            defaultValue = DEFAULT_IS_MINIMIZED_CONTROLS
         )
     )
 

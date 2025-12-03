@@ -11,6 +11,16 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.common.model.TimeUnit
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_DARK_THEME
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMAINING_TIME_DISPLAY
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_TICK_SOUND
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_SESSION_DURATION
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_TIME_UNIT
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -22,7 +32,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
 ) : SettingsPreferencesDataSource {
 
     override val isDarkThemeFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_DARK_THEME] ?: false
+        preferences[KEY_IS_DARK_THEME] ?: DEFAULT_IS_DARK_THEME
     }
 
     override val notificationSoundTypeFlow: Flow<NotificationSoundType> =
@@ -33,36 +43,36 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
     }
 
     override val isNotificationVibrateFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_NOTIFICATION_VIBRATE] ?: false
+        preferences[KEY_IS_NOTIFICATION_VIBRATE] ?: DEFAULT_IS_NOTIFICATION_VIBRATE
     }
     override val isTickSoundFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_TICK_SOUND] ?: false
+        preferences[KEY_IS_TICK_SOUND] ?: DEFAULT_IS_TICK_SOUND
     }
     override val defaultSessionDurationFlow: Flow<Duration> = dataStore.data.map { preferences ->
-        preferences[KEY_DEFAULT_SESSION_DURATION]?.minutes ?: 15.minutes
+        preferences[KEY_DEFAULT_SESSION_DURATION]?.minutes ?: DEFAULT_SESSION_DURATION
     }
     override val isRememberLastSessionFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_REMEMBER_LAST_SESSION] ?: true
+        preferences[KEY_IS_REMEMBER_LAST_SESSION] ?: DEFAULT_IS_REMEMBER_LAST_SESSION
     }
 
     override val timeUnitFlow: Flow<TimeUnit> = dataStore.data.map { preferences ->
-        TimeUnit.fromString(preferences[KEY_TIME_UNIT] ?: TimeUnit.MINUTE.name)
+        TimeUnit.fromString(preferences[KEY_TIME_UNIT] ?: DEFAULT_TIME_UNIT.name)
     }
 
     override val isScreenOnFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_SCREEN_ON] ?: false
+        preferences[KEY_IS_SCREEN_ON] ?: DEFAULT_IS_SCREEN_ON
     }
 
     override val isRemainingTimeDisplayFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_REMAINING_TIME_DISPLAY] ?: false
+        preferences[KEY_IS_REMAINING_TIME_DISPLAY] ?: DEFAULT_IS_REMAINING_TIME_DISPLAY
     }
 
     override val isHapticFeedbackFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_HAPTIC_FEEDBACK] ?: false
+        preferences[KEY_IS_HAPTIC_FEEDBACK] ?: DEFAULT_IS_HAPTIC_FEEDBACK
     }
 
     override val isMinimizedControlsFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_MINIMIZED_CONTROLS] ?: false
+        preferences[KEY_IS_MINIMIZED_CONTROLS] ?: DEFAULT_IS_MINIMIZED_CONTROLS
     }
 
     override val defaultPresetIdFlow: Flow<Int?> = dataStore.data.map { preferences ->

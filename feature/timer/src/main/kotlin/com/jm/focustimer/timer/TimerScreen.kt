@@ -324,7 +324,9 @@ private fun TimerScreen(
                             // 재생/일시정지 버튼
                             FocusIconButton(
                                 onClick = {
-                                    if (!uiState.isRunning) onIntent(TimerIntent.Start())
+                                    if (!uiState.isRunning) {
+                                        onIntent(TimerIntent.Start())
+                                    }
                                     else if (uiState.isPaused) onIntent(TimerIntent.Resume)
                                     else onIntent(TimerIntent.Pause)
                                 },
