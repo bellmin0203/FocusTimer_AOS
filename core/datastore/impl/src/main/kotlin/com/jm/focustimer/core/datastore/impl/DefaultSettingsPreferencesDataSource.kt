@@ -15,7 +15,6 @@ import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Compan
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
-import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMAINING_TIME_DISPLAY
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_TICK_SOUND
@@ -25,7 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.milliseconds
 
 class DefaultSettingsPreferencesDataSource @Inject constructor(
     private val dataStore: DataStore<Preferences>
@@ -49,7 +48,8 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         preferences[KEY_IS_TICK_SOUND] ?: DEFAULT_IS_TICK_SOUND
     }
     override val defaultSessionDurationFlow: Flow<Duration> = dataStore.data.map { preferences ->
-        preferences[KEY_DEFAULT_SESSION_DURATION]?.minutes ?: DEFAULT_SESSION_DURATION
+        val millis = preferences[KEY_DEFAULT_SESSION_DURATION]
+        millis?.milliseconds ?: DEFAULT_SESSION_DURATION
     }
     override val isRememberLastSessionFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[KEY_IS_REMEMBER_LAST_SESSION] ?: DEFAULT_IS_REMEMBER_LAST_SESSION
@@ -61,10 +61,6 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
 
     override val isScreenOnFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[KEY_IS_SCREEN_ON] ?: DEFAULT_IS_SCREEN_ON
-    }
-
-    override val isRemainingTimeDisplayFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_REMAINING_TIME_DISPLAY] ?: DEFAULT_IS_REMAINING_TIME_DISPLAY
     }
 
     override val isHapticFeedbackFlow: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -127,13 +123,6 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
-
-    override suspend fun updateIsRemainingTimeDisplay(isRemainingTimeDisplay: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[KEY_IS_REMAINING_TIME_DISPLAY] = isRemainingTimeDisplay
-        }
-    }
-
     override suspend fun updateIsHapticFeedback(isHapticFeedback: Boolean) {
         dataStore.edit { preferences ->
             preferences[KEY_IS_HAPTIC_FEEDBACK] = isHapticFeedback
@@ -165,7 +154,6 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         private val KEY_IS_REMEMBER_LAST_SESSION = booleanPreferencesKey("is_remember_last_session")
         private val KEY_TIME_UNIT = stringPreferencesKey("time_unit")
         private val KEY_IS_SCREEN_ON = booleanPreferencesKey("is_screen_on")
-        private val KEY_IS_REMAINING_TIME_DISPLAY = booleanPreferencesKey("is_remaining_time_display")
         private val KEY_IS_HAPTIC_FEEDBACK = booleanPreferencesKey("is_haptic_feedback")
         private val KEY_IS_MINIMIZED_CONTROLS = booleanPreferencesKey("is_minimized_controls")
         private val KEY_DEFAULT_PRESET_ID = intPreferencesKey("default_preset_id")

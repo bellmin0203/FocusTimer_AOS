@@ -2,9 +2,9 @@ package com.jm.focustimer.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.domain.model.session.TimerSession
+import com.jm.focustimer.domain.repository.SettingsRepository
 import com.jm.focustimer.domain.usecase.preset.AddPresetUseCase
 import com.jm.focustimer.domain.usecase.preset.DeletePresetUseCase
 import com.jm.focustimer.domain.usecase.preset.GetAllPresetsUseCase
@@ -56,7 +56,7 @@ class TimerViewModel @Inject constructor(
     private val saveTimerSessionUseCase: SaveTimerSessionUseCase,
     private val updateTimerSessionUseCase: UpdateTimerSessionUseCase,
     private val timerManager: TimerManager,
-    private val settingsDataSource: SettingsPreferencesDataSource,
+    private val settingsRepository: SettingsRepository,
     private val notificationSoundPlayer: NotificationSoundPlayer,
 ) : ViewModel() {
 
@@ -78,8 +78,10 @@ class TimerViewModel @Inject constructor(
         observeTimer()
         // Intent 요청 관찰
         observeIntent()
-        // 화면 켜짐 설정 관찰
-        observeScreenOnSetting()
+        // 설정 관찰
+        observeSettings()
+        // 마지막 세션 기억 설정에 따라 초기 시간 설정
+        initializeTimerDuration()
     }
 
     /**
@@ -96,16 +98,61 @@ class TimerViewModel @Inject constructor(
     }
 
     /**
-     * 화면 켜짐 유지 설정을 관찰하여 UI 상태에 반영
+     * 모든 설정을 관찰하여 UI 상태에 반영
      */
-    private fun observeScreenOnSetting() {
-        LogUtil.d("화면 켜짐 설정 관찰 시작")
-        settingsDataSource.isScreenOnFlow
+    private fun observeSettings() {
+        LogUtil.d("설정 관찰 시작")
+
+        // 화면 켜짐 설정
+        settingsRepository.isScreenOn
             .onEach { isScreenOnEnabled ->
                 LogUtil.d("화면 켜짐 설정 업데이트, isScreenOnEnabled=$isScreenOnEnabled")
                 _uiState.update { it.copy(isScreenOnEnabled = isScreenOnEnabled) }
             }
             .launchIn(viewModelScope)
+
+        // 햅틱 피드백 설정
+        settingsRepository.isHapticFeedback
+            .onEach { isHapticFeedbackEnabled ->
+                LogUtil.d("햅틱 피드백 설정 업데이트, isHapticFeedbackEnabled=$isHapticFeedbackEnabled")
+                _uiState.update { it.copy(isHapticFeedbackEnabled = isHapticFeedbackEnabled) }
+            }
+            .launchIn(viewModelScope)
+
+        // 틱 소리 설정
+        settingsRepository.isTickSound
+            .onEach { isTickSoundEnabled ->
+                LogUtil.d("틱 소리 설정 업데이트, isTickSoundEnabled=$isTickSoundEnabled")
+                _uiState.update { it.copy(isTickSoundEnabled = isTickSoundEnabled) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    /**
+     * 마지막 세션 기억 설정에 따라 초기 타이머 시간을 설정하고
+     * 기본 프리셋이 있으면 자동으로 선택합니다
+     */
+    private fun initializeTimerDuration() {
+        viewModelScope.launch {
+            val isRememberLastSession = settingsRepository.isRememberLastSession.first()
+            LogUtil.d("마지막 세션 기억 설정: $isRememberLastSession")
+
+            if (!isRememberLastSession) {
+                // 기본 프리셋이 있는지 확인
+                val defaultPresetId = settingsRepository.defaultPresetId.first()
+
+                if (defaultPresetId != null) {
+                    // 기본 프리셋이 설정되어 있으면 프리셋 선택
+                    LogUtil.d("기본 프리셋 선택: $defaultPresetId")
+                    handleSelectPreset(defaultPresetId)
+                } else {
+                    // 기본 프리셋이 없으면 기본 세션 시간으로 설정
+                    val defaultDuration = settingsRepository.defaultSessionDuration.first()
+                    LogUtil.d("기본 세션 시간으로 설정: $defaultDuration")
+                    handleSetTime(defaultDuration)
+                }
+            }
+        }
     }
 
     private fun observeTimer() {
@@ -154,15 +201,26 @@ class TimerViewModel @Inject constructor(
                                 progress = progress
                             )
                         }
-                        // 마지막 5초는 햅틱 피드백
-                        if (remainingTime in 1.seconds..5.seconds) {
+
+                        val currentState = _uiState.value
+
+                        // 틱 소리 재생 (매 초마다, 설정이 활성화된 경우)
+                        if (currentState.isTickSoundEnabled) {
+                            notificationSoundPlayer.playTick()
+                        }
+
+                        // 마지막 5초는 햅틱 피드백 (설정이 활성화된 경우)
+                        if (remainingTime in 1.seconds..5.seconds && currentState.isHapticFeedbackEnabled) {
                             LogUtil.d("startTimer: 마지막 5초, 햅틱 피드백 전송")
                             sendSideEffect(HapticFeedback(HapticPattern.TICK))
                         }
 
                         if (timerState.isShowReminder) {
                             sendSideEffect(ShowReminder(remainingTime))
-                            sendSideEffect(HapticFeedback(HapticPattern.REMINDER))
+                            // 리마인더 햅틱 피드백 (설정이 활성화된 경우)
+                            if (currentState.isHapticFeedbackEnabled) {
+                                sendSideEffect(HapticFeedback(HapticPattern.REMINDER))
+                            }
                         }
                     }
 
@@ -192,7 +250,12 @@ class TimerViewModel @Inject constructor(
                         if (!timerState.isOvertime) {
                             // 타이머가 정상 완료된 시점 (초과 시간 진입 전)
                             sendSideEffect(TimerSideEffect.ShowTimerCompleted)
-                            sendSideEffect(HapticFeedback(HapticPattern.COMPLETED))
+
+                            // 햅틱 피드백 (설정이 활성화된 경우)
+                            if (_uiState.value.isHapticFeedbackEnabled) {
+                                sendSideEffect(HapticFeedback(HapticPattern.COMPLETED))
+                            }
+
                             // 알림 소리 및 진동 재생
                             playNotificationSound()
 
@@ -777,8 +840,8 @@ class TimerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // 설정에서 알림 소리 타입과 진동 설정 가져오기
-                val soundType = settingsDataSource.notificationSoundTypeFlow.first()
-                val isVibrate = settingsDataSource.isNotificationVibrateFlow.first()
+                val soundType = settingsRepository.notificationSoundType.first()
+                val isVibrate = settingsRepository.isNotificationVibrate.first()
 
                 LogUtil.d("알림 재생: soundType=$soundType, isVibrate=$isVibrate")
 

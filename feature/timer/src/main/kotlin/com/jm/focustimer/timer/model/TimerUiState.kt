@@ -36,6 +36,8 @@ data class TimerUiState(
     val isScreenOnEnabled: Boolean = false, // 화면 켜짐 유지 기능 활성화 여부
     val currentSessionId: Long? = null, // 현재 진행 중인 세션 ID
     val sessionStartTime: Instant? = null, // 세션 시작 시간
+    val isHapticFeedbackEnabled: Boolean = false, // 햅틱 피드백 활성화 여부
+    val isTickSoundEnabled: Boolean = false, // 틱 소리 활성화 여부
 ) {
 
     /**

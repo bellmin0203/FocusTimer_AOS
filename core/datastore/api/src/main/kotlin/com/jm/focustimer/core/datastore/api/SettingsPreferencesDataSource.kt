@@ -23,8 +23,6 @@ interface SettingsPreferencesDataSource {
 
     val isScreenOnFlow: Flow<Boolean>
 
-    val isRemainingTimeDisplayFlow: Flow<Boolean>
-
     val isHapticFeedbackFlow: Flow<Boolean>
 
     val isMinimizedControlsFlow: Flow<Boolean>
@@ -51,8 +49,6 @@ interface SettingsPreferencesDataSource {
 
     suspend fun updateIsScreenOn(isScreenOn: Boolean)
 
-    suspend fun updateIsRemainingTimeDisplay(isRemainingTimeDisplay: Boolean)
-
     suspend fun updateIsHapticFeedback(isHapticFeedback: Boolean)
 
     suspend fun updateIsMinimizedControls(isMinimizedControls: Boolean)
@@ -71,7 +67,6 @@ interface SettingsPreferencesDataSource {
         const val DEFAULT_IS_REMEMBER_LAST_SESSION = true
         val DEFAULT_TIME_UNIT = TimeUnit.MINUTE
         const val DEFAULT_IS_SCREEN_ON = false
-        const val DEFAULT_IS_REMAINING_TIME_DISPLAY = false
         const val DEFAULT_IS_HAPTIC_FEEDBACK = false
         const val DEFAULT_IS_MINIMIZED_CONTROLS = false
     }

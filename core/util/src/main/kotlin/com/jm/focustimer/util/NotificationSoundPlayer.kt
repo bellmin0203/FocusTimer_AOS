@@ -123,6 +123,36 @@ class NotificationSoundPlayer @Inject constructor(
     }
 
     /**
+     * 틱 소리를 재생합니다 (짧은 틱 사운드)
+     * 매 초마다 호출될 수 있으므로 가볍게 처리
+     */
+    fun playTick() {
+        try {
+            // 틱 소리는 짧고 간단하게 재생
+            // 리소스 ID 가져오기
+            // TODO: jongmin, 틱 사운드 추가 필요함 
+            val resourceId = context.resources.getIdentifier(
+                "tick_sound",
+                "raw",
+                context.packageName
+            )
+
+            if (resourceId != 0) {
+                // 틱 소리용 MediaPlayer (기존과 별도)
+                MediaPlayer.create(context, resourceId)?.apply {
+                    setOnCompletionListener {
+                        it.release()
+                    }
+                    start()
+                }
+            }
+        } catch (e: Exception) {
+            // 재생 실패 시 무시 (틱 소리는 선택적 기능)
+            e.printStackTrace()
+        }
+    }
+
+    /**
      * 재생 중인 소리를 정지하고 리소스를 해제합니다
      */
     fun stop() {

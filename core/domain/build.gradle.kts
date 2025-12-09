@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    implementation(projects.core.common)
+
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.truth)

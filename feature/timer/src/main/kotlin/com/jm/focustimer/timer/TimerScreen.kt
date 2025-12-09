@@ -122,12 +122,15 @@ fun TimerScreen(
                 }
 
                 is TimerSideEffect.HapticFeedback -> {
-                    val feedbackConstant = when (effect.pattern) {
-                        HapticPattern.TICK -> HapticFeedbackConstants.CLOCK_TICK
-                        HapticPattern.COMPLETED -> HapticFeedbackConstants.LONG_PRESS
-                        HapticPattern.REMINDER -> HapticFeedbackConstants.CONTEXT_CLICK
+                    // 햅틱 피드백 설정이 활성화된 경우에만 실행
+                    if (uiState.isHapticFeedbackEnabled) {
+                        val feedbackConstant = when (effect.pattern) {
+                            HapticPattern.TICK -> HapticFeedbackConstants.CLOCK_TICK
+                            HapticPattern.COMPLETED -> HapticFeedbackConstants.LONG_PRESS
+                            HapticPattern.REMINDER -> HapticFeedbackConstants.CONTEXT_CLICK
+                        }
+                        view.performHapticFeedback(feedbackConstant)
                     }
-                    view.performHapticFeedback(feedbackConstant)
                 }
             }
         }

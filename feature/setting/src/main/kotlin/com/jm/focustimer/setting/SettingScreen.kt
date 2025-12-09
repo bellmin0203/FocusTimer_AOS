@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -47,8 +50,10 @@ fun SettingScreen(
     viewModel: SettingViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {}
 ) {
+    val settingItems by viewModel.settingItems.collectAsState(initial = emptyList())
+
     SettingScreen(
-        settingItems = viewModel.settingItems,
+        settingItems = settingItems,
         onBackClick = onBackClick
     )
 }
@@ -85,11 +90,13 @@ private fun SettingScreen(
             )
         }
     ) { paddingValues ->
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
+                .verticalScroll(scrollState)
         ) {
             SettingCategory.entries.forEach { category ->
                 val items = groupedSettings[category] ?: return@forEach
@@ -254,7 +261,71 @@ fun PreviewSettingScreen() {
             stateFlow = kotlinx.coroutines.flow.flowOf(true),
             onToggle = {},
             defaultValue = true
-        )
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
+        SettingType.Toggle(
+            title = "알림 진동",
+            description = "테스트 설명",
+            category = SettingCategory.NOTIFICATION,
+            stateFlow = kotlinx.coroutines.flow.flowOf(true),
+            onToggle = {},
+            defaultValue = true
+        ),
     )
 
     FocusTimerTheme {
