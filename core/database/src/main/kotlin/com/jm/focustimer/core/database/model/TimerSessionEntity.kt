@@ -3,7 +3,7 @@ package com.jm.focustimer.core.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.jm.focustimer.domain.model.TimerSession
+import com.jm.focustimer.domain.model.session.TimerSession
 import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 

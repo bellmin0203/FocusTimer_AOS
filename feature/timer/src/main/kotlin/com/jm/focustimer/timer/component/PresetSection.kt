@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.designsystem.theme.TimerColorPresets
-import com.jm.focustimer.domain.model.Preset
-import com.jm.focustimer.domain.usecase.AddPresetUseCase
+import com.jm.focustimer.domain.model.preset.Preset
+import com.jm.focustimer.domain.usecase.preset.AddPresetUseCase
 import com.jm.focustimer.timer.R
 import java.time.Instant
 import kotlin.time.Duration

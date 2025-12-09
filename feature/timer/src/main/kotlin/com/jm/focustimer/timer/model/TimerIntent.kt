@@ -1,6 +1,6 @@
 package com.jm.focustimer.timer.model
 
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import kotlin.time.Duration
 
 /**

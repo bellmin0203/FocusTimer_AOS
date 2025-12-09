@@ -3,7 +3,7 @@ package com.jm.focustimer.data.repository
 import com.jm.focustimer.core.database.dao.PresetDao
 import com.jm.focustimer.core.database.model.toPreset
 import com.jm.focustimer.core.database.model.toPresetEntity
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.domain.repository.PresetRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -1,6 +1,6 @@
 package com.jm.focustimer.domain.repository
 
-import com.jm.focustimer.domain.model.TimerSession
+import com.jm.focustimer.domain.model.session.TimerSession
 import kotlinx.coroutines.flow.Flow
 
 /**

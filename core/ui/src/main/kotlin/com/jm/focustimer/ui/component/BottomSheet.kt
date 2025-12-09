@@ -34,7 +34,7 @@ import com.jm.focustimer.designsystem.component.PresetCard
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 

@@ -3,7 +3,7 @@ package com.jm.focustimer.core.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.jm.focustimer.domain.model.Statistics
+import com.jm.focustimer.domain.model.statistics.Statistics
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.milliseconds
 

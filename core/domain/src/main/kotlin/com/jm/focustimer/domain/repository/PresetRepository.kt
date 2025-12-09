@@ -1,6 +1,6 @@
 package com.jm.focustimer.domain.repository
 
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import kotlinx.coroutines.flow.Flow
 
 /**

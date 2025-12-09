@@ -1,6 +1,6 @@
 package com.jm.focustimer.domain.repository
 
-import com.jm.focustimer.domain.model.Statistics
+import com.jm.focustimer.domain.model.statistics.Statistics
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
 

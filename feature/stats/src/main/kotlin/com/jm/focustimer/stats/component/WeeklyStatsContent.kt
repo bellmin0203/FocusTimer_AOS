@@ -15,8 +15,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
-import com.jm.focustimer.domain.model.DailyFocusTime
-import com.jm.focustimer.domain.model.WeeklyStats
+import com.jm.focustimer.domain.model.statistics.DailyFocusTime
+import com.jm.focustimer.domain.model.statistics.WeeklyStats
 import com.jm.focustimer.stats.StatsCard
 import com.jm.focustimer.stats.StatsRow
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost

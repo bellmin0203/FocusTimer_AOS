@@ -3,7 +3,7 @@ package com.jm.focustimer.data.repository
 import com.jm.focustimer.core.database.dao.StatisticsDao
 import com.jm.focustimer.core.database.model.toStatistics
 import com.jm.focustimer.core.database.model.toStatisticsEntity
-import com.jm.focustimer.domain.model.Statistics
+import com.jm.focustimer.domain.model.statistics.Statistics
 import com.jm.focustimer.domain.repository.StatisticsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -1,9 +1,9 @@
 package com.jm.focustimer.stats.model
 
-import com.jm.focustimer.domain.model.AchievementMetrics
-import com.jm.focustimer.domain.model.DailyStats
-import com.jm.focustimer.domain.model.MonthlyStats
-import com.jm.focustimer.domain.model.WeeklyStats
+import com.jm.focustimer.domain.model.statistics.AchievementMetrics
+import com.jm.focustimer.domain.model.statistics.DailyStats
+import com.jm.focustimer.domain.model.statistics.MonthlyStats
+import com.jm.focustimer.domain.model.statistics.WeeklyStats
 
 /**
  * 통계 화면의 UI 상태

@@ -47,4 +47,7 @@
     <string name="snackbar_preset_saved">프리셋 \'%1$s\' 저장 완료</string>
     <string name="snackbar_preset_deleted">프리셋 \'%1$s\' 삭제됨</string>
     <string name="snackbar_preset_updated">프리셋 \'%1$s\' 수정 완료</string>
+    <string name="snackbar_session_save_failed">세션 저장에 실패했습니다</string>
+    <string name="snackbar_session_updated">세션이 업데이트되었습니다</string>
+    <string name="snackbar_session_update_failed">세션 업데이트에 실패했습니다</string>
 </resources>

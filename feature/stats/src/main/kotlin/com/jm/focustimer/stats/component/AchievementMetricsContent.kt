@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
-import com.jm.focustimer.domain.model.AchievementMetrics
+import com.jm.focustimer.domain.model.statistics.AchievementMetrics
 import com.jm.focustimer.stats.StatsCard
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes

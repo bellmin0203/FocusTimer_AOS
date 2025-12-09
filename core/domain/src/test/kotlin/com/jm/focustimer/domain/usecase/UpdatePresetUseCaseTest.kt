@@ -1,7 +1,8 @@
 package com.jm.focustimer.domain.usecase
 
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.domain.repository.PresetRepository
+import com.jm.focustimer.domain.usecase.preset.UpdatePresetUseCase
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.Runs

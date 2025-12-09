@@ -3,7 +3,7 @@ package com.jm.focustimer.data.repository
 import com.jm.focustimer.core.database.dao.TimerSessionDao
 import com.jm.focustimer.core.database.model.toTimerSession
 import com.jm.focustimer.core.database.model.toTimerSessionEntity
-import com.jm.focustimer.domain.model.TimerSession
+import com.jm.focustimer.domain.model.session.TimerSession
 import com.jm.focustimer.domain.repository.TimerSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

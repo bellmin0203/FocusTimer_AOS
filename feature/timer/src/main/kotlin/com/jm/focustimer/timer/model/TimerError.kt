@@ -1,6 +1,6 @@
 package com.jm.focustimer.timer.model
 
-import com.jm.focustimer.domain.usecase.AddPresetUseCase
+import com.jm.focustimer.domain.usecase.preset.AddPresetUseCase
 import com.jm.focustimer.timer.R
 import com.jm.focustimer.ui.util.UiText
 

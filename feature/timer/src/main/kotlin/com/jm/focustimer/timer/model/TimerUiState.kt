@@ -2,7 +2,8 @@ package com.jm.focustimer.timer.model
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Immutable
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
+import java.time.Instant
 import kotlin.time.Duration
 
 /**
@@ -33,6 +34,8 @@ data class TimerUiState(
     val presets: List<Preset> = emptyList(),
     val selectedPresetId: Int? = null,
     val isScreenOnEnabled: Boolean = false, // 화면 켜짐 유지 기능 활성화 여부
+    val currentSessionId: Long? = null, // 현재 진행 중인 세션 ID
+    val sessionStartTime: Instant? = null, // 세션 시작 시간
 ) {
 
     /**

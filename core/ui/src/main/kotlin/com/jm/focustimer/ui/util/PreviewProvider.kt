@@ -1,6 +1,6 @@
 package com.jm.focustimer.ui.util
 
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.ui.component.ChartData
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes

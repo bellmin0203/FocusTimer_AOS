@@ -2,10 +2,10 @@ package com.jm.focustimer.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jm.focustimer.domain.usecase.GetAchievementMetricsUseCase
-import com.jm.focustimer.domain.usecase.GetDailyStatsUseCase
-import com.jm.focustimer.domain.usecase.GetMonthlyStatsUseCase
-import com.jm.focustimer.domain.usecase.GetWeeklyStatsUseCase
+import com.jm.focustimer.domain.usecase.statistics.GetAchievementMetricsUseCase
+import com.jm.focustimer.domain.usecase.statistics.GetDailyStatsUseCase
+import com.jm.focustimer.domain.usecase.statistics.GetMonthlyStatsUseCase
+import com.jm.focustimer.domain.usecase.statistics.GetWeeklyStatsUseCase
 import com.jm.focustimer.stats.model.StatsPeriod
 import com.jm.focustimer.stats.model.StatsUiState
 import com.jm.logutil.LogUtil

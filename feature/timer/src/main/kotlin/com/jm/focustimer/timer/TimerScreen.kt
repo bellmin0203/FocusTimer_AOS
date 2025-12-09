@@ -47,7 +47,7 @@ import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.designsystem.theme.TimerColorPresets
-import com.jm.focustimer.domain.model.Preset
+import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.timer.component.AddPresetDialog
 import com.jm.focustimer.timer.component.DeletePresetDialog
 import com.jm.focustimer.timer.component.EditPresetDialog
@@ -63,6 +63,7 @@ import com.jm.focustimer.timer.model.toUiText
 import com.jm.focustimer.ui.component.TimerTopBar
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
+import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.hours
@@ -167,13 +168,16 @@ private fun TimerScreen(
     DisposableEffect(uiState.isRunning, uiState.isScreenOnEnabled) {
         if (uiState.isRunning && uiState.isScreenOnEnabled) {
             window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            LogUtil.d("addFlags FLAG_KEEP_SCREEN_ON")
         } else {
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            LogUtil.d("clearFlags FLAG_KEEP_SCREEN_ON")
         }
 
         onDispose {
             // 컴포저블이 제거될 때 플래그 정리
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            LogUtil.d("clearFlags FLAG_KEEP_SCREEN_ON")
         }
     }
 
