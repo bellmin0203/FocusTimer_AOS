@@ -2,9 +2,10 @@ package com.jm.focustimer.util
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import androidx.core.content.getSystemService
+import android.os.VibratorManager
 import com.jm.focustimer.common.model.NotificationSoundType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -102,19 +103,23 @@ class NotificationSoundPlayer @Inject constructor(
      */
     private fun playVibration() {
         try {
-            val vibrator = context.getSystemService<Vibrator>()
-            vibrator?.let {
+            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // API 31 (S) 이상: VibratorManager 사용
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager.defaultVibrator
+            } else {
+                // 구 버전: Vibrator 서비스 직접 사용
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+
+            vibrator.let {
                 // Android 8.0(API 26) 이상에서는 VibrationEffect 사용
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    val vibrationEffect = VibrationEffect.createOneShot(
-                        500, // 지속 시간 (밀리초)
-                        VibrationEffect.DEFAULT_AMPLITUDE
-                    )
-                    it.vibrate(vibrationEffect)
-                } else {
-                    @Suppress("DEPRECATION")
-                    it.vibrate(500)
-                }
+                val vibrationEffect = VibrationEffect.createOneShot(
+                    500, // 지속 시간 (밀리초)
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                )
+                it.vibrate(vibrationEffect)
             }
         } catch (e: Exception) {
             // 진동 실패 시 로그 출력

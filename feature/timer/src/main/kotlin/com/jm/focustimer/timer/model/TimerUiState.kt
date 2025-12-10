@@ -38,6 +38,7 @@ data class TimerUiState(
     val sessionStartTime: Instant? = null, // 세션 시작 시간
     val isHapticFeedbackEnabled: Boolean = false, // 햅틱 피드백 활성화 여부
     val isTickSoundEnabled: Boolean = false, // 틱 소리 활성화 여부
+    val isMinimizedControlsEnabled: Boolean = false, // 최소화된 컨트롤 표시 활성화 여부
 ) {
 
     /**

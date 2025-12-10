@@ -126,6 +126,14 @@ class TimerViewModel @Inject constructor(
                 _uiState.update { it.copy(isTickSoundEnabled = isTickSoundEnabled) }
             }
             .launchIn(viewModelScope)
+
+        // 최소화된 컨트롤 설정
+        settingsRepository.isMinimizedControls
+            .onEach { isMinimizedControlsEnabled ->
+                LogUtil.d("최소화된 컨트롤 설정 업데이트, isMinimizedControlsEnabled=$isMinimizedControlsEnabled")
+                _uiState.update { it.copy(isMinimizedControlsEnabled = isMinimizedControlsEnabled) }
+            }
+            .launchIn(viewModelScope)
     }
 
     /**

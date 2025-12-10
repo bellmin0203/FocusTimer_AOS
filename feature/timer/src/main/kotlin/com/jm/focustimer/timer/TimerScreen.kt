@@ -3,10 +3,10 @@ package com.jm.focustimer.timer
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.view.HapticFeedbackConstants
 import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,10 +36,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jm.focustimer.designsystem.component.CircularTimerProgress
@@ -65,6 +72,7 @@ import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
 import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -79,7 +87,7 @@ fun TimerScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val view = LocalView.current
+    val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
@@ -125,11 +133,11 @@ fun TimerScreen(
                     // 햅틱 피드백 설정이 활성화된 경우에만 실행
                     if (uiState.isHapticFeedbackEnabled) {
                         val feedbackConstant = when (effect.pattern) {
-                            HapticPattern.TICK -> HapticFeedbackConstants.CLOCK_TICK
-                            HapticPattern.COMPLETED -> HapticFeedbackConstants.LONG_PRESS
-                            HapticPattern.REMINDER -> HapticFeedbackConstants.CONTEXT_CLICK
+                            HapticPattern.TICK -> HapticFeedbackType.SegmentTick
+                            HapticPattern.COMPLETED -> HapticFeedbackType.LongPress
+                            HapticPattern.REMINDER -> HapticFeedbackType.ContextClick
                         }
-                        view.performHapticFeedback(feedbackConstant)
+                        haptics.performHapticFeedback(feedbackConstant)
                     }
                 }
             }
@@ -166,6 +174,11 @@ private fun TimerScreen(
 ) {
     val context = LocalContext.current
     val window = context.findActivity()?.window
+    val view = LocalView.current
+
+    // UI 가시성 상태 관리 (최소화된 컨트롤 기능용)
+    var showUI by remember { mutableStateOf(true) }
+    var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     // 타이머가 실행 중이고 설정이 활성화되어 있을 때 화면 켜짐 유지
     DisposableEffect(uiState.isRunning, uiState.isScreenOnEnabled) {
@@ -181,6 +194,52 @@ private fun TimerScreen(
             // 컴포저블이 제거될 때 플래그 정리
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             LogUtil.d("clearFlags FLAG_KEEP_SCREEN_ON")
+        }
+    }
+
+    // 최소화된 컨트롤 - 시스템바 제어
+    DisposableEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, showUI) {
+        val activity = context.findActivity()
+        val windowInsetsController = activity?.window?.let {
+            WindowCompat.getInsetsController(it, view)
+        }
+
+        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI) {
+            // 시스템바 숨김
+            windowInsetsController?.apply {
+                hide(WindowInsetsCompat.Type.systemBars())
+                systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+            LogUtil.d("시스템바 숨김")
+        } else {
+            // 시스템바 표시
+            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
+            LogUtil.d("시스템바 표시")
+        }
+
+        onDispose {
+            // 컴포저블이 제거될 때 시스템바 복원
+            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
+    // 최소화된 컨트롤 - 자동 숨김 타이머
+    LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, lastInteractionTime) {
+        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && showUI) {
+            delay(2000) // 2초 대기
+            if (System.currentTimeMillis() - lastInteractionTime >= 2000) {
+                showUI = false
+                LogUtil.d("UI 자동 숨김")
+            }
+        }
+    }
+
+    // 타이머가 멈추면 UI 다시 표시
+    LaunchedEffect(uiState.isRunning) {
+        if (!uiState.isRunning) {
+            showUI = true
+            LogUtil.d("타이머 정지 - UI 표시")
         }
     }
 
@@ -209,24 +268,42 @@ private fun TimerScreen(
     ) {
         Scaffold(
             topBar = {
-                TimerTopBar(
-                    onMenuClick = {
-                        scope.launch {
-                            drawerState.open()
+                // 최소화된 컨트롤 기능이 활성화되고 타이머가 실행 중이며 UI가 숨겨진 상태면 TopBar 숨김
+                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI)) {
+                    TimerTopBar(
+                        onMenuClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
                         }
-                    }
-                )
+                    )
+                }
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { padding ->
-            Column(
+            // 전체 화면에 터치 감지를 위한 Box
+            androidx.compose.foundation.layout.Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                    // 화면 터치 감지 - UI 표시
+                    .pointerInput(uiState.isRunning, uiState.isMinimizedControlsEnabled, showUI) {
+                        detectTapGestures {
+                            if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI) {
+                                showUI = true
+                                lastInteractionTime = System.currentTimeMillis()
+                                LogUtil.d("화면 터치 - UI 표시")
+                            }
+                        }
+                    }
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
 
                 // 선택된 프리셋의 색상 가져오기
                 val selectedPreset = uiState.presets.find { it.id == uiState.selectedPresetId }
@@ -234,7 +311,8 @@ private fun TimerScreen(
                     TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
                 } ?: TimerColorPresets.lightPresets[0]
 
-                if (uiState.isIdle) {
+                // 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 PresetSection 표시
+                if (uiState.isIdle && !(uiState.isMinimizedControlsEnabled && !showUI)) {
                     PresetSection(
                         presets = uiState.presets,
                         selectedPresetId = uiState.selectedPresetId,
@@ -305,56 +383,59 @@ private fun TimerScreen(
                     }
                 }
 
-                // 하단 컨트롤 영역
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(bottom = 32.dp)
-                ) {
-                    // 타이머 컨트롤 버튼
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
+                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI)) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(bottom = 32.dp)
                     ) {
-                        // 완료 상태일 때는 완료 버튼 표시
-                        if (uiState.isCompleted) {
-                            FocusIconButton(
-                                onClick = {
-                                    onIntent(TimerIntent.Complete)
-                                },
-                                icon = FocusTimerIcons.Check,
-                                contentDescription = "Complete",
-                                containerColor = presetColors.progressColor,
-                                contentColor = Color.White
-                            )
-                        } else {
-                            // 재생/일시정지 버튼
-                            FocusIconButton(
-                                onClick = {
-                                    if (!uiState.isRunning) {
-                                        onIntent(TimerIntent.Start())
-                                    }
-                                    else if (uiState.isPaused) onIntent(TimerIntent.Resume)
-                                    else onIntent(TimerIntent.Pause)
-                                },
-                                icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
-                                contentDescription = if (uiState.isRunning) "Pause" else "Play",
-                                containerColor = presetColors.progressColor,
-                                contentColor = Color.White
-                            )
-
-                            if (uiState.isActive) {
-                                // 리셋 버튼
+                        // 타이머 컨트롤 버튼
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // 완료 상태일 때는 완료 버튼 표시
+                            if (uiState.isCompleted) {
                                 FocusIconButton(
                                     onClick = {
-                                        onIntent(TimerIntent.Stop)
+                                        onIntent(TimerIntent.Complete)
                                     },
-                                    icon = FocusTimerIcons.RestartAlt,
-                                    contentDescription = "Reset"
+                                    icon = FocusTimerIcons.Check,
+                                    contentDescription = "Complete",
+                                    containerColor = presetColors.progressColor,
+                                    contentColor = Color.White
                                 )
+                            } else {
+                                // 재생/일시정지 버튼
+                                FocusIconButton(
+                                    onClick = {
+                                        if (!uiState.isRunning) {
+                                            onIntent(TimerIntent.Start())
+                                        }
+                                        else if (uiState.isPaused) onIntent(TimerIntent.Resume)
+                                        else onIntent(TimerIntent.Pause)
+                                    },
+                                    icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
+                                    contentDescription = if (uiState.isRunning) "Pause" else "Play",
+                                    containerColor = presetColors.progressColor,
+                                    contentColor = Color.White
+                                )
+
+                                if (uiState.isActive) {
+                                    // 리셋 버튼
+                                    FocusIconButton(
+                                        onClick = {
+                                            onIntent(TimerIntent.Stop)
+                                        },
+                                        icon = FocusTimerIcons.RestartAlt,
+                                        contentDescription = "Reset"
+                                    )
+                                }
                             }
                         }
                     }
+                }
                 }
             }
 
