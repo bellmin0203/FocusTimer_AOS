@@ -124,9 +124,8 @@ class TimerManagerImpl @Inject constructor(
         reminderThresholds: List<Duration>
     ) {
         when (event) {
-            is TimerEvent.Tick -> _timerState.update {
-                it.copy(
-                    status = TimerStatus.Running,
+            is TimerEvent.Tick -> _timerState.update { state ->
+                state.toRunning(
                     initialDuration = initialDuration,
                     remainingTime = event.remainingTime,
                     reminderThresholds = reminderThresholds
@@ -134,13 +133,12 @@ class TimerManagerImpl @Inject constructor(
             }
 
             is TimerEvent.Completed -> handleTimerComplete(initialDuration)
-            is TimerEvent.Reminder -> _timerState.update {
-                it.copy(
-                    status = TimerStatus.Running,
+            is TimerEvent.Reminder -> _timerState.update { state ->
+                state.toRunning(
                     initialDuration = initialDuration,
                     remainingTime = event.remainingTime,
                     reminderThresholds = reminderThresholds,
-                    isShowReminder = true
+                    showReminder = true
                 )
             }
         }
@@ -148,13 +146,8 @@ class TimerManagerImpl @Inject constructor(
 
     private fun handleTimerComplete(initialDuration: Duration) {
         if (_timerState.value.status !is TimerStatus.Completed) {
-            _timerState.update {
-                it.copy(
-                    status = TimerStatus.Completed,
-                    initialDuration = initialDuration,
-                    remainingTime = Duration.ZERO,
-                    overtime = Duration.ZERO
-                )
+            _timerState.update { state ->
+                state.toCompleted(initialDuration)
             }
             startOvertimeTracking()
         }
@@ -190,9 +183,7 @@ class TimerManagerImpl @Inject constructor(
     override fun pause() {
         if (_timerState.value.status is TimerStatus.Running) {
             timerJob?.cancel()
-            _timerState.update {
-                it.copy(status = TimerStatus.Paused)
-            }
+            _timerState.update { it.toPaused() }
         }
     }
 
@@ -212,18 +203,49 @@ class TimerManagerImpl @Inject constructor(
         timerJob?.cancel()
         timerJob = null
 
-        _timerState.update {
-            it.copy(
-                status = TimerStatus.Idle,
-                initialDuration = initialDuration,
-                remainingTime = initialDuration,
-                overtime = Duration.ZERO,
-                reminderThresholds = emptyList()
-            )
+        _timerState.update { state ->
+            state.toIdle(initialDuration)
         }
     }
 
     override fun cancelAll() {
         job.cancelChildren()
     }
+
+    private fun TimerState.toRunning(
+        initialDuration: Duration,
+        remainingTime: Duration,
+        reminderThresholds: List<Duration>,
+        showReminder: Boolean = false
+    ): TimerState = copy(
+        status = TimerStatus.Running,
+        initialDuration = initialDuration,
+        remainingTime = remainingTime,
+        reminderThresholds = reminderThresholds,
+        isShowReminder = showReminder
+    )
+
+    private fun TimerState.toCompleted(
+        initialDuration: Duration
+    ): TimerState = copy(
+        status = TimerStatus.Completed,
+        initialDuration = initialDuration,
+        remainingTime = Duration.ZERO,
+        overtime = Duration.ZERO
+    )
+
+    private fun TimerState.toPaused(): TimerState = copy(
+        status = TimerStatus.Paused
+    )
+
+    private fun TimerState.toIdle(
+        initialDuration: Duration
+    ): TimerState = copy(
+        status = TimerStatus.Idle,
+        initialDuration = initialDuration,
+        remainingTime = initialDuration,
+        overtime = Duration.ZERO,
+        reminderThresholds = emptyList(),
+        isShowReminder = false
+    )
 }
