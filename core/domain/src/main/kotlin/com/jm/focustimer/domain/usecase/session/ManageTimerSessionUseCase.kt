@@ -37,11 +37,15 @@ class ManageTimerSessionUseCase @Inject constructor(
      */
     suspend fun completeSession(
         sessionId: Int,
-        presetId: Int,
-        startTime: Instant,
+        presetId: Int? = null,
+        startTime: Instant?,
         initialDuration: Duration,
         overtime: Duration,
     ): Result<Unit> {
+        if (startTime == null) {
+            return Result.failure(IllegalStateException("세션 시작 시간을 찾을 수 없습니다"))
+        }
+
         val session = TimerSession(
             id = sessionId,
             presetId = presetId,
@@ -60,10 +64,14 @@ class ManageTimerSessionUseCase @Inject constructor(
      */
     suspend fun stopSession(
         sessionId: Int,
-        presetId: Int,
-        startTime: Instant,
+        presetId: Int? = null,
+        startTime: Instant?,
         initialDuration: Duration,
     ): Result<Unit> {
+        if (startTime == null) {
+            return Result.failure(IllegalStateException("세션 시작 시간을 찾을 수 없습니다"))
+        }
+
         val session = TimerSession(
             id = sessionId,
             presetId = presetId,

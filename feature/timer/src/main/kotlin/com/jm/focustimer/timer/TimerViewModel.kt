@@ -3,14 +3,10 @@ package com.jm.focustimer.timer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.focustimer.domain.model.preset.Preset
-import com.jm.focustimer.domain.model.session.TimerSession
 import com.jm.focustimer.domain.repository.SettingsRepository
-import com.jm.focustimer.domain.usecase.preset.AddPresetUseCase
-import com.jm.focustimer.domain.usecase.preset.DeletePresetUseCase
-import com.jm.focustimer.domain.usecase.preset.GetAllPresetsUseCase
-import com.jm.focustimer.domain.usecase.preset.UpdatePresetUseCase
-import com.jm.focustimer.domain.usecase.session.SaveTimerSessionUseCase
-import com.jm.focustimer.domain.usecase.session.UpdateTimerSessionUseCase
+import com.jm.focustimer.domain.usecase.preset.ManagePresetUseCase
+import com.jm.focustimer.domain.usecase.preset.PresetException
+import com.jm.focustimer.domain.usecase.session.ManageTimerSessionUseCase
 import com.jm.focustimer.timer.model.HapticPattern
 import com.jm.focustimer.timer.model.PresetError
 import com.jm.focustimer.timer.model.SetTimeError
@@ -49,12 +45,8 @@ import kotlin.time.Duration.Companion.seconds
  */
 @HiltViewModel
 class TimerViewModel @Inject constructor(
-    private val getAllPresetsUseCase: GetAllPresetsUseCase,
-    private val addPresetUseCase: AddPresetUseCase,
-    private val updatePresetUseCase: UpdatePresetUseCase,
-    private val deletePresetUseCase: DeletePresetUseCase,
-    private val saveTimerSessionUseCase: SaveTimerSessionUseCase,
-    private val updateTimerSessionUseCase: UpdateTimerSessionUseCase,
+    private val managePresetUseCase: ManagePresetUseCase,
+    private val manageTimerSessionUseCase: ManageTimerSessionUseCase,
     private val timerManager: TimerManager,
     private val settingsRepository: SettingsRepository,
     private val notificationSoundPlayer: NotificationSoundPlayer,
@@ -89,7 +81,7 @@ class TimerViewModel @Inject constructor(
      */
     private fun observePresets() {
         LogUtil.d("프리셋 목록 관찰 시작")
-        getAllPresetsUseCase()
+        managePresetUseCase.getAllPresets()
             .onEach { presets ->
                 LogUtil.d("프리셋 목록 업데이트, count=${presets.size}")
                 _uiState.update { it.copy(presets = presets) }
@@ -271,12 +263,12 @@ class TimerViewModel @Inject constructor(
                             val currentState = _uiState.value
                             currentState.currentSessionId?.let { sessionId ->
                                 viewModelScope.launch {
-                                    val updateResult = updateTimerSession(
-                                        state = currentState,
+                                    val updateResult = manageTimerSessionUseCase.completeSession(
                                         sessionId = sessionId.toInt(),
-                                        endTime = Instant.now(),
-                                        completed = true,
-                                        overrunTime = Duration.ZERO
+                                        presetId = currentState.selectedPresetId,
+                                        startTime = currentState.sessionStartTime,
+                                        initialDuration = currentState.initialTime,
+                                        overtime = Duration.ZERO
                                     )
 
                                     updateResult.fold(
@@ -328,12 +320,7 @@ class TimerViewModel @Inject constructor(
             is TimerIntent.Complete -> handleComplete()
             is TimerIntent.DragProgress -> handleDragProgress(intent.progress)
             is TimerIntent.SelectPreset -> handleSelectPreset(intent.presetId)
-            is TimerIntent.SaveAsPreset -> handleSaveAsPreset(
-                intent.name,
-                intent.duration,
-                intent.colorIndex
-            )
-
+            is TimerIntent.SaveAsPreset -> handleSaveAsPreset(intent.name, intent.duration, intent.colorIndex)
             is TimerIntent.DeletePreset -> handleDeletePreset(intent.presetId)
             is TimerIntent.UpdatePreset -> handleUpdatePreset(intent.preset)
         }
@@ -364,9 +351,7 @@ class TimerViewModel @Inject constructor(
             LogUtil.w("시간이 설정되지 않음")
             sendSideEffect(
                 ShowError(
-                    TimerError.SetTime(
-                        SetTimeError.InvalidTime
-                    )
+                    TimerError.SetTime(SetTimeError.InvalidTime)
                 )
             )
             return
@@ -375,12 +360,10 @@ class TimerViewModel @Inject constructor(
         LogUtil.d("타이머 시작")
 
         // 타이머 시작 전에 세션을 DB에 저장
-        val startTime = Instant.now()
         viewModelScope.launch {
-            val sessionResult = saveTimerSession(
-                presetId = currentState.selectedPresetId ?: 0, // 프리셋 미선택 시 0
-                duration = currentState.initialTime,
-                startTime = startTime
+            val sessionResult = manageTimerSessionUseCase.startSession(
+                presetId = currentState.selectedPresetId ?: 0,
+                duration = currentState.initialTime
             )
 
             sessionResult.fold(
@@ -389,7 +372,7 @@ class TimerViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             currentSessionId = sessionId,
-                            sessionStartTime = startTime
+                            sessionStartTime = Instant.now()
                         )
                     }
 
@@ -402,12 +385,13 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("세션 저장 실패", error)
-                    // 세션 저장 실패 시에도 타이머는 시작 (데이터 저장은 부가 기능)
                     sendSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_session_save_failed
                         )
                     )
+
+                    // 세션 저장 실패 시에도 타이머는 시작
                     timerManager.start(
                         initialDuration = _uiState.value.initialTime,
                         duration = _uiState.value.remainingTime,
@@ -416,31 +400,6 @@ class TimerViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    /**
-     * 타이머 세션을 DB에 저장합니다.
-     *
-     * @param presetId 사용된 프리셋 ID (선택되지 않은 경우 0)
-     * @param duration 세션 지속 시간
-     * @param startTime 세션 시작 시간
-     * @return 저장된 세션 ID를 담은 Result
-     */
-    private suspend fun saveTimerSession(
-        presetId: Int,
-        duration: Duration,
-        startTime: Instant
-    ): Result<Long> {
-        val session = TimerSession(
-            presetId = presetId,
-            startTime = startTime,
-            endTime = null, // 시작 시점에는 종료 시간 없음
-            duration = duration,
-            completed = false, // 아직 완료되지 않음
-            overrunTime = null // 초과 시간 없음
-        )
-
-        return saveTimerSessionUseCase(session)
     }
 
     /**
@@ -487,12 +446,11 @@ class TimerViewModel @Inject constructor(
         val currentState = _uiState.value
         currentState.currentSessionId?.let { sessionId ->
             viewModelScope.launch {
-                val updateResult = updateTimerSession(
-                    state = currentState,
+                val updateResult = manageTimerSessionUseCase.stopSession(
                     sessionId = sessionId.toInt(),
-                    endTime = Instant.now(),
-                    completed = false,
-                    overrunTime = Duration.ZERO
+                    presetId = currentState.selectedPresetId,
+                    startTime = currentState.sessionStartTime,
+                    initialDuration = currentState.initialTime
                 )
 
                 updateResult.fold(
@@ -534,12 +492,12 @@ class TimerViewModel @Inject constructor(
         if (currentState.overtime > Duration.ZERO) {
             currentState.currentSessionId?.let { sessionId ->
                 viewModelScope.launch {
-                    val updateResult = updateTimerSession(
-                        state = currentState,
+                    val updateResult = manageTimerSessionUseCase.completeSession(
                         sessionId = sessionId.toInt(),
-                        endTime = Instant.now(),
-                        completed = true,
-                        overrunTime = currentState.overtime
+                        presetId = currentState.selectedPresetId,
+                        startTime = currentState.sessionStartTime,
+                        initialDuration = currentState.initialTime,
+                        overtime = Duration.ZERO
                     )
 
                     updateResult.fold(
@@ -575,39 +533,6 @@ class TimerViewModel @Inject constructor(
                 R.string.snackbar_timer_completed
             )
         )
-    }
-
-    /**
-     * 타이머 세션을 업데이트합니다.
-     *
-     * @param sessionId 업데이트할 세션 ID
-     * @param endTime 세션 종료 시간
-     * @param completed 세션 완료 여부
-     * @param overrunTime 초과 시간
-     * @return 업데이트 결과를 담은 Result
-     */
-    private suspend fun updateTimerSession(
-        state: TimerUiState,
-        sessionId: Int,
-        endTime: Instant,
-        completed: Boolean,
-        overrunTime: Duration,
-    ): Result<Unit> {
-        // 세션 시작 시간이 없으면 에러
-        val startTime = state.sessionStartTime
-            ?: return Result.failure(IllegalStateException("세션 시작 시간을 찾을 수 없습니다"))
-
-        val updatedSession = TimerSession(
-            id = sessionId,
-            presetId = state.selectedPresetId ?: 0,
-            startTime = startTime,
-            endTime = endTime,
-            duration = state.initialTime,
-            completed = completed,
-            overrunTime = if (overrunTime > Duration.ZERO) overrunTime else null
-        )
-
-        return updateTimerSessionUseCase(updatedSession)
     }
 
     /**
@@ -652,41 +577,38 @@ class TimerViewModel @Inject constructor(
     private fun handleSelectPreset(presetId: Int) {
         LogUtil.d("presetId=$presetId, isActive=${_uiState.value.isActive}")
 
-        // 타이머가 실행 중이면 무시
-        if (_uiState.value.isActive) {
-            LogUtil.w("타이머 실행 중이므로 프리셋 변경 불가")
-            sendSideEffect(
-                TimerSideEffect.ShowError(
-                    TimerError.Preset(
-                        PresetError.TimerRunning,
-                    ),
-                ),
-            )
-            return
-        }
+
 
         viewModelScope.launch {
-            val preset = _uiState.value.presets.find { it.id == presetId }
-            if (preset != null) {
-                LogUtil.d("프리셋 선택됨, name=${preset.name}, duration=${preset.duration}")
-                handleSetTime(preset.duration)
-                _uiState.update { it.copy(selectedPresetId = presetId) }
-                sendSideEffect(
-                    TimerSideEffect.ShowSnackbar(
-                        R.string.snackbar_preset_selected,
-                        listOf(preset.name)
+            val result = managePresetUseCase.selectPreset(
+                presetId = presetId,
+                presets = _uiState.value.presets,
+                isTimerActive = _uiState.value.isActive
+            )
+
+            result.fold(
+                onSuccess = { preset ->
+                    LogUtil.d("프리셋 선택됨, name=${preset.name}, duration=${preset.duration}")
+                    handleSetTime(preset.duration)
+                    _uiState.update { it.copy(selectedPresetId = presetId) }
+                    sendSideEffect(
+                        TimerSideEffect.ShowSnackbar(
+                            R.string.snackbar_preset_selected,
+                            listOf(preset.name)
+                        )
                     )
-                )
-            } else {
-                LogUtil.w("프리셋을 찾을 수 없음, presetId=$presetId")
-                sendSideEffect(
-                    TimerSideEffect.ShowError(
-                        TimerError.Preset(
-                            PresetError.NotFound,
-                        ),
-                    )
-                )
-            }
+                },
+                onFailure = { error ->
+                    LogUtil.e("프리셋 선택 실패", error)
+                    val timerError = when (error) {
+                        is PresetException.TimerRunning ->
+                            TimerError.Preset(PresetError.TimerRunning)
+                        else ->
+                            TimerError.Preset(PresetError.NotFound)
+                    }
+                    sendSideEffect(TimerSideEffect.ShowError(timerError))
+                }
+            )
         }
     }
 
@@ -696,36 +618,17 @@ class TimerViewModel @Inject constructor(
     private fun handleSaveAsPreset(name: String, duration: Duration, colorIndex: Int) {
         LogUtil.d("name=$name, duration=$duration, colorIndex=$colorIndex")
 
-        if (duration <= 0.seconds) {
-            LogUtil.w("시간이 설정되지 않음")
-            sendSideEffect(
-                TimerSideEffect.ShowError(
-                    TimerError.Preset(
-                        PresetError.NoTime,
-                    ),
-                ),
-            )
-            return
-        }
-
-        // 프리셋 최대 개수 체크
-        if (_uiState.value.presets.size >= AddPresetUseCase.MAX_PRESET_COUNT) {
-            LogUtil.w("프리셋 최대 개수 초과")
-            sendSideEffect(
-                TimerSideEffect.ShowError(
-                    TimerError.Preset(
-                        PresetError.MaxCount,
-                    ),
-                ),
-            )
-            return
-        }
-
         viewModelScope.launch {
-            val result = addPresetUseCase(name, duration, colorIndex)
+            val result = managePresetUseCase.addPreset(
+                name = name,
+                duration = duration,
+                colorIndex = colorIndex,
+                currentPresetCount = _uiState.value.presets.size
+            )
+
             result.fold(
-                onSuccess = { id ->
-                    LogUtil.d("프리셋 저장 성공, id=$id")
+                onSuccess = {
+                    LogUtil.d("프리셋 저장 성공")
                     sendSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_saved,
@@ -735,13 +638,12 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("프리셋 저장 실패", error)
-                    sendSideEffect(
-                        TimerSideEffect.ShowError(
-                            TimerError.Preset(
-                                PresetError.FailSave,
-                            ),
-                        ),
-                    )
+                    val presetError = when (error) {
+                        is PresetException.InvalidDuration -> PresetError.NoTime
+                        is PresetException.MaxCountExceeded -> PresetError.MaxCount
+                        else -> PresetError.FailSave
+                    }
+                    sendSideEffect(TimerSideEffect.ShowError(TimerError.Preset(presetError)))
                 }
             )
         }
@@ -757,7 +659,7 @@ class TimerViewModel @Inject constructor(
             val preset = _uiState.value.presets.find { it.id == presetId }
             if (preset != null) {
                 LogUtil.d("프리셋 찾음, name=${preset.name}")
-                val result = deletePresetUseCase(preset)
+                val result = managePresetUseCase.deletePreset(preset)
                 result.fold(
                     onSuccess = {
                         LogUtil.d("프리셋 삭제 성공")
@@ -806,7 +708,7 @@ class TimerViewModel @Inject constructor(
                 LogUtil.d("프리셋 찾음, oldName=${existingPreset.name}")
                 val updatedPreset =
                     existingPreset.copy(name = name, duration = duration, colorIndex = colorIndex)
-                val result = updatePresetUseCase(updatedPreset)
+                val result = managePresetUseCase.updatePreset(updatedPreset)
                 result.fold(
                     onSuccess = {
                         LogUtil.d("프리셋 수정 성공")

@@ -24,7 +24,7 @@ data class TimerSessionEntity(
     val id: Int = 0,
 
     @ColumnInfo(name = "preset_id")
-    val presetId: Int,
+    val presetId: Int?,
 
     @ColumnInfo(name = "start_time")
     val startTime: Long, // Instant를 timestamp(millis)로 저장

@@ -16,7 +16,7 @@ import kotlin.time.Duration
  */
 data class TimerSession(
     val id: Int = 0,
-    val presetId: Int,
+    val presetId: Int? = null,
     val startTime: Instant,
     val endTime: Instant?,
     val duration: Duration,
