@@ -796,9 +796,6 @@ class TimerViewModel @Inject constructor(
         const val MAX_DRAG_MINUTES = 60
         const val MIN_DRAG_MINUTES = 1
 
-        // 최소화된 컨트롤 설정
-        const val UI_AUTO_HIDE_DELAY_MILLIS = 2000L
-
         // 햅틱 피드백 설정
         private val HAPTIC_FEEDBACK_START_TIME = 5.seconds
         private val HAPTIC_FEEDBACK_RANGE = 1.seconds..HAPTIC_FEEDBACK_START_TIME
