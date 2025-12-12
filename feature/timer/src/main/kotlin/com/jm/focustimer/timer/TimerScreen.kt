@@ -180,11 +180,11 @@ private fun TimerScreen(
     val minimizedControlsState = rememberMinimizedControlsState()
 
     // 최소화된 컨트롤 - 자동 숨김 타이머
-    LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.showUI) {
-        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && minimizedControlsState.showUI) {
+    LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.isControlsVisible) {
+        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && minimizedControlsState.isControlsVisible) {
             delay(MinimizedControlsState.UI_AUTO_HIDE_DELAY_MILLIS) // 2초 대기
             if (minimizedControlsState.shouldAutoHide()) {
-                minimizedControlsState.hideUI()
+                minimizedControlsState.hideControls()
             }
         }
     }
@@ -192,13 +192,13 @@ private fun TimerScreen(
     // 타이머가 멈추면 UI 다시 표시
     LaunchedEffect(uiState.isRunning) {
         if (!uiState.isRunning) {
-            minimizedControlsState.showUIImmediate()
+            minimizedControlsState.showControls()
         }
     }
 
     // 시스템바 제어
     SystemBarsVisibilityEffect(
-        shouldHide = uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI
+        shouldHide = uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible
     )
 
     val presetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -227,7 +227,7 @@ private fun TimerScreen(
         Scaffold(
             topBar = {
                 // 최소화된 컨트롤 기능이 활성화되고 타이머가 실행 중이며 UI가 숨겨진 상태면 TopBar 숨김
-                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI)) {
+                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible)) {
                     TimerTopBar(
                         onMenuClick = {
                             scope.launch {
@@ -245,9 +245,9 @@ private fun TimerScreen(
                     .fillMaxSize()
                     .padding(padding)
                     // 화면 터치 감지 - UI 표시
-                    .pointerInput(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.showUI) {
+                    .pointerInput(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.isControlsVisible) {
                         detectTapGestures {
-                            if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI) {
+                            if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible) {
                                 minimizedControlsState.recordInteraction()
                                 LogUtil.d("화면 터치 - UI 표시")
                             }
@@ -269,11 +269,11 @@ private fun TimerScreen(
                 } ?: TimerColorPresets.lightPresets[0]
 
                 // 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 PresetSection 표시
-                if (uiState.isIdle && !(uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI)) {
+                if (uiState.isIdle && !(uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible)) {
                     PresetSection(
                         presets = uiState.presets,
                         selectedPresetId = uiState.selectedPresetId,
-                        canAddPreset = uiState.canAddPreset,
+                        canAddPreset = uiState.hasPresetSpaceAvailable,
                         onPresetClick = { presetId ->
                             onIntent(TimerIntent.SelectPreset(presetId))
                         },
@@ -287,7 +287,7 @@ private fun TimerScreen(
                 CircularTimerProgress(
                     progress = uiState.progress,
                     modifier = Modifier.weight(1f),
-                    enabled = !uiState.isActive, // 타이머가 유휴 상태일 때만 드래그 가능
+                    enabled = !uiState.isTimerActiveOrPaused, // 타이머가 유휴 상태일 때만 드래그 가능
                     progressColor = if (uiState.isCompleted) {
                         MaterialTheme.colorScheme.tertiary // 완료 상태일 때 다른 색상
                     } else {
@@ -310,7 +310,7 @@ private fun TimerScreen(
                                     MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
                                 },
                             )
-                            .clickable(enabled = !uiState.isActive) {
+                            .clickable(enabled = !uiState.isTimerActiveOrPaused) {
                                 showTimeInput = true
                             }
                             .padding(vertical = 6.dp, horizontal = 12.dp),
@@ -341,7 +341,7 @@ private fun TimerScreen(
                 }
 
                 // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
-                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI)) {
+                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -379,7 +379,7 @@ private fun TimerScreen(
                                     contentColor = Color.White
                                 )
 
-                                if (uiState.isActive) {
+                                if (uiState.isTimerActiveOrPaused) {
                                     // 리셋 버튼
                                     FocusIconButton(
                                         onClick = {
@@ -474,7 +474,7 @@ private fun TimerScreen(
                 PresetManagementBottomSheet(
                     sheetState = presetSheetState,
                     presets = uiState.presets,
-                    canAddPreset = uiState.canAddPreset,
+                    canAddPreset = uiState.hasPresetSpaceAvailable,
                     onDismiss = {
                         scope.launch {
                             presetSheetState.hide()

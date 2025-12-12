@@ -16,7 +16,7 @@ import com.jm.logutil.LogUtil
 class MinimizedControlsState(
     private val autoHideDelayMillis: Long = 2000L
 ) {
-    var showUI by mutableStateOf(true)
+    var isControlsVisible by mutableStateOf(true)
         private set
 
     private var lastInteractionTime by mutableLongStateOf(System.currentTimeMillis())
@@ -25,24 +25,24 @@ class MinimizedControlsState(
      * 사용자 상호작용을 기록하고 UI를 표시합니다
      */
     fun recordInteraction() {
-        showUI = true
+        isControlsVisible = true
         lastInteractionTime = System.currentTimeMillis()
     }
 
     /**
      * UI를 숨깁니다
      */
-    fun hideUI() {
-        showUI = false
-        LogUtil.d("UI 숨김")
+    fun hideControls() {
+        isControlsVisible = false
+        LogUtil.d("컨트롤 UI 숨김")
     }
 
     /**
      * UI를 표시합니다
      */
-    fun showUIImmediate() {
-        showUI = true
-        LogUtil.d("UI 표시")
+    fun showControls() {
+        isControlsVisible = true
+        LogUtil.d("컨트롤 UI 표시")
     }
 
     /**

@@ -50,7 +50,7 @@ data class TimerUiState(
     /**
      * 타이머가 활성 상태인지 (실행 중이거나 일시정지 상태)
      */
-    val isActive: Boolean
+    val isTimerActiveOrPaused: Boolean
         get() = isRunning || isPaused
 
     val isOvertime: Boolean = overtime > Duration.ZERO
@@ -92,6 +92,6 @@ data class TimerUiState(
     /**
      * 프리셋을 추가할 수 있는지 여부 (최대 5개 제한)
      */
-    val canAddPreset: Boolean
+    val hasPresetSpaceAvailable: Boolean
         get() = presets.size < 5
 }

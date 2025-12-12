@@ -67,7 +67,7 @@ class TimerViewModel @Inject constructor(
         // 프리셋 목록 관찰
         observePresets()
         // 타이머 매니저 관찰
-        observeTimer()
+        observeTimerStateChanges()
         // Intent 요청 관찰
         observeIntent()
         // 설정 관찰
@@ -155,7 +155,7 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    private fun observeTimer() {
+    private fun observeTimerStateChanges() {
         viewModelScope.launch {
             timerManager.timerState.collect { timerState ->
                 val initialTime = timerState.initialDuration
@@ -212,14 +212,14 @@ class TimerViewModel @Inject constructor(
                         // 마지막 5초는 햅틱 피드백 (설정이 활성화된 경우)
                         if (remainingTime in HAPTIC_FEEDBACK_RANGE && currentState.isHapticFeedbackEnabled) {
                             LogUtil.d("startTimer: 마지막 ${HAPTIC_FEEDBACK_START_TIME.inWholeSeconds}초, 햅틱 피드백 전송")
-                            sendSideEffect(HapticFeedback(HapticPattern.TICK))
+                            emitSideEffect(HapticFeedback(HapticPattern.TICK))
                         }
 
                         if (timerState.isShowReminder) {
-                            sendSideEffect(ShowReminder(remainingTime))
+                            emitSideEffect(ShowReminder(remainingTime))
                             // 리마인더 햅틱 피드백 (설정이 활성화된 경우)
                             if (currentState.isHapticFeedbackEnabled) {
-                                sendSideEffect(HapticFeedback(HapticPattern.REMINDER))
+                                emitSideEffect(HapticFeedback(HapticPattern.REMINDER))
                             }
                         }
                     }
@@ -249,11 +249,11 @@ class TimerViewModel @Inject constructor(
                         }
                         if (!timerState.isOvertime) {
                             // 타이머가 정상 완료된 시점 (초과 시간 진입 전)
-                            sendSideEffect(TimerSideEffect.ShowTimerCompleted)
+                            emitSideEffect(TimerSideEffect.ShowTimerCompleted)
 
                             // 햅틱 피드백 (설정이 활성화된 경우)
                             if (_uiState.value.isHapticFeedbackEnabled) {
-                                sendSideEffect(HapticFeedback(HapticPattern.COMPLETED))
+                                emitSideEffect(HapticFeedback(HapticPattern.COMPLETED))
                             }
 
                             // 알림 소리 및 진동 재생
@@ -289,7 +289,7 @@ class TimerViewModel @Inject constructor(
 
         viewModelScope.launch {
             timerManager.timerError.collect {
-                sendSideEffect(ShowError(it))
+                emitSideEffect(ShowError(it))
             }
         }
     }
@@ -305,15 +305,15 @@ class TimerViewModel @Inject constructor(
     private fun observeIntent() {
         viewModelScope.launch {
             intentChannel.consumeAsFlow().collect { intent ->
-                processIntent(intent = intent)
+                handleUserIntent(intent = intent)
             }
         }
     }
 
-    private fun processIntent(intent: TimerIntent) {
+    private fun handleUserIntent(intent: TimerIntent) {
         when (intent) {
             is TimerIntent.SetTime -> handleSetTime(intent.totalTime)
-            is TimerIntent.Start -> handleStart(intent.reminderThresholds)
+            is TimerIntent.Start -> startTimerWithSession(intent.reminderThresholds)
             is TimerIntent.Pause -> handlePause()
             is TimerIntent.Resume -> handleResume()
             is TimerIntent.Stop -> handleStop()
@@ -336,7 +336,7 @@ class TimerViewModel @Inject constructor(
     /**
      * 타이머 시작
      */
-    private fun handleStart(reminderThresholds: List<Duration>) {
+    private fun startTimerWithSession(reminderThresholds: List<Duration>) {
         val currentState = _uiState.value
         LogUtil.d("isRunning=${currentState.isRunning}, remainingTime=${currentState.remainingTime}")
 
@@ -349,7 +349,7 @@ class TimerViewModel @Inject constructor(
         // 시간이 설정되지 않았으면 에러
         if (currentState.remainingTime <= 0.seconds) {
             LogUtil.w("시간이 설정되지 않음")
-            sendSideEffect(
+            emitSideEffect(
                 ShowError(
                     TimerError.SetTime(SetTimeError.InvalidTime)
                 )
@@ -385,7 +385,7 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("세션 저장 실패", error)
-                    sendSideEffect(
+                    emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_session_save_failed
                         )
@@ -506,7 +506,7 @@ class TimerViewModel @Inject constructor(
                         },
                         onFailure = { error ->
                             LogUtil.e("세션 초과 시간 업데이트 실패", error)
-                            sendSideEffect(
+                            emitSideEffect(
                                 TimerSideEffect.ShowSnackbar(
                                     R.string.snackbar_session_update_failed
                                 )
@@ -528,7 +528,7 @@ class TimerViewModel @Inject constructor(
                 sessionStartTime = null
             )
         }
-        sendSideEffect(
+        emitSideEffect(
             TimerSideEffect.ShowSnackbar(
                 R.string.snackbar_timer_completed
             )
@@ -539,10 +539,10 @@ class TimerViewModel @Inject constructor(
      * 드래그를 통한 시간 조정
      */
     private fun handleDragProgress(newProgress: Float) {
-        LogUtil.d("newProgress=$newProgress, isActive=${_uiState.value.isActive}")
+        LogUtil.d("newProgress=$newProgress, isActive=${_uiState.value.isTimerActiveOrPaused}")
 
         // 타이머가 실행 중이 아닐 때만 드래그 가능
-        if (_uiState.value.isActive) {
+        if (_uiState.value.isTimerActiveOrPaused) {
             LogUtil.w("타이머 실행 중이므로 드래그 불가")
             return
         }
@@ -575,7 +575,7 @@ class TimerViewModel @Inject constructor(
      * 프리셋 선택 처리
      */
     private fun handleSelectPreset(presetId: Int) {
-        LogUtil.d("presetId=$presetId, isActive=${_uiState.value.isActive}")
+        LogUtil.d("presetId=$presetId, isActive=${_uiState.value.isTimerActiveOrPaused}")
 
 
 
@@ -583,7 +583,7 @@ class TimerViewModel @Inject constructor(
             val result = managePresetUseCase.selectPreset(
                 presetId = presetId,
                 presets = _uiState.value.presets,
-                isTimerActive = _uiState.value.isActive
+                isTimerActive = _uiState.value.isTimerActiveOrPaused
             )
 
             result.fold(
@@ -591,7 +591,7 @@ class TimerViewModel @Inject constructor(
                     LogUtil.d("프리셋 선택됨, name=${preset.name}, duration=${preset.duration}")
                     handleSetTime(preset.duration)
                     _uiState.update { it.copy(selectedPresetId = presetId) }
-                    sendSideEffect(
+                    emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_selected,
                             listOf(preset.name)
@@ -606,7 +606,7 @@ class TimerViewModel @Inject constructor(
                         else ->
                             TimerError.Preset(PresetError.NotFound)
                     }
-                    sendSideEffect(TimerSideEffect.ShowError(timerError))
+                    emitSideEffect(TimerSideEffect.ShowError(timerError))
                 }
             )
         }
@@ -629,7 +629,7 @@ class TimerViewModel @Inject constructor(
             result.fold(
                 onSuccess = {
                     LogUtil.d("프리셋 저장 성공")
-                    sendSideEffect(
+                    emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_saved,
                             listOf(name)
@@ -643,7 +643,7 @@ class TimerViewModel @Inject constructor(
                         is PresetException.MaxCountExceeded -> PresetError.MaxCount
                         else -> PresetError.FailSave
                     }
-                    sendSideEffect(TimerSideEffect.ShowError(TimerError.Preset(presetError)))
+                    emitSideEffect(TimerSideEffect.ShowError(TimerError.Preset(presetError)))
                 }
             )
         }
@@ -663,7 +663,7 @@ class TimerViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         LogUtil.d("프리셋 삭제 성공")
-                        sendSideEffect(
+                        emitSideEffect(
                             TimerSideEffect.ShowSnackbar(
                                 R.string.snackbar_preset_deleted,
                                 listOf(preset.name)
@@ -677,7 +677,7 @@ class TimerViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         LogUtil.e("프리셋 삭제 실패", error)
-                        sendSideEffect(
+                        emitSideEffect(
                             TimerSideEffect.ShowError(
                                 TimerError.Preset(
                                     PresetError.FailDelete,
@@ -712,7 +712,7 @@ class TimerViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         LogUtil.d("프리셋 수정 성공")
-                        sendSideEffect(
+                        emitSideEffect(
                             TimerSideEffect.ShowSnackbar(
                                 R.string.snackbar_preset_updated,
                                 listOf(name)
@@ -720,7 +720,7 @@ class TimerViewModel @Inject constructor(
                         )
 
                         // 수정된 프리셋이 현재 선택되어 있다면 타이머도 동기화
-                        if (_uiState.value.selectedPresetId == presetId && !_uiState.value.isActive) {
+                        if (_uiState.value.selectedPresetId == presetId && !_uiState.value.isTimerActiveOrPaused) {
                             LogUtil.d("선택된 프리셋이므로 타이머 동기화")
                             handleSetTime(duration)
                             _uiState.update { it.copy(selectedPresetId = presetId) }
@@ -728,7 +728,7 @@ class TimerViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         LogUtil.e("프리셋 수정 실패", error)
-                        sendSideEffect(
+                        emitSideEffect(
                             TimerSideEffect.ShowError(
                                 TimerError.Preset(
                                     PresetError.FailUpdate,
@@ -766,7 +766,7 @@ class TimerViewModel @Inject constructor(
     /**
      * Side Effect 전송
      */
-    private fun sendSideEffect(sideEffect: TimerSideEffect) {
+    private fun emitSideEffect(sideEffect: TimerSideEffect) {
         LogUtil.d("${sideEffect::class.simpleName}")
         viewModelScope.launch {
             _sideEffect.send(sideEffect)
