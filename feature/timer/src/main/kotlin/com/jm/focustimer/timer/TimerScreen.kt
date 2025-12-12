@@ -1,9 +1,5 @@
 package com.jm.focustimer.timer
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -27,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,10 +53,12 @@ import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.timer.component.AddPresetDialog
 import com.jm.focustimer.timer.component.DeletePresetDialog
 import com.jm.focustimer.timer.component.EditPresetDialog
+import com.jm.focustimer.timer.component.MinimizedControlsState
 import com.jm.focustimer.timer.component.NavigationDrawerContent
 import com.jm.focustimer.timer.component.PresetManagementBottomSheet
 import com.jm.focustimer.timer.component.PresetSection
 import com.jm.focustimer.timer.component.TimeInputBottomSheet
+import com.jm.focustimer.timer.component.rememberMinimizedControlsState
 import com.jm.focustimer.timer.model.HapticPattern
 import com.jm.focustimer.timer.model.TimerIntent
 import com.jm.focustimer.timer.model.TimerSideEffect
@@ -70,6 +67,8 @@ import com.jm.focustimer.timer.model.toUiText
 import com.jm.focustimer.ui.component.TimerTopBar
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
+import com.jm.focustimer.util.KeepScreenOnEffect
+import com.jm.focustimer.util.findActivity
 import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -172,65 +171,20 @@ private fun TimerScreen(
     onSettingsClick: () -> Unit = {},
     onStatsClick: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val window = context.findActivity()?.window
-    val view = LocalView.current
+    // 화면 켜짐 유지
+    KeepScreenOnEffect(
+        shouldKeepScreenOn = uiState.isRunning && uiState.isScreenOnEnabled
+    )
 
-    // UI 가시성 상태 관리 (최소화된 컨트롤 기능용)
-    var showUI by remember { mutableStateOf(true) }
-    var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-
-    // 타이머가 실행 중이고 설정이 활성화되어 있을 때 화면 켜짐 유지
-    DisposableEffect(uiState.isRunning, uiState.isScreenOnEnabled) {
-        if (uiState.isRunning && uiState.isScreenOnEnabled) {
-            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            LogUtil.d("addFlags FLAG_KEEP_SCREEN_ON")
-        } else {
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            LogUtil.d("clearFlags FLAG_KEEP_SCREEN_ON")
-        }
-
-        onDispose {
-            // 컴포저블이 제거될 때 플래그 정리
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            LogUtil.d("clearFlags FLAG_KEEP_SCREEN_ON")
-        }
-    }
-
-    // 최소화된 컨트롤 - 시스템바 제어
-    DisposableEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, showUI) {
-        val activity = context.findActivity()
-        val windowInsetsController = activity?.window?.let {
-            WindowCompat.getInsetsController(it, view)
-        }
-
-        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI) {
-            // 시스템바 숨김
-            windowInsetsController?.apply {
-                hide(WindowInsetsCompat.Type.systemBars())
-                systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-            LogUtil.d("시스템바 숨김")
-        } else {
-            // 시스템바 표시
-            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
-            LogUtil.d("시스템바 표시")
-        }
-
-        onDispose {
-            // 컴포저블이 제거될 때 시스템바 복원
-            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
-        }
-    }
+    // 최소화된 컨트롤 상태 관리
+    val minimizedControlsState = rememberMinimizedControlsState()
 
     // 최소화된 컨트롤 - 자동 숨김 타이머
-    LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, lastInteractionTime) {
-        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && showUI) {
-            delay(TimerViewModel.UI_AUTO_HIDE_DELAY_MILLIS) // 2초 대기
-            if (System.currentTimeMillis() - lastInteractionTime >= TimerViewModel.UI_AUTO_HIDE_DELAY_MILLIS) {
-                showUI = false
-                LogUtil.d("UI 자동 숨김")
+    LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.showUI) {
+        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && minimizedControlsState.showUI) {
+            delay(MinimizedControlsState.UI_AUTO_HIDE_DELAY_MILLIS) // 2초 대기
+            if (minimizedControlsState.shouldAutoHide()) {
+                minimizedControlsState.hideUI()
             }
         }
     }
@@ -238,10 +192,14 @@ private fun TimerScreen(
     // 타이머가 멈추면 UI 다시 표시
     LaunchedEffect(uiState.isRunning) {
         if (!uiState.isRunning) {
-            showUI = true
-            LogUtil.d("타이머 정지 - UI 표시")
+            minimizedControlsState.showUIImmediate()
         }
     }
+
+    // 시스템바 제어
+    SystemBarsVisibilityEffect(
+        shouldHide = uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI
+    )
 
     val presetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showPresets by remember { mutableStateOf(false) }
@@ -269,7 +227,7 @@ private fun TimerScreen(
         Scaffold(
             topBar = {
                 // 최소화된 컨트롤 기능이 활성화되고 타이머가 실행 중이며 UI가 숨겨진 상태면 TopBar 숨김
-                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI)) {
+                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI)) {
                     TimerTopBar(
                         onMenuClick = {
                             scope.launch {
@@ -287,11 +245,10 @@ private fun TimerScreen(
                     .fillMaxSize()
                     .padding(padding)
                     // 화면 터치 감지 - UI 표시
-                    .pointerInput(uiState.isRunning, uiState.isMinimizedControlsEnabled, showUI) {
+                    .pointerInput(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.showUI) {
                         detectTapGestures {
-                            if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI) {
-                                showUI = true
-                                lastInteractionTime = System.currentTimeMillis()
+                            if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI) {
+                                minimizedControlsState.recordInteraction()
                                 LogUtil.d("화면 터치 - UI 표시")
                             }
                         }
@@ -312,7 +269,7 @@ private fun TimerScreen(
                 } ?: TimerColorPresets.lightPresets[0]
 
                 // 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 PresetSection 표시
-                if (uiState.isIdle && !(uiState.isMinimizedControlsEnabled && !showUI)) {
+                if (uiState.isIdle && !(uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI)) {
                     PresetSection(
                         presets = uiState.presets,
                         selectedPresetId = uiState.selectedPresetId,
@@ -384,7 +341,7 @@ private fun TimerScreen(
                 }
 
                 // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
-                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !showUI)) {
+                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.showUI)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -548,10 +505,33 @@ private fun TimerScreen(
     }
 }
 
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+// 시스템바 가시성 제어 Effect
+@Composable
+fun SystemBarsVisibilityEffect(shouldHide: Boolean) {
+    val context = LocalContext.current
+    val view = LocalView.current
+
+    DisposableEffect(shouldHide) {
+        val activity = context.findActivity()
+        val windowInsetsController = activity?.window?.let {
+            WindowCompat.getInsetsController(it, view)
+        }
+
+        if (shouldHide) {
+            windowInsetsController?.apply {
+                hide(WindowInsetsCompat.Type.systemBars())
+                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+            LogUtil.d("시스템바 숨김")
+        } else {
+            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
+            LogUtil.d("시스템바 표시")
+        }
+
+        onDispose {
+            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
+        }
+    }
 }
 
 @ThemePreviews
