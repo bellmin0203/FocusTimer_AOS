@@ -187,7 +187,7 @@ class TimerViewModel @Inject constructor(
                         val progress = calculateProgress(remainingTime = remainingTime)
 
                         // 매 10초마다 로그 출력 (너무 빈번한 로그 방지)
-                        if (remainingTime.inWholeSeconds % 10L == 0L) {
+                        if (remainingTime.inWholeSeconds % LOG_INTERVAL_SECONDS == 0L) {
                             LogUtil.d("startTimer: Tick event, remainingTime=$remainingTime, progress=$progress")
                         }
 
@@ -210,8 +210,8 @@ class TimerViewModel @Inject constructor(
                         }
 
                         // 마지막 5초는 햅틱 피드백 (설정이 활성화된 경우)
-                        if (remainingTime in 1.seconds..5.seconds && currentState.isHapticFeedbackEnabled) {
-                            LogUtil.d("startTimer: 마지막 5초, 햅틱 피드백 전송")
+                        if (remainingTime in HAPTIC_FEEDBACK_RANGE && currentState.isHapticFeedbackEnabled) {
+                            LogUtil.d("startTimer: 마지막 ${HAPTIC_FEEDBACK_START_TIME.inWholeSeconds}초, 햅틱 피드백 전송")
                             sendSideEffect(HapticFeedback(HapticPattern.TICK))
                         }
 
@@ -791,8 +791,19 @@ class TimerViewModel @Inject constructor(
     }
 
     companion object {
+        // 타이머 설정
         val MAX_TIME = 60.minutes
         const val MAX_DRAG_MINUTES = 60
         const val MIN_DRAG_MINUTES = 1
+
+        // 최소화된 컨트롤 설정
+        const val UI_AUTO_HIDE_DELAY_MILLIS = 2000L
+
+        // 햅틱 피드백 설정
+        private val HAPTIC_FEEDBACK_START_TIME = 5.seconds
+        private val HAPTIC_FEEDBACK_RANGE = 1.seconds..HAPTIC_FEEDBACK_START_TIME
+
+        // 로그 설정
+        private const val LOG_INTERVAL_SECONDS = 10L
     }
 }

@@ -227,8 +227,8 @@ private fun TimerScreen(
     // 최소화된 컨트롤 - 자동 숨김 타이머
     LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, lastInteractionTime) {
         if (uiState.isRunning && uiState.isMinimizedControlsEnabled && showUI) {
-            delay(2000) // 2초 대기
-            if (System.currentTimeMillis() - lastInteractionTime >= 2000) {
+            delay(TimerViewModel.UI_AUTO_HIDE_DELAY_MILLIS) // 2초 대기
+            if (System.currentTimeMillis() - lastInteractionTime >= TimerViewModel.UI_AUTO_HIDE_DELAY_MILLIS) {
                 showUI = false
                 LogUtil.d("UI 자동 숨김")
             }
