@@ -25,6 +25,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -95,37 +96,22 @@ class TimerViewModel @Inject constructor(
     private fun observeSettings() {
         LogUtil.d("설정 관찰 시작")
 
-        // 화면 켜짐 설정
-        settingsRepository.isScreenOn
-            .onEach { isScreenOnEnabled ->
-                LogUtil.d("화면 켜짐 설정 업데이트, isScreenOnEnabled=$isScreenOnEnabled")
-                _uiState.update { it.copy(isScreenOnEnabled = isScreenOnEnabled) }
+        combine(
+            settingsRepository.isScreenOn,
+            settingsRepository.isHapticFeedback,
+            settingsRepository.isTickSound,
+            settingsRepository.isMinimizedControls
+        ) { screenOn, haptic, tick, minimized ->
+            LogUtil.d("설정 업데이트: screenOn=$screenOn, haptic=$haptic, tick=$tick, minimized=$minimized")
+            _uiState.update {
+                it.copy(
+                    isScreenOnEnabled = screenOn,
+                    isHapticFeedbackEnabled = haptic,
+                    isTickSoundEnabled = tick,
+                    isMinimizedControlsEnabled = minimized
+                )
             }
-            .launchIn(viewModelScope)
-
-        // 햅틱 피드백 설정
-        settingsRepository.isHapticFeedback
-            .onEach { isHapticFeedbackEnabled ->
-                LogUtil.d("햅틱 피드백 설정 업데이트, isHapticFeedbackEnabled=$isHapticFeedbackEnabled")
-                _uiState.update { it.copy(isHapticFeedbackEnabled = isHapticFeedbackEnabled) }
-            }
-            .launchIn(viewModelScope)
-
-        // 틱 소리 설정
-        settingsRepository.isTickSound
-            .onEach { isTickSoundEnabled ->
-                LogUtil.d("틱 소리 설정 업데이트, isTickSoundEnabled=$isTickSoundEnabled")
-                _uiState.update { it.copy(isTickSoundEnabled = isTickSoundEnabled) }
-            }
-            .launchIn(viewModelScope)
-
-        // 최소화된 컨트롤 설정
-        settingsRepository.isMinimizedControls
-            .onEach { isMinimizedControlsEnabled ->
-                LogUtil.d("최소화된 컨트롤 설정 업데이트, isMinimizedControlsEnabled=$isMinimizedControlsEnabled")
-                _uiState.update { it.copy(isMinimizedControlsEnabled = isMinimizedControlsEnabled) }
-            }
-            .launchIn(viewModelScope)
+        }.launchIn(viewModelScope)
     }
 
     /**
@@ -606,7 +592,7 @@ class TimerViewModel @Inject constructor(
                         else ->
                             TimerError.Preset(PresetError.NotFound)
                     }
-                    emitSideEffect(TimerSideEffect.ShowError(timerError))
+                    emitSideEffect(ShowError(timerError))
                 }
             )
         }
@@ -643,7 +629,7 @@ class TimerViewModel @Inject constructor(
                         is PresetException.MaxCountExceeded -> PresetError.MaxCount
                         else -> PresetError.FailSave
                     }
-                    emitSideEffect(TimerSideEffect.ShowError(TimerError.Preset(presetError)))
+                    emitSideEffect(ShowError(TimerError.Preset(presetError)))
                 }
             )
         }
@@ -678,7 +664,7 @@ class TimerViewModel @Inject constructor(
                     onFailure = { error ->
                         LogUtil.e("프리셋 삭제 실패", error)
                         emitSideEffect(
-                            TimerSideEffect.ShowError(
+                            ShowError(
                                 TimerError.Preset(
                                     PresetError.FailDelete,
                                 )
@@ -729,7 +715,7 @@ class TimerViewModel @Inject constructor(
                     onFailure = { error ->
                         LogUtil.e("프리셋 수정 실패", error)
                         emitSideEffect(
-                            TimerSideEffect.ShowError(
+                            ShowError(
                                 TimerError.Preset(
                                     PresetError.FailUpdate,
                                 ),
