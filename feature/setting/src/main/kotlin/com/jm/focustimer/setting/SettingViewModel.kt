@@ -43,20 +43,27 @@ class SettingViewModel @Inject constructor(
     val settingItems: StateFlow<List<SettingType>> = _settingItems.asStateFlow()
 
     init {
-        // 프리셋 목록과 기본 프리셋 ID를 결합하여 설정 항목 생성
+        // 설정 항목 생성
         viewModelScope.launch {
-            getAllPresetsUseCase().map { presets ->
-                createSettingItems(presets)
-            }.collect { items ->
-                _settingItems.value = items
-            }
+            getAllPresetsUseCase()
+                .map { presets -> createSettingItems(presets) }
+                .collect { items -> _settingItems.value = items }
         }
     }
 
-    private fun createSettingItems(
-        presets: List<Preset>,
-    ): List<SettingType> = listOf(
-        // 외관
+    private fun createSettingItems(presets: List<Preset>): List<SettingType> {
+        return buildList {
+            addAll(createAppearanceSettings())
+            addAll(createNotificationSettings())
+            addAll(createTimerSettings(presets))
+            addAll(createInteractionSettings())
+        }
+    }
+
+    /**
+    * 외관 설정 항목 생성
+    */
+    private fun createAppearanceSettings(): List<SettingType> = listOf(
         SettingType.Toggle(
             title = "다크 테마",
             description = "앱의 전반적인 테마를 밝게 또는 어둡게 설정합니다.",
@@ -64,8 +71,13 @@ class SettingViewModel @Inject constructor(
             onToggle = ::updateIsDarkTheme,
             category = SettingCategory.APPEARANCE,
             defaultValue = DEFAULT_IS_DARK_THEME
-        ),
-        // 알림
+        )
+    )
+
+    /**
+     * 알림 설정 항목 생성
+     */
+    private fun createNotificationSettings(): List<SettingType> = listOf(
         SettingType.Selector(
             title = "완료 알림 소리",
             description = "타이머 완료 시 재생될 알림 소리를 선택합니다.",
@@ -91,53 +103,64 @@ class SettingViewModel @Inject constructor(
             onToggle = ::updateIsTickSound,
             category = SettingCategory.NOTIFICATION,
             defaultValue = DEFAULT_IS_TICK_SOUND
-        ),
-        // 타이머
-        SettingType.Toggle(
-            title = "마지막 세션 기억",
-            description = "앱 종료 시 마지막 타이머 세션 설정을 기억합니다.",
-            stateFlow = settingsRepository.isRememberLastSession,
-            onToggle = ::updateIsRememberLastSession,
-            category = SettingCategory.TIMER,
-            defaultValue = DEFAULT_IS_REMEMBER_LAST_SESSION
-        ),
-        SettingType.Toggle(
-            title = "화면 켜짐 유지",
-            description = "타이머가 실행되는 동안 화면이 계속 켜져 있도록 설정합니다.",
-            stateFlow = settingsRepository.isScreenOn,
-            onToggle = ::updateIsScreenOn,
-            category = SettingCategory.TIMER,
-            defaultValue = DEFAULT_IS_SCREEN_ON
-        ),
-        SettingType.Selector(
-            title = "기본 세션 지속 시간",
-            description = "마지막 세션을 기억하지 않을 때 사용할 기본 타이머 시간입니다.",
-            category = SettingCategory.TIMER,
-            stateFlow = settingsRepository.defaultSessionDuration,
-            options = sessionDurationOptions,
-            displayName = { duration ->
-                "${duration.inWholeMinutes}분"
-            },
-            onSelect = ::updateDefaultSessionDuration,
-            defaultValue = DEFAULT_SESSION_DURATION
-        ),
-        SettingType.Selector(
-            title = "기본 프리셋",
-            description = "앱 시작 시 자동으로 선택될 프리셋입니다.",
-            category = SettingCategory.TIMER,
-            stateFlow = settingsRepository.defaultPresetId.map { id ->
-                presets.find { it.id == id }
-            },
-            options = listOf(null) + presets, // null = "없음" 옵션
-            displayName = { preset ->
-                preset?.name ?: "없음"
-            },
-            onSelect = { preset ->
-                updateDefaultPresetId(preset?.id)
-            },
-            defaultValue = null
-        ),
-        // 상호작용
+        )
+    )
+
+    /**
+     * 타이머 설정 항목 생성
+     */
+    private fun createTimerSettings(presets: List<Preset>): List<SettingType> {
+        val sessionDurationOptions = listOf(
+            5.minutes, 10.minutes, 15.minutes, 25.minutes,
+            30.minutes, 45.minutes, 60.minutes
+        )
+
+        return listOf(
+            SettingType.Toggle(
+                title = "마지막 세션 기억",
+                description = "앱 종료 시 마지막 타이머 세션 설정을 기억합니다.",
+                stateFlow = settingsRepository.isRememberLastSession,
+                onToggle = ::updateIsRememberLastSession,
+                category = SettingCategory.TIMER,
+                defaultValue = DEFAULT_IS_REMEMBER_LAST_SESSION
+            ),
+            SettingType.Toggle(
+                title = "화면 켜짐 유지",
+                description = "타이머가 실행되는 동안 화면이 계속 켜져 있도록 설정합니다.",
+                stateFlow = settingsRepository.isScreenOn,
+                onToggle = ::updateIsScreenOn,
+                category = SettingCategory.TIMER,
+                defaultValue = DEFAULT_IS_SCREEN_ON
+            ),
+            SettingType.Selector(
+                title = "기본 세션 지속 시간",
+                description = "마지막 세션을 기억하지 않을 때 사용할 기본 타이머 시간입니다.",
+                category = SettingCategory.TIMER,
+                stateFlow = settingsRepository.defaultSessionDuration,
+                options = sessionDurationOptions,
+                displayName = { duration -> "${duration.inWholeMinutes}분" },
+                onSelect = ::updateDefaultSessionDuration,
+                defaultValue = DEFAULT_SESSION_DURATION
+            ),
+            SettingType.Selector(
+                title = "기본 프리셋",
+                description = "앱 시작 시 자동으로 선택될 프리셋입니다.",
+                category = SettingCategory.TIMER,
+                stateFlow = settingsRepository.defaultPresetId.map { id ->
+                    presets.find { it.id == id }
+                },
+                options = listOf(null) + presets,
+                displayName = { preset -> preset?.name ?: "없음" },
+                onSelect = { preset -> updateDefaultPresetId(preset?.id) },
+                defaultValue = null
+            )
+        )
+    }
+
+    /**
+     * 상호작용 설정 항목 생성
+     */
+    private fun createInteractionSettings(): List<SettingType> = listOf(
         SettingType.Toggle(
             title = "햅틱 피드백",
             description = "타이머 동작 시 카운트다운 중 햅틱 피드백을 제공할지 설정합니다.",
