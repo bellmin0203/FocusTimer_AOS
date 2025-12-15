@@ -36,7 +36,7 @@ class ManageTimerSessionUseCase @Inject constructor(
      * 세션을 완료 상태로 업데이트합니다
      */
     suspend fun completeSession(
-        sessionId: Int,
+        sessionId: Long,
         presetId: Int? = null,
         startTime: Instant?,
         initialDuration: Duration,
@@ -63,7 +63,7 @@ class ManageTimerSessionUseCase @Inject constructor(
      * 세션을 미완료 상태로 종료합니다 (중도 정지)
      */
     suspend fun stopSession(
-        sessionId: Int,
+        sessionId: Long,
         presetId: Int? = null,
         startTime: Instant?,
         initialDuration: Duration,

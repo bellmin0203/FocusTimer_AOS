@@ -15,7 +15,7 @@ import kotlin.time.Duration
  * @param overrunTime 초과 시간 (nullable - 초과하지 않은 경우 null)
  */
 data class TimerSession(
-    val id: Int = 0,
+    val id: Long = 0,
     val presetId: Int? = null,
     val startTime: Instant,
     val endTime: Instant?,

@@ -264,7 +264,7 @@ class TimerViewModel @Inject constructor(
                             currentState.currentSessionId?.let { sessionId ->
                                 viewModelScope.launch {
                                     val updateResult = manageTimerSessionUseCase.completeSession(
-                                        sessionId = sessionId.toInt(),
+                                        sessionId = sessionId,
                                         presetId = currentState.selectedPresetId,
                                         startTime = currentState.sessionStartTime,
                                         initialDuration = currentState.initialTime,
@@ -447,7 +447,7 @@ class TimerViewModel @Inject constructor(
         currentState.currentSessionId?.let { sessionId ->
             viewModelScope.launch {
                 val updateResult = manageTimerSessionUseCase.stopSession(
-                    sessionId = sessionId.toInt(),
+                    sessionId = sessionId,
                     presetId = currentState.selectedPresetId,
                     startTime = currentState.sessionStartTime,
                     initialDuration = currentState.initialTime
@@ -493,7 +493,7 @@ class TimerViewModel @Inject constructor(
             currentState.currentSessionId?.let { sessionId ->
                 viewModelScope.launch {
                     val updateResult = manageTimerSessionUseCase.completeSession(
-                        sessionId = sessionId.toInt(),
+                        sessionId = sessionId,
                         presetId = currentState.selectedPresetId,
                         startTime = currentState.sessionStartTime,
                         initialDuration = currentState.initialTime,
