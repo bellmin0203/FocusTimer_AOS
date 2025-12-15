@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.Window
 import android.view.WindowManager
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalContext
 import com.jm.logutil.LogUtil
 
 /**
@@ -46,31 +43,6 @@ class KeepScreenOnManager(
      */
     fun release() {
         disableKeepScreenOn()
-    }
-}
-
-/**
- * 화면 켜짐 유지를 관리하는 Composable Effect
- *
- * @param shouldKeepScreenOn 화면을 켜진 상태로 유지해야 하는지 여부
- */
-@Composable
-fun KeepScreenOnEffect(shouldKeepScreenOn: Boolean) {
-    val context = LocalContext.current
-    val window = context.findActivity()?.window
-
-    DisposableEffect(shouldKeepScreenOn) {
-        val manager = KeepScreenOnManager(window)
-
-        if (shouldKeepScreenOn) {
-            manager.enableKeepScreenOn()
-        } else {
-            manager.disableKeepScreenOn()
-        }
-
-        onDispose {
-            manager.release()
-        }
     }
 }
 

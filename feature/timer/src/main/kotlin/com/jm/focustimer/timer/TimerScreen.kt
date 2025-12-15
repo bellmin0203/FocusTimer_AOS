@@ -67,7 +67,7 @@ import com.jm.focustimer.timer.model.toUiText
 import com.jm.focustimer.ui.component.TimerTopBar
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
-import com.jm.focustimer.util.KeepScreenOnEffect
+import com.jm.focustimer.util.KeepScreenOnManager
 import com.jm.focustimer.util.findActivity
 import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineScope
@@ -501,6 +501,31 @@ private fun TimerScreen(
                     }
                 )
             }
+        }
+    }
+}
+
+/**
+ * 화면 켜짐 유지를 관리하는 Composable Effect
+ *
+ * @param shouldKeepScreenOn 화면을 켜진 상태로 유지해야 하는지 여부
+ */
+@Composable
+fun KeepScreenOnEffect(shouldKeepScreenOn: Boolean) {
+    val context = LocalContext.current
+    val window = context.findActivity()?.window
+
+    DisposableEffect(shouldKeepScreenOn) {
+        val manager = KeepScreenOnManager(window)
+
+        if (shouldKeepScreenOn) {
+            manager.enableKeepScreenOn()
+        } else {
+            manager.disableKeepScreenOn()
+        }
+
+        onDispose {
+            manager.release()
         }
     }
 }
