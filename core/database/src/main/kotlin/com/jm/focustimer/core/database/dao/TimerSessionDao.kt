@@ -50,7 +50,7 @@ interface TimerSessionDao {
      * @return 세션 엔티티 (없으면 null)
      */
     @Query("SELECT * FROM timer_sessions WHERE id = :id")
-    suspend fun getSessionById(id: Int): TimerSessionEntity?
+    suspend fun getSessionById(id: Long): TimerSessionEntity?
 
     /**
      * 모든 타이머 세션을 조회합니다 (최신순).

@@ -33,7 +33,7 @@ class TimerSessionRepositoryImpl @Inject constructor(
         timerSessionDao.deleteSession(session.toTimerSessionEntity())
     }
 
-    override suspend fun getSessionById(id: Int): TimerSession? {
+    override suspend fun getSessionById(id: Long): TimerSession? {
         return timerSessionDao.getSessionById(id)?.toTimerSession()
     }
 

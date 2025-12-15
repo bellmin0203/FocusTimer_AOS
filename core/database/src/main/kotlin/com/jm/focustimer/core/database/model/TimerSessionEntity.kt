@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Entity(tableName = "timer_sessions")
 data class TimerSessionEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
 
     @ColumnInfo(name = "preset_id")
     val presetId: Int?,

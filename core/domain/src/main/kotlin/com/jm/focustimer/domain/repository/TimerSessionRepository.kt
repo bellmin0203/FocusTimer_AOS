@@ -38,7 +38,7 @@ interface TimerSessionRepository {
      * @param id 조회할 세션 ID
      * @return 세션 (없으면 null)
      */
-    suspend fun getSessionById(id: Int): TimerSession?
+    suspend fun getSessionById(id: Long): TimerSession?
 
     /**
      * 모든 타이머 세션을 조회합니다 (최신순).

@@ -17,7 +17,7 @@ class DeleteTimerSessionUseCase(
      * @return 삭제 결과를 담은 Result
      * @throws IllegalArgumentException 유효하지 않은 ID이거나 세션을 찾을 수 없는 경우
      */
-    suspend operator fun invoke(sessionId: Int): Result<Unit> {
+    suspend operator fun invoke(sessionId: Long): Result<Unit> {
         return try {
             // ID 유효성 검증
             if (sessionId < 0) {
