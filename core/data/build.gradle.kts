@@ -11,6 +11,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.database)
     implementation(projects.core.common)
+    implementation(projects.core.util)
 
     // datastore.api는 Repository 구현에서 사용하므로 api로 노출
     api(projects.core.datastore.api)

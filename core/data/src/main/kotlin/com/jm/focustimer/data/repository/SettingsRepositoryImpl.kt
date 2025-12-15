@@ -4,9 +4,11 @@ import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.common.model.TimeUnit
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import com.jm.focustimer.domain.repository.SettingsRepository
+import com.jm.logutil.LogUtil
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * SettingsRepository의 기본 구현체
@@ -50,10 +52,14 @@ class SettingsRepositoryImpl @Inject constructor(
         get() = settingsDataSource.defaultPresetIdFlow
 
     override suspend fun updateDarkTheme(isDarkTheme: Boolean) {
+        LogUtil.d("다크 테마 설정 변경: $isDarkTheme")
         settingsDataSource.updateIsDarkTheme(isDarkTheme)
     }
 
     override suspend fun updateNotificationSoundType(soundType: NotificationSoundType) {
+        require(soundType != NotificationSoundType.CUSTOM) {
+            "CUSTOM 사운드 타입은 직접 선택할 수 없습니다"
+        }
         settingsDataSource.updateNotificationSoundType(soundType)
     }
 
@@ -66,6 +72,9 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateDefaultSessionDuration(duration: Duration) {
+        require(duration >= 1.minutes && duration <= 60.minutes) {
+            "세션 시간은 1분 이상 60분 이하여야 합니다"
+        }
         settingsDataSource.updateDefaultSessionDuration(duration)
     }
 
@@ -90,6 +99,11 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateDefaultPresetId(presetId: Int?) {
+        if (presetId != null) {
+            LogUtil.d("기본 프리셋 설정: presetId=$presetId")
+        } else {
+            LogUtil.d("기본 프리셋 해제")
+        }
         settingsDataSource.updateDefaultPresetId(presetId)
     }
 }
