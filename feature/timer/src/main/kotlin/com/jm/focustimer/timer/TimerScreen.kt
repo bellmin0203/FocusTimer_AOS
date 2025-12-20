@@ -177,30 +177,6 @@ private fun TimerScreen(
 ) {
     val context = LocalContext.current
     
-    // Service 제어
-    LaunchedEffect(uiState.isRunning, uiState.isPaused, uiState.isCompleted) {
-        val intent = Intent(context, TimerService::class.java)
-        
-        when {
-            uiState.isRunning -> {
-                // 타이머가 실행 중이면 Service 시작 (또는 재개)
-                intent.action = TimerServiceAction.ACTION_START
-                intent.putExtra(TimerServiceAction.EXTRA_DURATION, uiState.remainingTime.inWholeMilliseconds)
-                ContextCompat.startForegroundService(context, intent)
-            }
-            uiState.isPaused -> {
-                // 타이머가 일시정지되면 Service에 알림 (알림 업데이트용)
-                intent.action = TimerServiceAction.ACTION_PAUSE
-                context.startService(intent)
-            }
-            !uiState.isCompleted -> {
-                // 타이머가 정지되면 Service 종료 (완료 상태는 유지)
-                intent.action = TimerServiceAction.ACTION_STOP
-                context.startService(intent)
-            }
-        }
-    }
-    
     // 화면 켜짐 유지
     KeepScreenOnEffect(
         shouldKeepScreenOn = uiState.isRunning && uiState.isScreenOnEnabled
@@ -386,7 +362,14 @@ private fun TimerScreen(
                             if (uiState.isCompleted) {
                                 FocusIconButton(
                                     onClick = {
+                                        // 타이머 완료 처리
                                         onIntent(TimerIntent.Complete)
+                                        
+                                        // 서비스 종료
+                                        val intent = Intent(context, TimerService::class.java).apply {
+                                            action = TimerServiceAction.ACTION_STOP
+                                        }
+                                        ContextCompat.startForegroundService(context, intent)
                                     },
                                     icon = FocusTimerIcons.Check,
                                     contentDescription = "Complete",
@@ -397,11 +380,35 @@ private fun TimerScreen(
                                 // 재생/일시정지 버튼
                                 FocusIconButton(
                                     onClick = {
-                                        if (!uiState.isRunning) {
-                                            onIntent(TimerIntent.Start())
+                                        val intent = Intent(context, TimerService::class.java)
+                                        
+                                        when {
+                                            !uiState.isRunning -> {
+                                                // 타이머 시작
+                                                onIntent(TimerIntent.Start())
+                                                
+                                                // 서비스 시작
+                                                intent.action = TimerServiceAction.ACTION_START
+                                                intent.putExtra(TimerServiceAction.EXTRA_DURATION, uiState.remainingTime.inWholeMilliseconds)
+                                                ContextCompat.startForegroundService(context, intent)
+                                            }
+                                            uiState.isPaused -> {
+                                                // 타이머 재개
+                                                onIntent(TimerIntent.Resume)
+                                                
+                                                // 서비스에 재개 알림
+                                                intent.action = TimerServiceAction.ACTION_RESUME
+                                                ContextCompat.startForegroundService(context, intent)
+                                            }
+                                            else -> {
+                                                // 타이머 일시정지
+                                                onIntent(TimerIntent.Pause)
+                                                
+                                                // 서비스에 일시정지 알림
+                                                intent.action = TimerServiceAction.ACTION_PAUSE
+                                                ContextCompat.startForegroundService(context, intent)
+                                            }
                                         }
-                                        else if (uiState.isPaused) onIntent(TimerIntent.Resume)
-                                        else onIntent(TimerIntent.Pause)
                                     },
                                     icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
                                     contentDescription = if (uiState.isRunning) "Pause" else "Play",
@@ -413,7 +420,14 @@ private fun TimerScreen(
                                     // 리셋 버튼
                                     FocusIconButton(
                                         onClick = {
+                                            // 타이머 정지
                                             onIntent(TimerIntent.Stop)
+                                            
+                                            // 서비스 종료
+                                            val intent = Intent(context, TimerService::class.java).apply {
+                                                action = TimerServiceAction.ACTION_STOP
+                                            }
+                                            ContextCompat.startForegroundService(context, intent)
                                         },
                                         icon = FocusTimerIcons.RestartAlt,
                                         contentDescription = "Reset"
@@ -450,6 +464,14 @@ private fun TimerScreen(
                     onConfirm = { time ->
                         onIntent(TimerIntent.SetTime(time))
                         onIntent(TimerIntent.Start())
+                        
+                        // 서비스 시작
+                        val intent = Intent(context, TimerService::class.java).apply {
+                            action = TimerServiceAction.ACTION_START
+                            putExtra(TimerServiceAction.EXTRA_DURATION, time.inWholeMilliseconds)
+                        }
+                        ContextCompat.startForegroundService(context, intent)
+                        
                         showTimeInput = false
                     }
                 )
