@@ -181,7 +181,7 @@ private fun TimerScreen(
 
     // 최소화된 컨트롤 - 자동 숨김 타이머
     LaunchedEffect(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.isControlsVisible) {
-        if (uiState.isRunning && uiState.isMinimizedControlsEnabled && minimizedControlsState.isControlsVisible) {
+        if (uiState.shouldStartAutoHideTimer(minimizedControlsState.isControlsVisible)) {
             delay(MinimizedControlsState.UI_AUTO_HIDE_DELAY_MILLIS) // 2초 대기
             if (minimizedControlsState.shouldAutoHide()) {
                 minimizedControlsState.hideControls()
@@ -198,7 +198,7 @@ private fun TimerScreen(
 
     // 시스템바 제어
     SystemBarsVisibilityEffect(
-        shouldHide = uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible
+        shouldHide = uiState.shouldHideUi(minimizedControlsState.isControlsVisible)
     )
 
     val presetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -227,7 +227,7 @@ private fun TimerScreen(
         Scaffold(
             topBar = {
                 // 최소화된 컨트롤 기능이 활성화되고 타이머가 실행 중이며 UI가 숨겨진 상태면 TopBar 숨김
-                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible)) {
+                if (!uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
                     TimerTopBar(
                         onMenuClick = {
                             scope.launch {
@@ -247,7 +247,7 @@ private fun TimerScreen(
                     // 화면 터치 감지 - UI 표시
                     .pointerInput(uiState.isRunning, uiState.isMinimizedControlsEnabled, minimizedControlsState.isControlsVisible) {
                         detectTapGestures {
-                            if (uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible) {
+                            if (uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
                                 minimizedControlsState.recordInteraction()
                                 LogUtil.d("화면 터치 - UI 표시")
                             }
@@ -269,7 +269,7 @@ private fun TimerScreen(
                 } ?: TimerColorPresets.lightPresets[0]
 
                 // 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 PresetSection 표시
-                if (uiState.isIdle && !(uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible)) {
+                if (uiState.isIdle && !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
                     PresetSection(
                         presets = uiState.presets,
                         selectedPresetId = uiState.selectedPresetId,
@@ -341,7 +341,7 @@ private fun TimerScreen(
                 }
 
                 // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
-                if (!(uiState.isRunning && uiState.isMinimizedControlsEnabled && !minimizedControlsState.isControlsVisible)) {
+                if (!uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),

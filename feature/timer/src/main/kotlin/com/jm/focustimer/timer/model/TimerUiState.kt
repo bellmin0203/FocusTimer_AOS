@@ -94,4 +94,24 @@ data class TimerUiState(
      */
     val hasPresetSpaceAvailable: Boolean
         get() = presets.size < 5
+
+    /**
+     * UI를 숨겨야 하는지 여부 (최소화된 컨트롤이 활성화되고 타이머가 실행 중이며 컨트롤이 숨겨진 상태)
+     *
+     * @param isControlsVisible 컨트롤이 현재 표시되고 있는지 여부
+     * @return UI를 숨겨야 하면 true, 표시해야 하면 false
+     */
+    fun shouldHideUi(isControlsVisible: Boolean): Boolean {
+        return isRunning && isMinimizedControlsEnabled && !isControlsVisible
+    }
+
+    /**
+     * 자동 숨김 타이머를 시작해야 하는지 여부 (최소화된 컨트롤이 활성화되고 타이머가 실행 중이며 컨트롤이 표시된 상태)
+     *
+     * @param isControlsVisible 컨트롤이 현재 표시되고 있는지 여부
+     * @return 자동 숨김 타이머를 시작해야 하면 true, 그렇지 않으면 false
+     */
+    fun shouldStartAutoHideTimer(isControlsVisible: Boolean): Boolean {
+        return isRunning && isMinimizedControlsEnabled && isControlsVisible
+    }
 }
