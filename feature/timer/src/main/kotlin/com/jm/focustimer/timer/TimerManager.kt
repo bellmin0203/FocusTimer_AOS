@@ -9,7 +9,6 @@ import com.jm.focustimer.timer.usecase.TimerState
 import com.jm.focustimer.timer.usecase.TimerStatus
 import com.jm.focustimer.timer.usecase.TimerValidationResult
 import com.jm.logutil.LogUtil
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -29,6 +28,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -49,14 +49,13 @@ interface TimerManager {
     fun cancelAll()
 }
 
-@ViewModelScoped // ViewModel의 생명주기에 맞춤
+@Singleton
 class TimerManagerImpl @Inject constructor(
     private val timerControlUseCase: TimerControlUseCase,
     @param:DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-    externalScope: CoroutineScope? = null,
 ) : TimerManager {
     private val job = SupervisorJob()
-    private val scope: CoroutineScope = externalScope ?: CoroutineScope(defaultDispatcher + job)
+    private val scope: CoroutineScope = CoroutineScope(defaultDispatcher + job)
     private val _timerState = MutableStateFlow(
         TimerState(
             status = TimerStatus.Idle,

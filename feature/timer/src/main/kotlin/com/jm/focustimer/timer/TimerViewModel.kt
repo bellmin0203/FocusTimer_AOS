@@ -514,6 +514,7 @@ class TimerViewModel @Inject constructor(
                 sessionStartTime = null
             )
         }
+        
         emitSideEffect(
             TimerSideEffect.ShowSnackbar(
                 R.string.snackbar_timer_completed

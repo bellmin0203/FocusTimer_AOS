@@ -1,5 +1,6 @@
 package com.jm.focustimer.timer
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -64,6 +66,8 @@ import com.jm.focustimer.timer.model.TimerIntent
 import com.jm.focustimer.timer.model.TimerSideEffect
 import com.jm.focustimer.timer.model.TimerUiState
 import com.jm.focustimer.timer.model.toUiText
+import com.jm.focustimer.timer.service.TimerService
+import com.jm.focustimer.timer.service.TimerServiceAction
 import com.jm.focustimer.ui.component.TimerTopBar
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
@@ -171,6 +175,32 @@ private fun TimerScreen(
     onSettingsClick: () -> Unit = {},
     onStatsClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    
+    // Service 제어
+    LaunchedEffect(uiState.isRunning, uiState.isPaused, uiState.isCompleted) {
+        val intent = Intent(context, TimerService::class.java)
+        
+        when {
+            uiState.isRunning -> {
+                // 타이머가 실행 중이면 Service 시작 (또는 재개)
+                intent.action = TimerServiceAction.ACTION_START
+                intent.putExtra(TimerServiceAction.EXTRA_DURATION, uiState.remainingTime.inWholeMilliseconds)
+                ContextCompat.startForegroundService(context, intent)
+            }
+            uiState.isPaused -> {
+                // 타이머가 일시정지되면 Service에 알림 (알림 업데이트용)
+                intent.action = TimerServiceAction.ACTION_PAUSE
+                context.startService(intent)
+            }
+            !uiState.isCompleted -> {
+                // 타이머가 정지되면 Service 종료 (완료 상태는 유지)
+                intent.action = TimerServiceAction.ACTION_STOP
+                context.startService(intent)
+            }
+        }
+    }
+    
     // 화면 켜짐 유지
     KeepScreenOnEffect(
         shouldKeepScreenOn = uiState.isRunning && uiState.isScreenOnEnabled
