@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,6 +66,7 @@ fun SettingsItem(
         }
 
         if (trailing != null) {
+            Spacer(Modifier.size(14.dp))
             trailing()
         }
     }
@@ -167,7 +169,7 @@ fun SettingsClickableItemPreview() {
     FocusTimerTheme {
         SettingsClickableItem(
             title = "클릭 가능한 설정",
-            subtitle = "부제목",
+            subtitle = "부제목설정 항목 부제목설정 항목 부제목설정 항목 부제목설정 항목 부제목설정 항목 부제목",
             onClick = {},
             value = "값",
             icon = FocusTimerIcons.KeyboardArrowRight
