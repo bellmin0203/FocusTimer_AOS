@@ -9,26 +9,43 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
+import com.jm.focustimer.domain.repository.SettingsRepository
 import com.jm.focustimer.navigation.FocusTimerNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            FocusTimerApp()
+            val isDarkTheme by settingsRepository.isDarkTheme.collectAsStateWithLifecycle(
+                initialValue = isSystemInDarkTheme()
+            )
+
+            FocusTimerTheme(
+                darkTheme = isDarkTheme
+            ) {
+                FocusTimerApp()
+            }
         }
     }
 }
@@ -71,11 +88,9 @@ private fun FocusTimerApp() {
         }
     }
 
-    FocusTimerTheme {
-        FocusTimerNavHost(
-            navController = navController,
-            snackbarHostState = snackbarHostState,
-            scope = scope
-        )
-    }
+    FocusTimerNavHost(
+        navController = navController,
+        snackbarHostState = snackbarHostState,
+        scope = scope
+    )
 }
