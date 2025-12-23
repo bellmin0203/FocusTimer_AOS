@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.domain.repository.SettingsRepository
 import com.jm.focustimer.navigation.FocusTimerNavHost
@@ -37,9 +38,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val isDarkTheme by settingsRepository.isDarkTheme.collectAsStateWithLifecycle(
-                initialValue = isSystemInDarkTheme()
+            val themeMode by settingsRepository.themeMode.collectAsStateWithLifecycle(
+                initialValue = ThemeMode.SYSTEM
             )
+
+            val isDarkTheme = when (themeMode) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
 
             FocusTimerTheme(
                 darkTheme = isDarkTheme

@@ -4,9 +4,9 @@ package com.jm.focustimer.setting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.domain.repository.SettingsRepository
-import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_DARK_THEME
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
@@ -14,6 +14,7 @@ import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_SCREEN_ON
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_TICK_SOUND
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_SESSION_DURATION
+import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_THEME_MODE
 import com.jm.focustimer.domain.usecase.preset.GetAllPresetsUseCase
 import com.jm.focustimer.setting.model.SettingCategory
 import com.jm.focustimer.setting.model.SettingType
@@ -64,13 +65,21 @@ class SettingViewModel @Inject constructor(
     * 외관 설정 항목 생성
     */
     private fun createAppearanceSettings(): List<SettingType> = listOf(
-        SettingType.Toggle(
-            title = "다크 테마",
-            description = "앱의 전반적인 테마를 밝게 또는 어둡게 설정합니다.",
-            stateFlow = settingsRepository.isDarkTheme,
-            onToggle = ::updateIsDarkTheme,
+        SettingType.Selector(
+            title = "앱 테마",
+            description = "앱의 전반적인 테마를 설정합니다.",
             category = SettingCategory.APPEARANCE,
-            defaultValue = DEFAULT_IS_DARK_THEME
+            stateFlow = settingsRepository.themeMode,
+            options = ThemeMode.entries,
+            displayName = { mode ->
+                when (mode) {
+                    ThemeMode.SYSTEM -> "시스템 설정"
+                    ThemeMode.LIGHT -> "라이트 모드"
+                    ThemeMode.DARK -> "다크 모드"
+                }
+            },
+            onSelect = ::updateThemeMode,
+            defaultValue = DEFAULT_THEME_MODE
         )
     )
 
@@ -190,8 +199,8 @@ class SettingViewModel @Inject constructor(
         }
     }
 
-    fun updateIsDarkTheme(value: Boolean) = updateSetting {
-        settingsRepository.updateDarkTheme(value)
+    fun updateThemeMode(value: ThemeMode) = updateSetting {
+        settingsRepository.updateThemeMode(value)
     }
 
     fun updateNotificationSoundType(soundType: NotificationSoundType) = updateSetting {
@@ -230,4 +239,3 @@ class SettingViewModel @Inject constructor(
         settingsRepository.updateDefaultPresetId(presetId)
     }
 }
-

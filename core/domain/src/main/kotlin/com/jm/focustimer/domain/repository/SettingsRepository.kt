@@ -1,6 +1,7 @@
 package com.jm.focustimer.domain.repository
 
 import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.common.model.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
@@ -12,9 +13,9 @@ import kotlin.time.Duration.Companion.minutes
 interface SettingsRepository {
 
     /**
-     * 다크 테마 활성화 여부 Flow
+     * 테마 모드 Flow
      */
-    val isDarkTheme: Flow<Boolean>
+    val themeMode: Flow<ThemeMode>
 
     /**
      * 알림 소리 타입 Flow
@@ -68,10 +69,10 @@ interface SettingsRepository {
     val defaultPresetId: Flow<Int?>
 
     /**
-     * 다크 테마 설정을 업데이트합니다.
-     * @param isDarkTheme 다크 테마 활성화 여부
+     * 테마 모드를 업데이트합니다.
+     * @param themeMode 테마 모드
      */
-    suspend fun updateDarkTheme(isDarkTheme: Boolean)
+    suspend fun updateThemeMode(themeMode: ThemeMode)
 
     /**
      * 알림 소리 타입을 업데이트합니다.
@@ -134,7 +135,7 @@ interface SettingsRepository {
     suspend fun updateDefaultPresetId(presetId: Int?)
 
     companion object {
-        const val DEFAULT_IS_DARK_THEME = false
+        val DEFAULT_THEME_MODE = ThemeMode.SYSTEM
         const val DEFAULT_IS_NOTIFICATION_VIBRATE = false
         const val DEFAULT_IS_TICK_SOUND = false
         val DEFAULT_SESSION_DURATION = 15.minutes

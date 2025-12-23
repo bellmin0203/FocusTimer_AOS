@@ -1,6 +1,7 @@
 package com.jm.focustimer.data.repository
 
 import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.common.model.TimeUnit
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import com.jm.focustimer.domain.repository.SettingsRepository
@@ -18,8 +19,8 @@ class SettingsRepositoryImpl @Inject constructor(
     private val settingsDataSource: SettingsPreferencesDataSource
 ) : SettingsRepository {
 
-    override val isDarkTheme: Flow<Boolean>
-        get() = settingsDataSource.isDarkThemeFlow
+    override val themeMode: Flow<ThemeMode>
+        get() = settingsDataSource.themeModeFlow
 
     override val notificationSoundType: Flow<NotificationSoundType>
         get() = settingsDataSource.notificationSoundTypeFlow
@@ -51,9 +52,9 @@ class SettingsRepositoryImpl @Inject constructor(
     override val defaultPresetId: Flow<Int?>
         get() = settingsDataSource.defaultPresetIdFlow
 
-    override suspend fun updateDarkTheme(isDarkTheme: Boolean) {
-        LogUtil.d("다크 테마 설정 변경: $isDarkTheme")
-        settingsDataSource.updateIsDarkTheme(isDarkTheme)
+    override suspend fun updateThemeMode(themeMode: ThemeMode) {
+        LogUtil.d("테마 설정 변경: $themeMode")
+        settingsDataSource.updateThemeMode(themeMode)
     }
 
     override suspend fun updateNotificationSoundType(soundType: NotificationSoundType) {

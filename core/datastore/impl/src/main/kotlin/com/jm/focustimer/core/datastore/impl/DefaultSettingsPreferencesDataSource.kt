@@ -9,9 +9,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.common.model.TimeUnit
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
-import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_DARK_THEME
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
@@ -30,8 +30,9 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : SettingsPreferencesDataSource {
 
-    override val isDarkThemeFlow: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[KEY_IS_DARK_THEME] ?: DEFAULT_IS_DARK_THEME
+    override val themeModeFlow: Flow<ThemeMode> = dataStore.data.map { preferences ->
+        val themeModeString = preferences[KEY_THEME_MODE]
+        ThemeMode.fromString(themeModeString)
     }
 
     override val notificationSoundTypeFlow: Flow<NotificationSoundType> =
@@ -75,9 +76,9 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         preferences[KEY_DEFAULT_PRESET_ID]
     }
 
-    override suspend fun updateIsDarkTheme(isDarkTheme: Boolean) {
+    override suspend fun updateThemeMode(themeMode: ThemeMode) {
         dataStore.edit { preferences ->
-            preferences[KEY_IS_DARK_THEME] = isDarkTheme
+            preferences[KEY_THEME_MODE] = themeMode.name
         }
     }
 
@@ -99,7 +100,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
-    override suspend fun updateDefaultSessionDuration(duration: Duration) {
+    override suspend fun updateDefaultSessionDuration(duration: kotlin.time.Duration) {
         dataStore.edit { preferences ->
             preferences[KEY_DEFAULT_SESSION_DURATION] = duration.inWholeMilliseconds
         }
@@ -146,7 +147,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
     }
 
     companion object {
-        private val KEY_IS_DARK_THEME = booleanPreferencesKey("is_dark_theme")
+        private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_NOTIFICATION_SOUND_TYPE = stringPreferencesKey("notification_sound_type")
         private val KEY_IS_NOTIFICATION_VIBRATE = booleanPreferencesKey("is_notification_vibrate")
         private val KEY_IS_TICK_SOUND = booleanPreferencesKey("is_tick_sound")

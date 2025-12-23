@@ -171,13 +171,15 @@ fun <T> SelectorSettingItem(item: SettingType.Selector<T>) {
 fun PreviewSettingScreen() {
     val dummyItems = listOf(
         // 외관
-        SettingType.Toggle(
-            title = "다크 테마",
-            description = "시스템 설정에 따라 테마를 변경합니다.",
+        SettingType.Selector(
+            title = "앱 테마",
+            description = "앱의 전반적인 테마를 설정합니다.",
             category = SettingCategory.APPEARANCE,
-            stateFlow = kotlinx.coroutines.flow.flowOf(false),
-            onToggle = {},
-            defaultValue = false
+            stateFlow = kotlinx.coroutines.flow.flowOf("시스템 설정"),
+            options = listOf("시스템 설정", "라이트 모드", "다크 모드"),
+            displayName = { it },
+            onSelect = {},
+            defaultValue = "시스템 설정"
         ),
         SettingType.Selector(
             title = "테마 색상",

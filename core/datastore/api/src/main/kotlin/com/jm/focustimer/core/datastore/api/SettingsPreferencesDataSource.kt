@@ -1,13 +1,14 @@
 package com.jm.focustimer.core.datastore.api
 
 import com.jm.focustimer.common.model.NotificationSoundType
+import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.common.model.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 interface SettingsPreferencesDataSource {
-    val isDarkThemeFlow: Flow<Boolean>
+    val themeModeFlow: Flow<ThemeMode>
 
     val notificationSoundTypeFlow: Flow<NotificationSoundType>
 
@@ -33,7 +34,7 @@ interface SettingsPreferencesDataSource {
      */
     val defaultPresetIdFlow: Flow<Int?>
 
-    suspend fun updateIsDarkTheme(isDarkTheme: Boolean)
+    suspend fun updateThemeMode(themeMode: ThemeMode)
 
     suspend fun updateNotificationSoundType(soundType: NotificationSoundType)
 
@@ -60,7 +61,7 @@ interface SettingsPreferencesDataSource {
     suspend fun updateDefaultPresetId(presetId: Int?)
 
     companion object {
-        const val DEFAULT_IS_DARK_THEME = false
+        val DEFAULT_THEME_MODE = ThemeMode.SYSTEM
         const val DEFAULT_IS_NOTIFICATION_VIBRATE = false
         const val DEFAULT_IS_TICK_SOUND = false
         val DEFAULT_SESSION_DURATION = 15.minutes
