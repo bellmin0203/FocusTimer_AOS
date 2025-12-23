@@ -9,9 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -38,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -58,7 +66,6 @@ import com.jm.focustimer.timer.component.EditPresetDialog
 import com.jm.focustimer.timer.component.MinimizedControlsState
 import com.jm.focustimer.timer.component.NavigationDrawerContent
 import com.jm.focustimer.timer.component.PresetManagementBottomSheet
-import com.jm.focustimer.timer.component.PresetSection
 import com.jm.focustimer.timer.component.TimeInputBottomSheet
 import com.jm.focustimer.timer.component.rememberMinimizedControlsState
 import com.jm.focustimer.timer.model.HapticPattern
@@ -274,21 +281,6 @@ private fun TimerScreen(
                     TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
                 } ?: TimerColorPresets.lightPresets[0]
 
-                // 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 PresetSection 표시
-                if (uiState.isIdle && !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
-                    PresetSection(
-                        presets = uiState.presets,
-                        selectedPresetId = uiState.selectedPresetId,
-                        canAddPreset = uiState.hasPresetSpaceAvailable,
-                        onPresetClick = { presetId ->
-                            onIntent(TimerIntent.SelectPreset(presetId))
-                        },
-                        onAddPreset = { showAddPresetDialog = true },
-                        onEditPreset = { showEditPresetDialog = it },
-                        onDeletePreset = { showDeletePresetDialog = it },
-                    )
-                }
-
                 // 원형 타이머
                 CircularTimerProgress(
                     progress = uiState.progress,
@@ -344,6 +336,34 @@ private fun TimerScreen(
                             )
                         }
                     }
+                }
+
+                // 프리셋 선택 AssistChip (타이머 다이얼 바로 아래)
+                if (uiState.isIdle && !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
+                    AssistChip(
+                        onClick = { showPresets = true },
+                        label = {
+                            Text(
+                                text = selectedPreset?.name ?: stringResource(R.string.preset_section_header),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        shape = RoundedCornerShape(50),
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        border = null,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
                 }
 
                 // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
