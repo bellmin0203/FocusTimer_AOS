@@ -148,8 +148,21 @@ class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
             hourlyBreakdown = (0..23).map { hour ->
                 HourlyStats(
                     hour = hour,
-                    focusTime = (hour % 5).minutes,
-                    sessionCount = hour * 2
+                    focusTime = if (hour in 13..15) 30.minutes else if (hour in 9..11) 15.minutes else 0.minutes,
+                    sessionCount = if (hour in 13..15) 1 else 0
+                )
+            }
+        ),
+        DailyStats(
+            date = LocalDate.now().minusDays(1),
+            totalFocusTime = 0.minutes,
+            completedSessions = 0,
+            mostProductiveHour = null,
+            hourlyBreakdown = (0..23).map { hour ->
+                HourlyStats(
+                    hour = hour,
+                    focusTime = 0.minutes,
+                    sessionCount = 0
                 )
             }
         )

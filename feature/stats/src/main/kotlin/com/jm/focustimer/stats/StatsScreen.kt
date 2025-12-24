@@ -32,14 +32,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.jm.focustimer.designsystem.theme.FocusTimerTheme
+import com.jm.focustimer.domain.model.statistics.AchievementMetrics
+import com.jm.focustimer.domain.model.statistics.DailyFocusTime
+import com.jm.focustimer.domain.model.statistics.DailyStats
+import com.jm.focustimer.domain.model.statistics.HourlyStats
+import com.jm.focustimer.domain.model.statistics.MonthlyStats
+import com.jm.focustimer.domain.model.statistics.WeeklyFocusTime
+import com.jm.focustimer.domain.model.statistics.WeeklyStats
 import com.jm.focustimer.stats.component.AchievementMetricsContent
 import com.jm.focustimer.stats.component.DailyStatsContent
 import com.jm.focustimer.stats.component.MonthlyStatsContent
 import com.jm.focustimer.stats.component.WeeklyStatsContent
 import com.jm.focustimer.stats.model.StatsPeriod
 import com.jm.focustimer.stats.model.StatsUiState
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.YearMonth
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * 통계 화면
@@ -266,4 +280,152 @@ fun StatsRow(
             textAlign = TextAlign.End
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StatsScreenLoadingPreview() {
+    FocusTimerTheme {
+        StatsScreen(
+            uiState = StatsUiState(isLoading = true),
+            onPeriodSelected = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
+            onToday = {},
+            onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StatsScreenDailyPreview() {
+    FocusTimerTheme {
+        StatsScreen(
+            uiState = StatsUiState(
+                selectedPeriod = StatsPeriod.DAILY,
+                achievementMetrics = StatsPreviewData.achievementMetrics,
+                dailyStats = StatsPreviewData.dailyStats
+            ),
+            onPeriodSelected = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
+            onToday = {},
+            onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StatsScreenWeeklyPreview() {
+    FocusTimerTheme {
+        StatsScreen(
+            uiState = StatsUiState(
+                selectedPeriod = StatsPeriod.WEEKLY,
+                achievementMetrics = StatsPreviewData.achievementMetrics,
+                weeklyStats = StatsPreviewData.weeklyStats
+            ),
+            onPeriodSelected = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
+            onToday = {},
+            onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StatsScreenMonthlyPreview() {
+    FocusTimerTheme {
+        StatsScreen(
+            uiState = StatsUiState(
+                selectedPeriod = StatsPeriod.MONTHLY,
+                achievementMetrics = StatsPreviewData.achievementMetrics,
+                monthlyStats = StatsPreviewData.monthlyStats
+            ),
+            onPeriodSelected = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
+            onToday = {},
+            onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StatsScreenErrorPreview() {
+    FocusTimerTheme {
+        StatsScreen(
+            uiState = StatsUiState(
+                error = "데이터를 불러오는 중 오류가 발생했습니다."
+            ),
+            onPeriodSelected = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
+            onToday = {},
+            onBackClick = {}
+        )
+    }
+}
+
+private object StatsPreviewData {
+    val achievementMetrics = AchievementMetrics(
+        focusRate = 0.85,
+        consecutiveFocusDays = 5,
+        longestFocusTime = 50.minutes,
+        averageSessionLength = 25.minutes,
+        totalSessions = 20,
+        completedSessions = 17,
+        totalFocusTime = 425.minutes
+    )
+
+    val dailyStats = DailyStats(
+        date = LocalDate.now(),
+        totalFocusTime = 150.minutes,
+        completedSessions = 6,
+        hourlyBreakdown = (0..23).map { hour ->
+            HourlyStats(
+                hour = hour,
+                focusTime = if (hour in 9..18) 25.minutes else 0.minutes,
+                sessionCount = if (hour in 9..18) 1 else 0
+            )
+        },
+        mostProductiveHour = 10
+    )
+
+    val weeklyStats = WeeklyStats(
+        weekStartDate = LocalDate.now().minusDays(3),
+        weekEndDate = LocalDate.now().plusDays(3),
+        totalFocusTime = 15.hours,
+        dailyBreakdown = (0..6).map { day ->
+            DailyFocusTime(
+                date = LocalDate.now().minusDays(3L - day),
+                dayOfWeek = LocalDate.now().minusDays(3L - day).dayOfWeek,
+                focusTime = 2.hours,
+                sessionCount = 4
+            )
+        },
+        averageSessionsPerDay = 4.5,
+        mostProductiveDay = DayOfWeek.MONDAY
+    )
+
+    val monthlyStats = MonthlyStats(
+        yearMonth = YearMonth.now(),
+        totalFocusTime = 60.hours,
+        weeklyBreakdown = (1..4).map { week ->
+            WeeklyFocusTime(
+                weekOfMonth = week,
+                weekStartDate = LocalDate.now(),
+                weekEndDate = LocalDate.now(),
+                focusTime = 15.hours,
+                sessionCount = 20
+            )
+        },
+        averageSessionsPerWeek = 25.0,
+        mostProductiveWeek = 2,
+        trend = 0.15
+    )
 }
