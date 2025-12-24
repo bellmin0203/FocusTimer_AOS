@@ -13,17 +13,17 @@ import androidx.compose.ui.platform.LocalContext
 
 // 다크 테마 ColorScheme
 private val DarkColorScheme = darkColorScheme(
-    // Primary - 브랜드 메인 컬러
+    // Primary - 브랜드 메인 컬러 (다크 모드에서는 밝은 Green 유지)
     primary = PrimaryGreen,
     onPrimary = DarkBackground,
     primaryContainer = DarkSurfaceVariant,
     onPrimaryContainer = PrimaryGreen,
 
     // Secondary - 보조 컬러
-    secondary = DarkSecondaryText,
+    secondary = DarkOnSurfaceVariant, // 업데이트: Deprecated된 DarkSecondaryText 대신 사용
     onSecondary = DarkBackground,
     secondaryContainer = DarkSurface,
-    onSecondaryContainer = DarkSecondaryText,
+    onSecondaryContainer = DarkOnSurfaceVariant,
 
     // Tertiary - 3차 컬러 (Break 아이콘용)
     tertiary = BreakIconDark,
@@ -37,52 +37,52 @@ private val DarkColorScheme = darkColorScheme(
     surface = DarkSurface,
     onSurface = DarkOnSurface,
     surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = DarkSecondaryText,
+    onSurfaceVariant = DarkOnSurfaceVariant, // 업데이트: 텍스트 가독성 최적화
 
     // Outline & Border
     outline = DarkBorder,
     outlineVariant = DarkSurfaceInactive,
 
-    // Error (Material3 기본값 유지)
-    error = Color(0xFFCF6679),
-    onError = Color(0xFF000000),
+    // Error (Material3 표준 적용)
+    error = DarkError,
+    onError = DarkOnError,
 )
 
 // 라이트 테마 ColorScheme
 private val LightColorScheme = lightColorScheme(
-    // Primary - 브랜드 메인 컬러
-    primary = PrimaryGreen,
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = LightSurfaceVariant,
-    onPrimaryContainer = PrimaryGreen,
+    // Primary - 브랜드 메인 컬러 (라이트 모드 가독성 최적화)
+    primary = PrimaryGreenLight,
+    onPrimary = Color.White,
+    primaryContainer = PrimaryGreenContainer,
+    onPrimaryContainer = PrimaryGreenLight, // 컨테이너 위 텍스트는 짙은 색 사용
 
     // Secondary - 보조 컬러
-    secondary = LightSecondaryText,
-    onSecondary = Color(0xFFFFFFFF),
+    secondary = LightOnSurfaceVariant, // 업데이트: Deprecated된 LightSecondaryText 대신 사용
+    onSecondary = Color.White,
     secondaryContainer = LightSurface,
-    onSecondaryContainer = LightSecondaryText,
+    onSecondaryContainer = LightOnSurfaceVariant,
 
     // Tertiary - 3차 컬러 (Break 아이콘용)
     tertiary = BreakIconLight,
-    onTertiary = Color(0xFFFFFFFF),
+    onTertiary = Color.White,
     tertiaryContainer = BreakIconLightBackground,
     onTertiaryContainer = BreakIconLight,
 
     // Background & Surface
     background = LightBackground,
     onBackground = LightOnBackground,
-    surface = LightBackground,
+    surface = LightBackground, // Surface는 보통 Background와 같거나 약간 다름
     onSurface = LightOnSurface,
-    surfaceVariant = LightSurface,
-    onSurfaceVariant = LightSecondaryText,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant, // 업데이트: 텍스트 가독성 최적화
 
     // Outline & Border
     outline = LightBorder,
     outlineVariant = LightBorderVariant,
 
-    // Error (Material3 기본값 유지)
-    error = Color(0xFFB00020),
-    onError = Color(0xFFFFFFFF),
+    // Error (Material3 표준 적용)
+    error = LightError,
+    onError = LightOnError,
 )
 
 @Composable
