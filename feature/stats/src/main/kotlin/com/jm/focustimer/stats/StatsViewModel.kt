@@ -2,6 +2,7 @@ package com.jm.focustimer.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jm.focustimer.data.util.DummyDataHelper
 import com.jm.focustimer.domain.usecase.statistics.GetAchievementMetricsUseCase
 import com.jm.focustimer.domain.usecase.statistics.GetDailyStatsUseCase
 import com.jm.focustimer.domain.usecase.statistics.GetMonthlyStatsUseCase
@@ -27,7 +28,8 @@ class StatsViewModel @Inject constructor(
     private val getDailyStatsUseCase: GetDailyStatsUseCase,
     private val getWeeklyStatsUseCase: GetWeeklyStatsUseCase,
     private val getMonthlyStatsUseCase: GetMonthlyStatsUseCase,
-    private val getAchievementMetricsUseCase: GetAchievementMetricsUseCase
+    private val getAchievementMetricsUseCase: GetAchievementMetricsUseCase,
+    private val dummyDataHelper: DummyDataHelper,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StatsUiState())
@@ -36,10 +38,28 @@ class StatsViewModel @Inject constructor(
     private var currentDate = LocalDate.now()
     private var currentYearMonth = YearMonth.now()
 
+
+
     init {
         LogUtil.d("StatsViewModel initialized")
+
+        generateDummyData()
         loadAchievementMetrics()
         loadStats()
+    }
+
+    // 디버그 전용 함수들
+    fun generateDummyData() {
+        if (BuildConfig.DEBUG) {
+            viewModelScope.launch {
+                try {
+                    val count = dummyDataHelper.generateRandomMonthData()
+                    // 성공 처리
+                } catch (e: Exception) {
+                    // 에러 처리
+                }
+            }
+        }
     }
 
     /**
@@ -180,9 +200,10 @@ class StatsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(achievementMetrics = achievementMetrics)
                 }
-                LogUtil.d("Achievement metrics loaded: focusRate=${achievementMetrics.focusRatePercent}%, consecutiveDays=${achievementMetrics.consecutiveFocusDays}")
+                LogUtil.d("Achievement metrics loaded: focusRate=${achievementMetrics.focusRatePercent} %, consecutiveDays=${achievementMetrics.consecutiveFocusDays}")
             } catch (e: Exception) {
                 LogUtil.e("Failed to load achievement metrics", e)
+                e.printStackTrace()
                 // 성취 지표 로드 실패는 에러로 표시하지 않음 (옵션)
             }
         }
