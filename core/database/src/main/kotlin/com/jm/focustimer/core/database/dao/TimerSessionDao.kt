@@ -203,4 +203,13 @@ interface TimerSessionDao {
         )
         """)
     suspend fun getLongestDailyFocusTime(): Long?
+    
+    // ========== DEBUG/TEST 전용 메서드들 ==========
+    
+    /**
+     * 더미 데이터 생성을 위한 배치 삽입 (DEBUG 전용)
+     * @param sessions 더미 세션 리스트
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDummySessions(sessions: List<TimerSessionEntity>)
 }
