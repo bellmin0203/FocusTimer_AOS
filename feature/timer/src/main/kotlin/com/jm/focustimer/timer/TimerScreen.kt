@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -268,7 +269,7 @@ private fun TimerScreen(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { padding ->
             // 전체 화면에 터치 감지를 위한 Box
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -282,6 +283,8 @@ private fun TimerScreen(
                             if (uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
                                 minimizedControlsState.recordInteraction()
                                 LogUtil.d("화면 터치 - UI 표시")
+                            } else {
+                                minimizedControlsState.hideControls()
                             }
                         }
                     }
