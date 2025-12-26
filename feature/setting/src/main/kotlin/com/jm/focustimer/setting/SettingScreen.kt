@@ -1,7 +1,9 @@
 package com.jm.focustimer.setting
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -139,28 +142,36 @@ fun <T> SelectorSettingItem(item: SettingType.Selector<T>) {
     val selectedValue by item.stateFlow.collectAsState(initial = item.defaultValue)
     var expanded by remember { mutableStateOf(false) }
 
-    Column {
-        SettingsClickableItem(
-            title = item.title,
-            subtitle = item.description,
-            onClick = { expanded = true },
-            value = selectedValue?.let { item.displayName(it) },
-            icon = Icons.Default.ArrowDropDown
-        )
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+            SettingsClickableItem(
+                title = item.title,
+                subtitle = item.description,
+                onClick = { expanded = true },
+                value = selectedValue?.let { item.displayName(it) },
+                icon = Icons.Default.ArrowDropDown
+            )
 
-        // 드롭다운 메뉴
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp)
         ) {
-            item.options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(item.displayName(option)) },
-                    onClick = {
-                        item.onSelect(option)
-                        expanded = false
-                    }
-                )
+            // 드롭다운 메뉴
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                item.options.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(item.displayName(option)) },
+                        onClick = {
+                            item.onSelect(option)
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
     }
