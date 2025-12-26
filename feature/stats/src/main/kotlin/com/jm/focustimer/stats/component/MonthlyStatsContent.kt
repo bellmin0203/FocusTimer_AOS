@@ -36,8 +36,10 @@ import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
@@ -45,6 +47,9 @@ import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.rounded
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -202,6 +207,9 @@ private fun StatItem(
 private fun WeeklyChart(stats: MonthlyStats) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
+    val markerBackgroundColor = MaterialTheme.colorScheme.surfaceContainer
+    val markerTextColor = MaterialTheme.colorScheme.onSurface
+
     // 차트 데이터 준비
     LaunchedEffect(stats) {
         val weeks = stats.weeklyBreakdown.map { it.weekOfMonth.toFloat() }
@@ -213,6 +221,35 @@ private fun WeeklyChart(stats: MonthlyStats) {
             columnSeries { series(weeks, focusTimes) }
         }
     }
+
+    val marker = rememberDefaultCartesianMarker(
+        label = rememberTextComponent(
+            color = markerTextColor,
+            background = rememberShapeComponent(
+                fill = fill(markerBackgroundColor)
+            ),
+            padding = Insets(horizontalDp = 8f, verticalDp = 4f),
+        ),
+        labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint,
+        valueFormatter = remember {
+            DefaultCartesianMarker.ValueFormatter { _, targets ->
+                targets.filterIsInstance<ColumnCartesianLayerMarkerTarget>()
+                    .flatMap { it.columns }
+                    .joinToString("\n") { column ->
+                        val minutes = column.entry.y.toInt()
+                        val hours = minutes / 60
+                        val remainingMinutes = minutes % 60
+                        val timeText = when {
+                            hours > 0 && remainingMinutes > 0 -> "${hours}시간 ${remainingMinutes}분"
+                            hours > 0 -> "${hours}시간"
+                            remainingMinutes > 0 -> "${remainingMinutes}분"
+                            else -> "0분"
+                        }
+                        timeText
+                    }
+            }
+        }
+    )
 
     CartesianChartHost(
         chart = rememberCartesianChart(
@@ -237,7 +274,8 @@ private fun WeeklyChart(stats: MonthlyStats) {
                 valueFormatter = { _, value, _ ->
                     "${value.toInt()}주"
                 }
-            )
+            ),
+            marker = marker
         ),
         modelProducer = modelProducer,
         modifier = Modifier.height(250.dp)
