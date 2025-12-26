@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -18,14 +19,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -81,6 +87,12 @@ private fun StatsScreen(
     onToday: () -> Unit,
     onBackClick: () -> Unit
 ) {
+
+    var showAchievementSheet by rememberSaveable { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,6 +106,12 @@ private fun StatsScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showAchievementSheet = true }) {
+                        Icon(
+                            imageVector = Icons.Default.EmojiEvents,
+                            contentDescription = "성취 기록 보기"
+                        )
+                    }
                     IconButton(onClick = onToday) {
                         Icon(
                             imageVector = Icons.Default.Today,
@@ -156,12 +174,6 @@ private fun StatsScreen(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp)
                 ) {
-                    // 성취 지표 섹션 (항상 상단에 노출)
-                    uiState.achievementMetrics?.let { metrics ->
-                        AchievementMetricsContent(metrics = metrics)
-                        Spacer(modifier = Modifier.height(24.dp))
-                    }
-
                     when (uiState.selectedPeriod) {
                         StatsPeriod.DAILY -> {
                             uiState.dailyStats?.let { stats ->
@@ -208,6 +220,28 @@ private fun StatsScreen(
                                 modifier = Modifier.padding(16.dp),
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
+                        }
+                    }
+                }
+
+                // 성취 기록 바텀시트
+                if (showAchievementSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showAchievementSheet = false },
+                        sheetState = sheetState,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 48.dp)
+                        ) {
+                            uiState.achievementMetrics?.let { metrics ->
+                                AchievementMetricsContent(metrics = metrics)
+                            } ?: run {
+                                Text("아직 기록된 성취가 없습니다.")
+                            }
                         }
                     }
                 }
