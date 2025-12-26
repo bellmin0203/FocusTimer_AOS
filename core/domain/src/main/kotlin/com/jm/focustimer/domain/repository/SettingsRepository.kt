@@ -143,6 +143,6 @@ interface SettingsRepository {
         val DEFAULT_TIME_UNIT = TimeUnit.MINUTE
         const val DEFAULT_IS_SCREEN_ON = false
         const val DEFAULT_IS_HAPTIC_FEEDBACK = false
-        const val DEFAULT_IS_MINIMIZED_CONTROLS = false
+        const val DEFAULT_IS_MINIMIZED_CONTROLS = true
     }
 }
