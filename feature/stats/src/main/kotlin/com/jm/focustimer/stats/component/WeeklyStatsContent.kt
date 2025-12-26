@@ -1,15 +1,28 @@
 package com.jm.focustimer.stats.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -18,7 +31,6 @@ import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.domain.model.statistics.DailyFocusTime
 import com.jm.focustimer.domain.model.statistics.WeeklyStats
 import com.jm.focustimer.stats.StatsCard
-import com.jm.focustimer.stats.StatsRow
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -42,51 +54,133 @@ import kotlin.time.Duration.Companion.minutes
  * 주간 통계 컨텐츠
  */
 @Composable
-fun WeeklyStatsContent(stats: WeeklyStats) {
-    val dateFormatter = DateTimeFormatter.ofPattern("M월 d일")
+fun WeeklyStatsContent(
+    stats: WeeklyStats,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit
+) {
+    val dateFormatter = DateTimeFormatter.ofPattern("M.d")
 
-    // 기간 표시
-    Text(
-        text = "${stats.weekStartDate.format(dateFormatter)} ~ ${
-            stats.weekEndDate.format(
-                dateFormatter
+    // 날짜 네비게이션 헤더
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onPrevious) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "이전 주"
             )
-        }",
-        style = MaterialTheme.typography.headlineSmall,
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
+        }
 
-    // 요약 카드
-    StatsCard(title = "주간 요약") {
-        StatsRow(
-            label = "총 집중 시간",
-            value = formatDuration(stats.totalFocusTime)
+        Text(
+            text = "${stats.weekStartDate.format(dateFormatter)} ~ ${stats.weekEndDate.format(dateFormatter)}",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
-        StatsRow(
-            label = "완료된 세션",
-            value = "${stats.totalSessions}개"
-        )
-        StatsRow(
-            label = "하루 평균 세션",
-            value = String.format("%.1f개", stats.averageSessionsPerDay)
-        )
-        StatsRow(
-            label = "하루 평균 집중 시간",
-            value = formatDuration(stats.averageDailyFocusTime)
-        )
-        stats.mostProductiveDay?.let { day ->
-            StatsRow(
-                label = "가장 생산적인 요일",
-                value = getDayOfWeekKorean(day)
+
+        IconButton(onClick = onNext) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "다음 주"
             )
         }
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    // 요약 카드 (Grid)
+    StatsCard(title = "주간 요약") {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatItem(
+                    label = "총 집중 시간",
+                    value = formatDuration(stats.totalFocusTime),
+                    modifier = Modifier.weight(1f)
+                )
+                StatItem(
+                    label = "완료된 세션",
+                    value = "${stats.totalSessions}개",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatItem(
+                    label = "하루 평균 세션",
+                    value = String.format("%.1f개", stats.averageSessionsPerDay),
+                    modifier = Modifier.weight(1f)
+                )
+                StatItem(
+                    label = "하루 평균 집중",
+                    value = formatDuration(stats.averageDailyFocusTime),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            // 5번째 아이템은 꽉 채우거나 별도 처리 (여기서는 가장 생산적인 요일을 하단에 배치)
+            StatItem(
+                label = "가장 생산적인 요일",
+                value = stats.mostProductiveDay?.let { getDayOfWeekKorean(it) } ?: "-",
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
 
     // 일별 집중 시간 차트
     StatsCard(title = "일별 집중 시간") {
-        DailyChart(stats = stats)
+        if (stats.totalFocusTime.inWholeMinutes == 0L) {
+             Box(
+                 modifier = Modifier
+                     .fillMaxWidth()
+                     .height(200.dp),
+                 contentAlignment = Alignment.Center
+             ) {
+                 Text(
+                     text = "이번 주 집중 기록이 없습니다.",
+                     style = MaterialTheme.typography.bodyMedium,
+                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                 )
+             }
+        } else {
+            DailyChart(stats = stats)
+        }
+    }
+}
+
+@Composable
+private fun StatItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -113,21 +207,21 @@ private fun DailyChart(stats: WeeklyStats) {
             rememberColumnCartesianLayer(
                 columnProvider = ColumnCartesianLayer.ColumnProvider.series(
                     rememberLineComponent(
-                        fill = fill(Color(0xFF03DAC6)),
-                        thickness = 8.dp,
+                        fill = fill(MaterialTheme.colorScheme.primary),
+                        thickness = 16.dp,
                         shape = rounded(allPercent = 40)
                     )
                 ),
             ),
             startAxis = VerticalAxis.rememberStart(
-                label = rememberTextComponent(),
+                label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
                 title = "분",
-                titleComponent = rememberTextComponent()
+                titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface)
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
-                label = rememberTextComponent(),
+                label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
                 title = "요일",
-                titleComponent = rememberTextComponent(),
+                titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface),
                 valueFormatter = { _, value, _ ->
                     val index = value.toInt()
                     if (index in stats.dailyBreakdown.indices) {
@@ -226,6 +320,10 @@ private fun WeeklyStatsContentPreview(
     @PreviewParameter(WeeklyStatsProvider::class) stats: WeeklyStats
 ) {
     FocusTimerTheme {
-        WeeklyStatsContent(stats = stats)
+        WeeklyStatsContent(
+            stats = stats,
+            onPrevious = {},
+            onNext = {}
+        )
     }
 }
