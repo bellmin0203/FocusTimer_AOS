@@ -1,6 +1,7 @@
 package com.jm.focustimer.timer
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -100,6 +101,9 @@ fun TimerScreen(
     val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
+
+    // 시스템 설정과 무관하게 센서에 따라 화면 회전 허용
+    ScreenOrientationEffect(orientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR)
 
     LaunchedEffect(viewModel) {
         viewModel.sideEffect.collect { effect ->
@@ -598,6 +602,28 @@ fun KeepScreenOnEffect(shouldKeepScreenOn: Boolean) {
 
         onDispose {
             manager.release()
+        }
+    }
+}
+
+/**
+ * 화면 방향을 강제로 제어하는 Effect
+ * 시스템 설정을 무시하고 지정된 orientation을 따르도록 함
+ */
+@Composable
+fun ScreenOrientationEffect(orientation: Int) {
+    val context = LocalContext.current
+
+    DisposableEffect(orientation) {
+        val activity = context.findActivity()
+        val originalOrientation = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+
+        // 요청된 방향으로 설정 (시스템 설정 무시)
+        activity?.requestedOrientation = orientation
+
+        onDispose {
+            // 화면을 벗어날 때 원래 방향 설정으로 복구
+            activity?.requestedOrientation = originalOrientation
         }
     }
 }
