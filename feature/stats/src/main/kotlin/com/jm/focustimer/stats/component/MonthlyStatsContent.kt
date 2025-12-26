@@ -151,18 +151,18 @@ fun MonthlyStatsContent(
     // 주별 집중 시간 차트
     StatsCard(title = "주별 집중 시간") {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
-             Box(
-                 modifier = Modifier
-                     .fillMaxWidth()
-                     .height(200.dp),
-                 contentAlignment = Alignment.Center
-             ) {
-                 Text(
-                     text = "이번 달 집중 기록이 없습니다.",
-                     style = MaterialTheme.typography.bodyMedium,
-                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                 )
-             }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "이번 달 집중 기록이 없습니다.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         } else {
             WeeklyChart(stats = stats)
         }

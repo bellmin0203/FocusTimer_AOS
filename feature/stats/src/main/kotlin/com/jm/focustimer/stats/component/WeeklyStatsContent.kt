@@ -77,7 +77,11 @@ fun WeeklyStatsContent(
         }
 
         Text(
-            text = "${stats.weekStartDate.format(dateFormatter)} ~ ${stats.weekEndDate.format(dateFormatter)}",
+            text = "${stats.weekStartDate.format(dateFormatter)} ~ ${
+                stats.weekEndDate.format(
+                    dateFormatter
+                )
+            }",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -138,18 +142,18 @@ fun WeeklyStatsContent(
     // 일별 집중 시간 차트
     StatsCard(title = "일별 집중 시간") {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
-             Box(
-                 modifier = Modifier
-                     .fillMaxWidth()
-                     .height(200.dp),
-                 contentAlignment = Alignment.Center
-             ) {
-                 Text(
-                     text = "이번 주 집중 기록이 없습니다.",
-                     style = MaterialTheme.typography.bodyMedium,
-                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                 )
-             }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "이번 주 집중 기록이 없습니다.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         } else {
             DailyChart(stats = stats)
         }

@@ -72,95 +72,91 @@ fun DailyStatsContent(
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)")
 
-    Column(
-        modifier = Modifier.padding(16.dp)
+    // 날짜 네비게이션 헤더
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // 날짜 네비게이션 헤더
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onPrevious) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "이전 날짜"
-                )
-            }
-
-            Text(
-                text = stats.date.format(dateFormatter),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+        IconButton(onClick = onPrevious) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "이전 날짜"
             )
+        }
 
-            IconButton(onClick = onNext) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "다음 날짜"
+        Text(
+            text = stats.date.format(dateFormatter),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        IconButton(onClick = onNext) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "다음 날짜"
+            )
+        }
+    }
+
+    // 요약 카드 (Grid Layout)
+    StatsCard(title = "하루 요약") {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatItem(
+                    label = "총 집중 시간",
+                    value = formatDuration(stats.totalFocusTime),
+                    modifier = Modifier.weight(1f)
+                )
+                StatItem(
+                    label = "완료된 세션",
+                    value = "${stats.completedSessions}개",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatItem(
+                    label = "평균 세션 길이",
+                    value = formatDuration(stats.averageSessionLength),
+                    modifier = Modifier.weight(1f)
+                )
+                StatItem(
+                    label = "가장 생산적인 시간",
+                    value = stats.mostProductiveHour?.let { "${it}:00" } ?: "-",
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
+    }
 
-        // 요약 카드 (Grid Layout)
-        StatsCard(title = "하루 요약") {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    StatItem(
-                        label = "총 집중 시간",
-                        value = formatDuration(stats.totalFocusTime),
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatItem(
-                        label = "완료된 세션",
-                        value = "${stats.completedSessions}개",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    StatItem(
-                        label = "평균 세션 길이",
-                        value = formatDuration(stats.averageSessionLength),
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatItem(
-                        label = "가장 생산적인 시간",
-                        value = stats.mostProductiveHour?.let { "${it}:00" } ?: "-",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // 시간대별 집중 시간 차트
+    StatsCard(title = "24시간 집중 시간") {
+        if (stats.totalFocusTime.inWholeMilliseconds == 0L) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "집중 기록이 없습니다.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // 시간대별 집중 시간 차트
-        StatsCard(title = "24시간 집중 시간") {
-            if (stats.totalFocusTime.inWholeMilliseconds == 0L) {
-                 Box(
-                     modifier = Modifier
-                         .fillMaxWidth()
-                         .height(200.dp),
-                     contentAlignment = Alignment.Center
-                 ) {
-                     Text(
-                         text = "집중 기록이 없습니다.",
-                         style = MaterialTheme.typography.bodyMedium,
-                         color = MaterialTheme.colorScheme.onSurfaceVariant
-                     )
-                 }
-            } else {
-                HourlyChart(stats = stats)
-            }
+        } else {
+            HourlyChart(stats = stats)
         }
     }
 }
@@ -196,7 +192,7 @@ private fun StatItem(
 @Composable
 private fun HourlyChart(stats: DailyStats) {
     val modelProducer = remember { CartesianChartModelProducer() }
-    
+
     // UX 개선 1: 테마 색상 적용
     val barColor = MaterialTheme.colorScheme.primary
     val markerBackgroundColor = MaterialTheme.colorScheme.surfaceContainer
@@ -236,7 +232,6 @@ private fun HourlyChart(stats: DailyStats) {
     // 하지만 일단 컴파일 에러를 피하기 위해 Marker를 잠시 주석 처리하고 기본 차트만 표시
     // 사용자의 요청 사항이므로 추후 Vico 2.1.0의 정확한 Marker API를 확인 후 적용 권장
     // 현재는 import 에러를 해결하는 것이 우선.
-    
 
     // Marker 구현 (Vico 2.1.0 API 호환성 문제로 주석 처리)
     val marker = rememberDefaultCartesianMarker(
