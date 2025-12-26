@@ -44,7 +44,10 @@ class GetDailyStatsUseCase @Inject constructor(
                 .ofInstant(session.startTime, zoneId)
                 .hour
 
-            val currentStats = hourlyStatsMap[sessionStartHour]!!
+            // null 안전 처리: 키가 없을 경우 기본값으로 초기화하여 업데이트
+            val currentStats = hourlyStatsMap[sessionStartHour]
+                ?: HourlyStats(sessionStartHour, 0.milliseconds, 0)
+
             hourlyStatsMap[sessionStartHour] = currentStats.copy(
                 focusTime = currentStats.focusTime + session.duration,
                 sessionCount = currentStats.sessionCount + 1
