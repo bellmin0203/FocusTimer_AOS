@@ -1,18 +1,15 @@
 package com.jm.focustimer.stats
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -115,7 +111,8 @@ private fun StatsScreen(
         ) {
             // 기간 선택 탭
             PrimaryTabRow(
-                selectedTabIndex = uiState.selectedPeriod.ordinal
+                selectedTabIndex = uiState.selectedPeriod.ordinal,
+                modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.DAILY,
@@ -134,50 +131,32 @@ private fun StatsScreen(
                 )
             }
 
-            // 기간 네비게이션
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onPreviousPeriod) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "이전"
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                IconButton(onClick = onNextPeriod) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "다음"
-                    )
-                }
-            }
-
             // 로딩 또는 통계 내용
             if (uiState.isLoading) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("통계를 불러오는 중...")
+                    Text(
+                        text = "통계를 불러오는 중...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             } else {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 24.dp)
                 ) {
-                    // 성취 지표 섹션
+                    // 성취 지표 섹션 (항상 상단에 노출)
                     uiState.achievementMetrics?.let { metrics ->
                         AchievementMetricsContent(metrics = metrics)
                         Spacer(modifier = Modifier.height(24.dp))
@@ -186,19 +165,31 @@ private fun StatsScreen(
                     when (uiState.selectedPeriod) {
                         StatsPeriod.DAILY -> {
                             uiState.dailyStats?.let { stats ->
-                                DailyStatsContent(stats = stats)
+                                DailyStatsContent(
+                                    stats = stats,
+                                    onPrevious = onPreviousPeriod,
+                                    onNext = onNextPeriod
+                                )
                             }
                         }
 
                         StatsPeriod.WEEKLY -> {
                             uiState.weeklyStats?.let { stats ->
-                                WeeklyStatsContent(stats = stats)
+                                WeeklyStatsContent(
+                                    stats = stats,
+                                    onPrevious = onPreviousPeriod,
+                                    onNext = onNextPeriod
+                                )
                             }
                         }
 
                         StatsPeriod.MONTHLY -> {
                             uiState.monthlyStats?.let { stats ->
-                                MonthlyStatsContent(stats = stats)
+                                MonthlyStatsContent(
+                                    stats = stats,
+                                    onPrevious = onPreviousPeriod,
+                                    onNext = onNextPeriod
+                                )
                             }
                         }
                     }
@@ -236,7 +227,11 @@ fun StatsCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -244,41 +239,11 @@ fun StatsCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-            Spacer(modifier = Modifier.height(12.dp))
             content()
         }
-    }
-}
-
-/**
- * 통계 항목 행
- */
-@Composable
-fun StatsRow(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.End
-        )
     }
 }
 
