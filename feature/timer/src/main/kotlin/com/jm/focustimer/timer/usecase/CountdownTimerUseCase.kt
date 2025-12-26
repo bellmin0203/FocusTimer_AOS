@@ -1,6 +1,5 @@
 package com.jm.focustimer.timer.usecase
 
-import com.jm.focustimer.timer.TimerViewModel
 import com.jm.focustimer.timer.model.TimerEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -26,9 +25,6 @@ class CountdownTimerUseCase @Inject constructor() {
         reminderThresholds: List<Duration> = emptyList()
     ): Flow<TimerEvent> = flow {
         require(totalDuration > Duration.ZERO) { "타이머 시간은 0보다 커야 합니다. 입력된 값: $totalDuration" }
-        require(totalDuration <= TimerViewModel.MAX_TIME) {
-            "타이머 시간은 ${TimerViewModel.MAX_TIME.inWholeHours}시간을 초과할 수 없습니다. 입력된 값: $totalDuration"
-        }
         require(reminderThresholds.all { it > 0.seconds }) { "All reminder thresholds must be positive" }
 
         // 리마인더 임계값을 정렬하여 중복 제거
