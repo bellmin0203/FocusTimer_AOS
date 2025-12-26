@@ -246,11 +246,13 @@ private fun WeeklyChart(stats: MonthlyStats) {
             ),
             startAxis = VerticalAxis.rememberStart(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                guideline = null,
                 title = "분",
                 titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface)
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                guideline = null,
                 title = "주",
                 titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface),
                 valueFormatter = { _, value, _ ->

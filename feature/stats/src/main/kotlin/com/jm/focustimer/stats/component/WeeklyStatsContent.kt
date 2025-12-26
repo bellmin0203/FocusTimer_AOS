@@ -240,12 +240,12 @@ private fun DailyChart(stats: WeeklyStats) {
             ),
             startAxis = VerticalAxis.rememberStart(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                title = "분",
+                guideline = null,
                 titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface)
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                title = "요일",
+                guideline = null,
                 titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface),
                 valueFormatter = { _, value, _ ->
                     val index = value.toInt()
