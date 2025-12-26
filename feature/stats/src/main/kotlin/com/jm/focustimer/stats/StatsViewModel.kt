@@ -200,7 +200,7 @@ class StatsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(achievementMetrics = achievementMetrics)
                 }
-                LogUtil.d("Achievement metrics loaded: focusRate=${achievementMetrics.focusRatePercent} %, consecutiveDays=${achievementMetrics.consecutiveFocusDays}")
+                LogUtil.d("Achievement metrics loaded: focusRate=${achievementMetrics.focusRatePercent}%%, consecutiveDays=${achievementMetrics.consecutiveFocusDays}")
             } catch (e: Exception) {
                 LogUtil.e("Failed to load achievement metrics", e)
                 e.printStackTrace()
