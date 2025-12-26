@@ -99,7 +99,6 @@ fun MonthlyStatsContent(
     // 요약 카드
     StatsCard(title = "월간 요약") {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            // Row 1
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -110,34 +109,17 @@ fun MonthlyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "완료된 세션",
-                    value = "${stats.totalSessions}개",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            // Row 2
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatItem(
-                    label = "주평균 세션",
-                    value = String.format("%.1f개", stats.averageSessionsPerWeek),
-                    modifier = Modifier.weight(1f)
-                )
-                StatItem(
-                    label = "주평균 집중",
+                    label = "주 평균 집중 시간",
                     value = formatDuration(stats.averageWeeklyFocusTime),
                     modifier = Modifier.weight(1f)
                 )
             }
-            // Row 3
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    label = "가장 생산적인 주",
+                    label = "가장 집중한 주",
                     value = stats.mostProductiveWeek?.let { "${it}주차" } ?: "-",
                     modifier = Modifier.weight(1f)
                 )

@@ -113,29 +113,13 @@ fun WeeklyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "완료된 세션",
-                    value = "${stats.totalSessions}개",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatItem(
-                    label = "하루 평균 세션",
-                    value = String.format("%.1f개", stats.averageSessionsPerDay),
-                    modifier = Modifier.weight(1f)
-                )
-                StatItem(
-                    label = "하루 평균 집중",
+                    label = "하루 평균 집중 시간",
                     value = formatDuration(stats.averageDailyFocusTime),
                     modifier = Modifier.weight(1f)
                 )
             }
-            // 5번째 아이템은 꽉 채우거나 별도 처리 (여기서는 가장 생산적인 요일을 하단에 배치)
             StatItem(
-                label = "가장 생산적인 요일",
+                label = "가장 집중한 요일",
                 value = stats.mostProductiveDay?.let { getDayOfWeekKorean(it) } ?: "-",
                 modifier = Modifier.fillMaxWidth()
             )

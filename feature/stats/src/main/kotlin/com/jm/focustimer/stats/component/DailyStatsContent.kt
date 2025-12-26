@@ -115,22 +115,7 @@ fun DailyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "완료된 세션",
-                    value = "${stats.completedSessions}개",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatItem(
-                    label = "평균 세션 길이",
-                    value = formatDuration(stats.averageSessionLength),
-                    modifier = Modifier.weight(1f)
-                )
-                StatItem(
-                    label = "가장 생산적인 시간",
+                    label = "가장 집중한 시간",
                     value = stats.mostProductiveHour?.let { "${it}:00" } ?: "-",
                     modifier = Modifier.weight(1f)
                 )
