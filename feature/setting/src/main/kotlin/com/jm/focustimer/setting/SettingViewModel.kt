@@ -12,7 +12,6 @@ import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_SCREEN_ON
-import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_IS_TICK_SOUND
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_SESSION_DURATION
 import com.jm.focustimer.domain.repository.SettingsRepository.Companion.DEFAULT_THEME_MODE
 import com.jm.focustimer.domain.usecase.preset.GetAllPresetsUseCase
@@ -87,6 +86,8 @@ class SettingViewModel @Inject constructor(
      * 알림 설정 항목 생성
      */
     private fun createNotificationSettings(): List<SettingType> = listOf(
+        // 완료 알림 소리 - 임시적으로 주석처리
+        /*
         SettingType.Selector(
             title = "완료 알림 소리",
             description = "타이머 완료 시 재생될 알림 소리를 선택합니다.",
@@ -97,6 +98,7 @@ class SettingViewModel @Inject constructor(
             onSelect = ::updateNotificationSoundType,
             defaultValue = NotificationSoundType.DEFAULT
         ),
+        */
         SettingType.Toggle(
             title = "알림 진동",
             description = "알림 발생 시 진동을 사용할지 설정합니다.",
@@ -105,6 +107,8 @@ class SettingViewModel @Inject constructor(
             category = SettingCategory.NOTIFICATION,
             defaultValue = DEFAULT_IS_NOTIFICATION_VIBRATE
         ),
+        // 틱 사운드 - 임시적으로 주석처리
+        /*
         SettingType.Toggle(
             title = "틱 사운드",
             description = "타이머 진행 중 틱톡 사운드를 사용할지 설정합니다.",
@@ -113,6 +117,7 @@ class SettingViewModel @Inject constructor(
             category = SettingCategory.NOTIFICATION,
             defaultValue = DEFAULT_IS_TICK_SOUND
         )
+        */
     )
 
     /**

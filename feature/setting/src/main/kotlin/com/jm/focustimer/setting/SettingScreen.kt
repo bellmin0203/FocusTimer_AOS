@@ -203,6 +203,8 @@ fun PreviewSettingScreen() {
             defaultValue = "기본"
         ),
         // 알림
+        // 완료 알림 소리 - 임시적으로 주석처리
+        /*
         SettingType.Selector(
             title = "완료 알림 소리",
             description = "타이머 완료 시 재생될 알림 소리를 선택합니다.",
@@ -213,6 +215,7 @@ fun PreviewSettingScreen() {
             onSelect = {},
             defaultValue = "기본"
         ),
+        */
         SettingType.Toggle(
             title = "알림 진동",
             description = "타이머 완료 시 진동으로 알려줍니다.",
@@ -221,6 +224,8 @@ fun PreviewSettingScreen() {
             onToggle = {},
             defaultValue = true
         ),
+        // 틱 사운드 - 임시적으로 주석처리
+        /*
         SettingType.Toggle(
             title = "중간 알림",
             description = "타이머 종료 1분 전에 짧게 알려줍니다.",
@@ -229,6 +234,7 @@ fun PreviewSettingScreen() {
             onToggle = {},
             defaultValue = false
         ),
+        */
         // 타이머
         SettingType.Selector(
             title = "기본 집중 시간",
