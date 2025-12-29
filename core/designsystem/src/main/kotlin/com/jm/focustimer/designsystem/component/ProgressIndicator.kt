@@ -154,6 +154,11 @@ private fun createDragModifierIfEnabled(
                 val down = awaitFirstDown()
                 val center = Offset(size.width / 2f, size.height / 2f)
 
+                // 터치 영역이 원의 바깥이면 무시
+                val radius = size.width / 2f
+                val distance = (down.position - center).getDistance()
+                if (distance > radius) continue
+
                 // 초기 터치 위치로 progress 설정
                 onProgressChange(calculateProgressFromPosition(down.position, center))
 
