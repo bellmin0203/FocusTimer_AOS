@@ -10,16 +10,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -29,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -87,7 +92,6 @@ import com.jm.focustimer.timer.model.TimerUiState
 import com.jm.focustimer.timer.model.toUiText
 import com.jm.focustimer.timer.service.TimerService
 import com.jm.focustimer.timer.service.TimerServiceAction
-import com.jm.focustimer.ui.component.TimerTopBar
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
 import com.jm.focustimer.util.KeepScreenOnManager
@@ -242,7 +246,8 @@ private fun TimerScreen(
     var showEditPresetDialog by remember { mutableStateOf<Preset?>(null) }
     var showDeletePresetDialog by remember { mutableStateOf<Preset?>(null) }
 
-    val isLandscape = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    val isLandscape =
+        LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -259,18 +264,6 @@ private fun TimerScreen(
         }
     ) {
         Scaffold(
-            topBar = {
-                // 최소화된 컨트롤 기능이 활성화되고 타이머가 실행 중이며 UI가 숨겨진 상태면 TopBar 숨김
-                if (!uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
-                    TimerTopBar(
-                        onMenuClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }
-                    )
-                }
-            },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { padding ->
             // 전체 화면에 터치 감지를 위한 Box
@@ -294,7 +287,6 @@ private fun TimerScreen(
                         }
                     }
             ) {
-
                 if (isLandscape) {
                     Row(
                         modifier = Modifier
@@ -426,7 +418,8 @@ private fun TimerScreen(
                     ) {
 
                         // 선택된 프리셋의 색상 가져오기
-                        val selectedPreset = uiState.presets.find { it.id == uiState.selectedPresetId }
+                        val selectedPreset =
+                            uiState.presets.find { it.id == uiState.selectedPresetId }
                         val presetColors = selectedPreset?.let { preset ->
                             TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
                         } ?: TimerColorPresets.lightPresets[0]
@@ -511,6 +504,22 @@ private fun TimerScreen(
                                 isVertical = false
                             )
                         }
+                    }
+                }
+
+                if (!uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
+                    IconButton(
+                        onClick = { scope.launch { drawerState.open() } },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = 16.dp)
+                            .windowInsetsPadding(WindowInsets.statusBars)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
@@ -756,7 +765,7 @@ private fun TimerControlButtons(
     onIntent: (TimerIntent) -> Unit
 ) {
     val context = LocalContext.current
-    
+
     // 완료 상태일 때는 완료 버튼 표시
     if (uiState.isCompleted) {
         FocusIconButton(
