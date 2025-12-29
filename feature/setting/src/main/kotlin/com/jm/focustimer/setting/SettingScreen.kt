@@ -113,6 +113,7 @@ private fun SettingScreen(
                             val checked by item.stateFlow.collectAsState(initial = item.defaultValue)
                             SettingsSwitchItem(
                                 title = item.title,
+                                subtitle = item.description,
                                 checked = checked,
                                 onCheckedChange = item.onToggle
                             )

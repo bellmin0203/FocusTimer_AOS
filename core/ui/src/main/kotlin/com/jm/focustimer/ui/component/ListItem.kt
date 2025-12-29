@@ -90,14 +90,16 @@ fun SettingsItemPreview() {
  */
 @Composable
 fun SettingsSwitchItem(
+    modifier: Modifier = Modifier,
     title: String,
+    subtitle: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
     SettingsItem(
         title = title,
+        subtitle = subtitle,
         modifier = modifier,
         trailing = {
             FocusSwitch(
