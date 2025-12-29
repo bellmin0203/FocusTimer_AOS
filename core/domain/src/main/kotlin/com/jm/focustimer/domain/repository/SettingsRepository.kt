@@ -5,7 +5,6 @@ import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.common.model.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * 앱 설정 관리를 위한 Repository 인터페이스
@@ -133,16 +132,4 @@ interface SettingsRepository {
      * @param presetId 설정할 프리셋 ID (null인 경우 기본값 제거)
      */
     suspend fun updateDefaultPresetId(presetId: Int?)
-
-    companion object {
-        val DEFAULT_THEME_MODE = ThemeMode.SYSTEM
-        const val DEFAULT_IS_NOTIFICATION_VIBRATE = false
-        const val DEFAULT_IS_TICK_SOUND = false
-        val DEFAULT_SESSION_DURATION = 15.minutes
-        const val DEFAULT_IS_REMEMBER_LAST_SESSION = true
-        val DEFAULT_TIME_UNIT = TimeUnit.MINUTE
-        const val DEFAULT_IS_SCREEN_ON = false
-        const val DEFAULT_IS_HAPTIC_FEEDBACK = false
-        const val DEFAULT_IS_MINIMIZED_CONTROLS = true
-    }
 }
