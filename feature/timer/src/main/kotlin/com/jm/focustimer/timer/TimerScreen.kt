@@ -15,14 +15,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -483,33 +488,18 @@ private fun TimerScreen(
                             }
                         }
 
-                        // 프리셋 선택 AssistChip (타이머 다이얼 바로 아래)
+                        // 프리셋 선택 (타이머 다이얼 바로 아래)
                         if (uiState.isIdle && !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
-                            AssistChip(
-                                onClick = { showPresets = true },
-                                label = {
-                                    Text(
-                                        text = selectedPreset?.name
-                                            ?: stringResource(R.string.preset_section_header),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
+                            PresetListRow(
+                                presets = uiState.presets,
+                                selectedPresetId = uiState.selectedPresetId,
+                                isEnabled = uiState.isIdle,
+                                onPresetClick = { presetId ->
+                                    onIntent(TimerIntent.SelectPreset(presetId))
                                 },
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowDropDown,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                shape = RoundedCornerShape(50),
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                border = null,
-                                modifier = Modifier.padding(bottom = 16.dp)
+                                onManageClick = { showPresets = true },
                             )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
 
                         // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
@@ -523,7 +513,6 @@ private fun TimerScreen(
                         }
                     }
                 }
-
             }
 
             // PickerState 생성
@@ -862,6 +851,75 @@ private fun TimerControlButtons(
                 },
                 icon = FocusTimerIcons.RestartAlt,
                 contentDescription = "Reset"
+            )
+        }
+    }
+}
+
+@Composable
+private fun PresetListRow(
+    presets: List<Preset>,
+    selectedPresetId: Int?,
+    isEnabled: Boolean,
+    onPresetClick: (Int) -> Unit,
+    onManageClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 1. 프리셋 관리(목록/추가) 버튼을 맨 앞에 배치
+        item {
+            AssistChip(
+                onClick = onManageClick,
+                label = {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Manage Presets",
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                border = null,
+                enabled = isEnabled
+            )
+        }
+
+        // 2. 프리셋 목록 표시
+        items(items = presets, key = { it.id }) { preset ->
+            // 선택된 프리셋의 색상 테마 가져오기 (시각적 피드백)
+            val presetColor = TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
+                ?: TimerColorPresets.lightPresets[0]
+
+            val isSelected = preset.id == selectedPresetId
+
+            FilterChip(
+                selected = isSelected,
+                onClick = { onPresetClick(preset.id) },
+                label = {
+                    Text(
+                        text = preset.name,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = presetColor.progressColor.copy(alpha = 0.2f),
+                    selectedLabelColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = isEnabled,
+                    selected = isSelected,
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    selectedBorderColor = presetColor.progressColor
+                ),
+                enabled = isEnabled
             )
         }
     }
