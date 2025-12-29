@@ -155,7 +155,8 @@ private fun createDragModifierIfEnabled(
                 val center = Offset(size.width / 2f, size.height / 2f)
 
                 // 터치 영역이 원의 바깥이면 무시
-                val radius = size.width / 2f
+                val radius = if (size.height >= size.width) size.width / 2f else size.height / 2f
+
                 val distance = (down.position - center).getDistance()
                 if (distance > radius) continue
 
