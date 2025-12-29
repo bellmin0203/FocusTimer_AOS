@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.common.model.ThemeMode
-import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
@@ -175,14 +174,14 @@ class SettingViewModel @Inject constructor(
      * 상호작용 설정 항목 생성
      */
     private fun createInteractionSettings(): List<SettingType> = listOf(
-        SettingType.Toggle(
-            title = "햅틱 피드백",
-            description = "타이머 동작 시 카운트다운 중 햅틱 피드백을 제공할지 설정합니다.",
-            stateFlow = settingsRepository.isHapticFeedback,
-            onToggle = ::updateIsHapticFeedback,
-            category = SettingCategory.INTERACTION,
-            defaultValue = DEFAULT_IS_HAPTIC_FEEDBACK
-        ),
+//        SettingType.Toggle(
+//            title = "햅틱 피드백",
+//            description = "타이머 동작 시 카운트다운 중 햅틱 피드백을 제공할지 설정합니다.",
+//            stateFlow = settingsRepository.isHapticFeedback,
+//            onToggle = ::updateIsHapticFeedback,
+//            category = SettingCategory.INTERACTION,
+//            defaultValue = DEFAULT_IS_HAPTIC_FEEDBACK
+//        ),
         SettingType.Toggle(
             title = "컨트롤 최소화",
             description = "타이머 화면에서 컨트롤 버튼을 최소화하여 표시합니다.",
