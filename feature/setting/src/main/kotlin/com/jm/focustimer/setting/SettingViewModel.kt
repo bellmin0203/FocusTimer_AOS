@@ -1,4 +1,3 @@
-
 package com.jm.focustimer.setting
 
 import androidx.lifecycle.ViewModel
@@ -7,6 +6,7 @@ import com.jm.focustimer.common.model.NotificationSoundType
 import com.jm.focustimer.common.model.ThemeMode
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_PULSE_ANIMATION_ENABLED
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_SESSION_DURATION
@@ -189,6 +189,14 @@ class SettingViewModel @Inject constructor(
             onToggle = ::updateIsMinimizedControls,
             category = SettingCategory.INTERACTION,
             defaultValue = DEFAULT_IS_MINIMIZED_CONTROLS
+        ),
+        SettingType.Toggle(
+            title = "완료 시 시각 알림",
+            description = "타이머가 끝나면 원형 타이머가 부드럽게 움직이며 완료를 알려줍니다.",
+            stateFlow = settingsRepository.isPulseAnimationEnabled,
+            onToggle = ::updateIsPulseAnimationEnabled,
+            category = SettingCategory.INTERACTION,
+            defaultValue = DEFAULT_IS_PULSE_ANIMATION_ENABLED
         )
     )
 
@@ -241,5 +249,9 @@ class SettingViewModel @Inject constructor(
 
     fun updateDefaultPresetId(presetId: Int?) = updateSetting {
         settingsRepository.updateDefaultPresetId(presetId)
+    }
+
+    fun updateIsPulseAnimationEnabled(value: Boolean) = updateSetting {
+        settingsRepository.updatePulseAnimationEnabled(value)
     }
 }

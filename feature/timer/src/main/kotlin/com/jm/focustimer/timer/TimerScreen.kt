@@ -318,7 +318,8 @@ private fun TimerScreen(
                             onProgressChange = { newProgress ->
                                 onIntent(TimerIntent.DragProgress(newProgress))
                             },
-                            isCompleted = uiState.isCompleted
+                            isCompleted = uiState.isCompleted,
+                            pulseAnimationEnabled = uiState.isPulseAnimationEnabled
                         ) {
                             Column(
                                 modifier = Modifier
@@ -441,7 +442,8 @@ private fun TimerScreen(
                             onProgressChange = { newProgress ->
                                 onIntent(TimerIntent.DragProgress(newProgress))
                             },
-                            isCompleted = uiState.isCompleted
+                            isCompleted = uiState.isCompleted,
+                            pulseAnimationEnabled = uiState.isPulseAnimationEnabled
                         ) {
                             Column(
                                 modifier = Modifier

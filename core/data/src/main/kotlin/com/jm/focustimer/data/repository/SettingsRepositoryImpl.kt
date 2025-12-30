@@ -52,6 +52,9 @@ class SettingsRepositoryImpl @Inject constructor(
     override val defaultPresetId: Flow<Int?>
         get() = settingsDataSource.defaultPresetIdFlow
 
+    override val isPulseAnimationEnabled: Flow<Boolean>
+        get() = settingsDataSource.isPulseAnimationEnabledFlow
+
     override suspend fun updateThemeMode(themeMode: ThemeMode) {
         LogUtil.d("테마 설정 변경: $themeMode")
         settingsDataSource.updateThemeMode(themeMode)
@@ -106,5 +109,9 @@ class SettingsRepositoryImpl @Inject constructor(
             LogUtil.d("기본 프리셋 해제")
         }
         settingsDataSource.updateDefaultPresetId(presetId)
+    }
+
+    override suspend fun updatePulseAnimationEnabled(isEnabled: Boolean) {
+        settingsDataSource.updateIsPulseAnimationEnabled(isEnabled)
     }
 }

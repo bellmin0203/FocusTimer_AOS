@@ -39,6 +39,7 @@ data class TimerUiState(
     val isHapticFeedbackEnabled: Boolean = false, // 햅틱 피드백 활성화 여부
     val isTickSoundEnabled: Boolean = false, // 틱 소리 활성화 여부
     val isMinimizedControlsEnabled: Boolean = false, // 최소화된 컨트롤 표시 활성화 여부
+    val isPulseAnimationEnabled: Boolean = true, // 펄스 애니메이션 활성화 여부
 ) {
 
     /**

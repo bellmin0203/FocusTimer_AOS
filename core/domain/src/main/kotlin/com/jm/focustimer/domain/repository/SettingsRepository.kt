@@ -68,6 +68,11 @@ interface SettingsRepository {
     val defaultPresetId: Flow<Int?>
 
     /**
+     * 펄스 애니메이션 활성화 여부 Flow
+     */
+    val isPulseAnimationEnabled: Flow<Boolean>
+
+    /**
      * 테마 모드를 업데이트합니다.
      * @param themeMode 테마 모드
      */
@@ -132,4 +137,10 @@ interface SettingsRepository {
      * @param presetId 설정할 프리셋 ID (null인 경우 기본값 제거)
      */
     suspend fun updateDefaultPresetId(presetId: Int?)
+
+    /**
+     * 펄스 애니메이션 설정을 업데이트합니다.
+     * @param isEnabled 펄스 애니메이션 활성화 여부
+     */
+    suspend fun updatePulseAnimationEnabled(isEnabled: Boolean)
 }

@@ -71,6 +71,7 @@ fun CircularTimerProgress(
     enabled: Boolean = true,
     onProgressChange: ((Float) -> Unit)? = null,
     isCompleted: Boolean = false,
+    pulseAnimationEnabled: Boolean = true,
     content: @Composable () -> Unit = {}
 ) {
     // 무한 반복 트랜지션 (Pulse 효과)
@@ -113,7 +114,7 @@ fun CircularTimerProgress(
     )
 
     Box(
-        modifier = if (isCompleted) {
+        modifier = if (isCompleted && pulseAnimationEnabled) {
             modifier.graphicsLayer(
                 scaleX = pulseScale, scaleY = pulseScale, alpha = pulseAlpha
             )

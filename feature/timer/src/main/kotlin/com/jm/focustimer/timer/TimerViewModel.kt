@@ -99,15 +99,17 @@ class TimerViewModel @Inject constructor(
             settingsRepository.isScreenOn,
             settingsRepository.isHapticFeedback,
             settingsRepository.isTickSound,
-            settingsRepository.isMinimizedControls
-        ) { screenOn, haptic, tick, minimized ->
-            LogUtil.d("설정 업데이트: screenOn=$screenOn, haptic=$haptic, tick=$tick, minimized=$minimized")
+            settingsRepository.isMinimizedControls,
+            settingsRepository.isPulseAnimationEnabled
+        ) { screenOn, haptic, tick, minimized, pulse ->
+            LogUtil.d("설정 업데이트: screenOn=$screenOn, haptic=$haptic, tick=$tick, minimized=$minimized, pulse=$pulse")
             _uiState.update {
                 it.copy(
                     isScreenOnEnabled = screenOn,
                     isHapticFeedbackEnabled = haptic,
                     isTickSoundEnabled = tick,
-                    isMinimizedControlsEnabled = minimized
+                    isMinimizedControlsEnabled = minimized,
+                    isPulseAnimationEnabled = pulse
                 )
             }
         }.launchIn(viewModelScope)

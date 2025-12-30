@@ -34,6 +34,8 @@ interface SettingsPreferencesDataSource {
      */
     val defaultPresetIdFlow: Flow<Int?>
 
+    val isPulseAnimationEnabledFlow: Flow<Boolean>
+
     suspend fun updateThemeMode(themeMode: ThemeMode)
 
     suspend fun updateNotificationSoundType(soundType: NotificationSoundType)
@@ -60,6 +62,8 @@ interface SettingsPreferencesDataSource {
      */
     suspend fun updateDefaultPresetId(presetId: Int?)
 
+    suspend fun updateIsPulseAnimationEnabled(isEnabled: Boolean)
+
     companion object {
         val DEFAULT_THEME_MODE = ThemeMode.SYSTEM
         const val DEFAULT_IS_NOTIFICATION_VIBRATE = false
@@ -70,5 +74,6 @@ interface SettingsPreferencesDataSource {
         const val DEFAULT_IS_SCREEN_ON = true
         const val DEFAULT_IS_HAPTIC_FEEDBACK = false
         const val DEFAULT_IS_MINIMIZED_CONTROLS = true
+        const val DEFAULT_IS_PULSE_ANIMATION_ENABLED = true
     }
 }

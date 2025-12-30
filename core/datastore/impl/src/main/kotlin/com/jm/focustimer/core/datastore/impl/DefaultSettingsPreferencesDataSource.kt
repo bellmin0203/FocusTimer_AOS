@@ -15,6 +15,7 @@ import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_HAPTIC_FEEDBACK
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_NOTIFICATION_VIBRATE
+import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_PULSE_ANIMATION_ENABLED
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
 import com.jm.focustimer.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_TICK_SOUND
@@ -74,6 +75,10 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
 
     override val defaultPresetIdFlow: Flow<Int?> = dataStore.data.map { preferences ->
         preferences[KEY_DEFAULT_PRESET_ID]
+    }
+
+    override val isPulseAnimationEnabledFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_PULSE_ANIMATION_ENABLED] ?: DEFAULT_IS_PULSE_ANIMATION_ENABLED
     }
 
     override suspend fun updateThemeMode(themeMode: ThemeMode) {
@@ -146,6 +151,12 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
+    override suspend fun updateIsPulseAnimationEnabled(isEnabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_PULSE_ANIMATION_ENABLED] = isEnabled
+        }
+    }
+
     companion object {
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_NOTIFICATION_SOUND_TYPE = stringPreferencesKey("notification_sound_type")
@@ -158,6 +169,6 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         private val KEY_IS_HAPTIC_FEEDBACK = booleanPreferencesKey("is_haptic_feedback")
         private val KEY_IS_MINIMIZED_CONTROLS = booleanPreferencesKey("is_minimized_controls")
         private val KEY_DEFAULT_PRESET_ID = intPreferencesKey("default_preset_id")
-
+        private val KEY_IS_PULSE_ANIMATION_ENABLED = booleanPreferencesKey("is_pulse_animation_enabled")
     }
 }
