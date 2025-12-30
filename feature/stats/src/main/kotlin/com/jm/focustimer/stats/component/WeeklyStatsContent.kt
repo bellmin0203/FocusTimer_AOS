@@ -54,7 +54,6 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.round
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.math.abs
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -130,25 +129,11 @@ fun WeeklyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                val growthRateText = if (stats.growthRate >= 0) {
-                    "+${(stats.growthRate * 100).toInt()}%"
-                } else {
-                    "-${abs((stats.growthRate * 100).toInt())}%"
-                }
-
-                val growthRateColor = if (stats.growthRate > 0) {
-                    Color(0xFF4CAF50) // Green
-                } else if (stats.growthRate < 0) {
-                    Color(0xFFE53935) // Red
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
-
                 StatItem(
                     label = "지난주 대비",
-                    value = growthRateText,
-                    modifier = Modifier.weight(1f),
-                    valueColor = growthRateColor
+                    value = formatGrowthRate(stats.growthRate),
+                    valueColor = getGrowthRateColor(stats.growthRate),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -304,6 +289,24 @@ private fun formatDuration(duration: kotlin.time.Duration): String {
         hours > 0 -> "${hours}시간"
         minutes > 0 -> "${minutes}분"
         else -> "0분"
+    }
+}
+
+private fun formatGrowthRate(growthRate: Double): String {
+    val percentage = (growthRate * 100).toInt()
+    return when {
+        percentage > 0 -> "↗ +${percentage}%"
+        percentage < 0 -> "↘ ${percentage}%"
+        else -> "→ 0%"
+    }
+}
+
+@Composable
+private fun getGrowthRateColor(growthRate: Double): Color {
+    return when {
+        growthRate > 0 -> Color(0xFF4CAF50) // Green
+        growthRate < 0 -> MaterialTheme.colorScheme.error // Red
+        else -> MaterialTheme.colorScheme.onSurface // Default
     }
 }
 
