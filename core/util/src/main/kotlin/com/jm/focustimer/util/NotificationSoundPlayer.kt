@@ -6,10 +6,11 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import com.jm.focustimer.common.model.NotificationSoundType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * 알림 소리 및 진동을 재생하는 유틸리티 클래스
@@ -21,74 +22,35 @@ class NotificationSoundPlayer @Inject constructor(
     private var mediaPlayer: MediaPlayer? = null
 
     /**
-     * 알림 소리를 재생합니다
+     * 타이머 완료 알람을 재생합니다 (반복 재생)
      *
-     * @param soundType 재생할 소리 타입
      * @param vibrate 진동 여부
+     * @param intervalSeconds 진동 반복 간격 (초 단위)
      */
-    fun play(soundType: NotificationSoundType, vibrate: Boolean) {
-        // 진동 재생
+    fun playTimerComplete(vibrate: Boolean, intervalSeconds: Duration = 0.5.seconds) {
         if (vibrate) {
-            playVibration()
+            playRepeatingVibration(intervalSeconds)
         }
 
-        // 소리 재생
-        when (soundType) {
-            NotificationSoundType.SILENT -> {
-                // 무음 - 아무것도 재생하지 않음
-            }
-
-            NotificationSoundType.DEFAULT -> {
-                playSound("notification_default")
-            }
-
-            NotificationSoundType.BELL -> {
-                playSound("notification_bell")
-            }
-
-            NotificationSoundType.BUZZER -> {
-                playSound("notification_buzzer")
-            }
-
-            NotificationSoundType.CUSTOM -> {
-                // TODO: 커스텀 사운드 파일 경로에서 재생
-                playSound("notification_default") // 임시로 기본 소리 재생
-            }
-        }
+        playSound(isLoop = true)
     }
 
     /**
-     * 리소스 이름으로 소리를 재생합니다
      *
-     * @param resourceName raw 폴더 내 리소스 파일명 (확장자 제외)
      */
-    private fun playSound(resourceName: String) {
+    private fun playSound(isLoop: Boolean = false) {
         try {
             // 기존 MediaPlayer가 있으면 해제
             mediaPlayer?.release()
 
-            // 리소스 ID 가져오기
-            val resourceId = context.resources.getIdentifier(
-                resourceName,
-                "raw",
-                context.packageName
-            )
-
-            // 리소스가 존재하지 않으면 기본 알림 소리 사용
-            mediaPlayer = if (resourceId == 0) {
-                // 시스템 기본 알림 소리 사용
-                MediaPlayer.create(
-                    context,
-                    android.provider.Settings.System.DEFAULT_NOTIFICATION_URI
-                )
-            } else {
-                MediaPlayer.create(context, resourceId)
-            }
-
+            mediaPlayer = MediaPlayer.create(context, R.raw.notification_default)
             mediaPlayer?.apply {
+                isLooping = isLoop
                 setOnCompletionListener {
-                    it.release()
-                    mediaPlayer = null
+                    if (!isLooping) {
+                        it.release()
+                        mediaPlayer = null
+                    }
                 }
                 start()
             }
@@ -101,19 +63,9 @@ class NotificationSoundPlayer @Inject constructor(
     /**
      * 진동을 재생합니다
      */
-    private fun playVibration() {
+    private fun playOneShotVibration() {
         try {
-            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // API 31 (S) 이상: VibratorManager 사용
-                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                vibratorManager.defaultVibrator
-            } else {
-                // 구 버전: Vibrator 서비스 직접 사용
-                @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            }
-
-            vibrator.let {
+            getVibrator().let {
                 // Android 8.0(API 26) 이상에서는 VibrationEffect 사용
                 val vibrationEffect = VibrationEffect.createOneShot(
                     500, // 지속 시간 (밀리초)
@@ -124,6 +76,55 @@ class NotificationSoundPlayer @Inject constructor(
         } catch (e: Exception) {
             // 진동 실패 시 로그 출력
             e.printStackTrace()
+        }
+    }
+
+    /**
+     * 반복 진동 재생 (Waveform 사용)
+     *
+     * @param intervalDuration 반복 간격
+     */
+    private fun playRepeatingVibration(intervalDuration: Duration) {
+        try {
+            getVibrator().let { vibrator ->
+                val vibrationDuration = 500L // 0.5초 동안 진동
+                val pauseDuration = intervalDuration.inWholeMilliseconds  // 대기
+
+                // 패턴: [대기, 진동, 대기, 진동 ...] (ms 단위)
+                // 0초 대기 후 -> 0.5초 진동 -> n초 대기
+                val timings = longArrayOf(0, vibrationDuration, pauseDuration)
+
+                // amplitudes: [0(대기), 진동세기, 0(대기)]
+                // DEFAULT_AMPLITUDE는 -1이지만 waveform에서는 1~255 값을 명시하거나 0을 써야 함.
+                // 편의상 createWaveform(timings, repeatIndex) 방식을 사용합니다.
+
+                // repeatIndex: 패턴 배열에서 반복을 시작할 인덱스.
+                // 0으로 설정하면 timings[0]부터 다시 시작 (즉, 계속 반복)
+                val repeatIndex = 0
+
+                val vibrationEffect = VibrationEffect.createWaveform(
+                    timings,
+                    repeatIndex
+                )
+
+                vibrator.vibrate(vibrationEffect)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Vibrator 시스템 서비스를 가져오는 헬퍼 함수
+     */
+    private fun getVibrator(): Vibrator {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager =
+                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
     }
 
@@ -168,5 +169,11 @@ class NotificationSoundPlayer @Inject constructor(
             release()
         }
         mediaPlayer = null
+
+        try {
+            getVibrator().cancel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

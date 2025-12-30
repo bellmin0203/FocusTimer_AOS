@@ -15,7 +15,6 @@ import com.jm.focustimer.timer.model.TimerIntent
 import com.jm.focustimer.timer.model.TimerSideEffect
 import com.jm.focustimer.timer.model.TimerSideEffect.HapticFeedback
 import com.jm.focustimer.timer.model.TimerSideEffect.ShowError
-import com.jm.focustimer.timer.model.TimerSideEffect.ShowReminder
 import com.jm.focustimer.timer.model.TimerUiState
 import com.jm.focustimer.timer.usecase.TimerStatus
 import com.jm.focustimer.util.NotificationSoundPlayer
@@ -152,6 +151,8 @@ class TimerViewModel @Inject constructor(
 
                 when (timerState.status) {
                     is TimerStatus.Idle -> {
+                        notificationSoundPlayer.stop() // 알림 소리 정지
+
                         val progress = calculateProgress(remainingTime = initialTime)
                         _uiState.update {
                             it.copy(
@@ -191,23 +192,24 @@ class TimerViewModel @Inject constructor(
                         val currentState = _uiState.value
 
                         // 틱 소리 재생 (매 초마다, 설정이 활성화된 경우)
-                        if (currentState.isTickSoundEnabled) {
-                            notificationSoundPlayer.playTick()
-                        }
+//                        if (currentState.isTickSoundEnabled) {
+//                            notificationSoundPlayer.playTick()
+//                        }
 
                         // 마지막 5초는 햅틱 피드백 (설정이 활성화된 경우)
-                        if (remainingTime in HAPTIC_FEEDBACK_RANGE && currentState.isHapticFeedbackEnabled) {
-                            LogUtil.d("startTimer: 마지막 ${HAPTIC_FEEDBACK_START_TIME.inWholeSeconds}초, 햅틱 피드백 전송")
-                            emitSideEffect(HapticFeedback(HapticPattern.TICK))
-                        }
-
-                        if (timerState.isShowReminder) {
-                            emitSideEffect(ShowReminder(remainingTime))
-                            // 리마인더 햅틱 피드백 (설정이 활성화된 경우)
-                            if (currentState.isHapticFeedbackEnabled) {
-                                emitSideEffect(HapticFeedback(HapticPattern.REMINDER))
-                            }
-                        }
+//                        if (remainingTime in HAPTIC_FEEDBACK_RANGE && currentState.isHapticFeedbackEnabled) {
+//                            LogUtil.d("startTimer: 마지막 ${HAPTIC_FEEDBACK_START_TIME.inWholeSeconds}초, 햅틱 피드백 전송")
+//                            emitSideEffect(HapticFeedback(HapticPattern.TICK))
+//                        }
+//
+//                        // TODO: jongmin, 리마인더에 대한 설정 메뉴 구현 (몇 초 남았을 때 리마인더할 지)
+//                        if (timerState.isShowReminder) {
+//                            emitSideEffect(ShowReminder(remainingTime))
+//                            // 리마인더 햅틱 피드백 (설정이 활성화된 경우)
+//                            if (currentState.isHapticFeedbackEnabled) {
+//                                emitSideEffect(HapticFeedback(HapticPattern.REMINDER))
+//                            }
+//                        }
                     }
 
                     is TimerStatus.Paused -> {
@@ -306,7 +308,12 @@ class TimerViewModel @Inject constructor(
             is TimerIntent.Complete -> handleComplete()
             is TimerIntent.DragProgress -> handleDragProgress(intent.progress)
             is TimerIntent.SelectPreset -> handleSelectPreset(intent.presetId)
-            is TimerIntent.SaveAsPreset -> handleSaveAsPreset(intent.name, intent.duration, intent.colorIndex)
+            is TimerIntent.SaveAsPreset -> handleSaveAsPreset(
+                intent.name,
+                intent.duration,
+                intent.colorIndex
+            )
+
             is TimerIntent.DeletePreset -> handleDeletePreset(intent.presetId)
             is TimerIntent.UpdatePreset -> handleUpdatePreset(intent.preset)
         }
@@ -514,7 +521,7 @@ class TimerViewModel @Inject constructor(
                 sessionStartTime = null
             )
         }
-        
+
         emitSideEffect(
             TimerSideEffect.ShowSnackbar(
                 R.string.snackbar_timer_completed
@@ -590,6 +597,7 @@ class TimerViewModel @Inject constructor(
                     val timerError = when (error) {
                         is PresetException.TimerRunning ->
                             TimerError.Preset(PresetError.TimerRunning)
+
                         else ->
                             TimerError.Preset(PresetError.NotFound)
                     }
@@ -743,7 +751,7 @@ class TimerViewModel @Inject constructor(
                 LogUtil.d("알림 재생: soundType=$soundType, isVibrate=$isVibrate")
 
                 // 알림 소리 및 진동 재생
-                notificationSoundPlayer.play(soundType, isVibrate)
+                notificationSoundPlayer.playTimerComplete(vibrate = isVibrate)
             } catch (e: Exception) {
                 LogUtil.e("알림 재생 실패", e)
             }
