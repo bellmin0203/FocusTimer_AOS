@@ -124,9 +124,9 @@ fun MonthlyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "생산성 트렌드",
-                    value = formatTrend(stats.trend),
-                    valueColor = getTrendColor(stats.trend),
+                    label = "지난달 대비",
+                    value = formatGrowthRate(stats.growthRate),
+                    valueColor = getGrowthRateColor(stats.growthRate),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -282,10 +282,10 @@ private fun formatDuration(duration: kotlin.time.Duration): String {
 }
 
 /**
- * 트렌드를 퍼센트 형식으로 변환
+ * 월 집중 시간 증감률을 퍼센트 형식으로 변환
  */
-private fun formatTrend(trend: Double): String {
-    val percentage = (trend * 100).toInt()
+private fun formatGrowthRate(growthRate: Double): String {
+    val percentage = (growthRate * 100).toInt()
     return when {
         percentage > 0 -> "↗ +${percentage}%"
         percentage < 0 -> "↘ ${percentage}%"
@@ -294,10 +294,10 @@ private fun formatTrend(trend: Double): String {
 }
 
 @Composable
-private fun getTrendColor(trend: Double): Color {
+private fun getGrowthRateColor(growthRate: Double): Color {
     return when {
-        trend > 0 -> Color(0xFF4CAF50) // Green
-        trend < 0 -> MaterialTheme.colorScheme.error // Red
+        growthRate > 0 -> Color(0xFF4CAF50) // Green
+        growthRate < 0 -> MaterialTheme.colorScheme.error // Red
         else -> MaterialTheme.colorScheme.onSurface // Default
     }
 }
@@ -309,7 +309,7 @@ class MonthlyStatsProvider : PreviewParameterProvider<MonthlyStats> {
             totalFocusTime = 2800.minutes,
             averageSessionsPerWeek = 28.0,
             mostProductiveWeek = 3,
-            trend = 0.15,
+            growthRate = 0.15,
             weeklyBreakdown = listOf(
                 WeeklyFocusTime(
                     weekOfMonth = 1,

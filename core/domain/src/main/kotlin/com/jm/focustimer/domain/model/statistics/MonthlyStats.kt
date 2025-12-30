@@ -29,7 +29,7 @@ data class WeeklyFocusTime(
  * @param weeklyBreakdown 주별 분석
  * @param averageSessionsPerWeek 주평균 세션 수
  * @param mostProductiveWeek 가장 생산적인 주
- * @param trend 생산성 트렌드 (이전 월 대비 증감률, -1.0 ~ 1.0)
+ * @param growthRate 이전 월 대비 증감률 (-1.0 ~ 1.0)
  */
 data class MonthlyStats(
     val yearMonth: YearMonth,
@@ -37,7 +37,7 @@ data class MonthlyStats(
     val weeklyBreakdown: List<WeeklyFocusTime>,
     val averageSessionsPerWeek: Double,
     val mostProductiveWeek: Int?,
-    val trend: Double
+    val growthRate: Double
 ) {
     /**
      * 총 완료 세션 수를 계산합니다

@@ -48,7 +48,7 @@ class GetMonthlyStatsUseCase @Inject constructor(
         val previousMonthData = getMonthData(yearMonth.minusMonths(1), zoneId)
 
         // 트렌드 계산
-        val monthOverMonthTrend = calculateMonthOverMonthTrend(
+        val monthOverMonthGrowthRate = calculateMonthOverMonthGrowthRate(
             currentMonthFocusTime = currentMonthData.totalFocusTime,
             previousMonthFocusTime = previousMonthData.totalFocusTime
         )
@@ -56,7 +56,7 @@ class GetMonthlyStatsUseCase @Inject constructor(
         return buildMonthlyStats(
             yearMonth = yearMonth,
             monthData = currentMonthData,
-            trend = monthOverMonthTrend
+            growthRate = monthOverMonthGrowthRate
         )
     }
 
@@ -157,11 +157,11 @@ class GetMonthlyStatsUseCase @Inject constructor(
     }
 
     /**
-     * 이전 달 대비 트렌드를 계산합니다
+     * 이전 달 대비 증감율를 계산합니다
      *
      * @return -1.0(100% 감소) ~ 1.0(100% 증가) 범위의 값
      */
-    private fun calculateMonthOverMonthTrend(
+    private fun calculateMonthOverMonthGrowthRate(
         currentMonthFocusTime: Duration,
         previousMonthFocusTime: Duration
     ): Double {
@@ -176,10 +176,10 @@ class GetMonthlyStatsUseCase @Inject constructor(
 
         // 이전 달 대비 변화율 계산
         val changeMillis = currentMonthFocusTime.inWholeMilliseconds - previousMonthFocusTime.inWholeMilliseconds
-        val trendRatio = changeMillis.toDouble() / previousMonthFocusTime.inWholeMilliseconds
+        val growthRate = changeMillis.toDouble() / previousMonthFocusTime.inWholeMilliseconds
 
         // -1.0 ~ 1.0 범위로 제한 (100% 감소 ~ 100% 증가)
-        return trendRatio.coerceIn(TREND_MIN_VALUE, TREND_MAX_VALUE)
+        return growthRate
     }
 
     /**
@@ -188,7 +188,7 @@ class GetMonthlyStatsUseCase @Inject constructor(
     private fun buildMonthlyStats(
         yearMonth: YearMonth,
         monthData: MonthData,
-        trend: Double
+        growthRate: Double
     ): MonthlyStats {
         val weeklyBreakdown = monthData.weeklyBreakdown
 
@@ -211,7 +211,7 @@ class GetMonthlyStatsUseCase @Inject constructor(
             weeklyBreakdown = weeklyBreakdown,
             averageSessionsPerWeek = averageSessionsPerWeek,
             mostProductiveWeek = mostProductiveWeek,
-            trend = trend
+            growthRate = growthRate
         )
     }
 

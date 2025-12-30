@@ -425,6 +425,6 @@ private object StatsPreviewData {
         },
         averageSessionsPerWeek = 25.0,
         mostProductiveWeek = 2,
-        trend = 0.15
+        growthRate = 0.15
     )
 }
