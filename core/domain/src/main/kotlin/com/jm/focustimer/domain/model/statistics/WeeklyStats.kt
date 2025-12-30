@@ -28,6 +28,7 @@ data class DailyFocusTime(
  * @param dailyBreakdown 일별 분석 (월~일)
  * @param averageSessionsPerDay 하루 평균 세션 수
  * @param mostProductiveDay 가장 생산적인 요일
+ * @param growthRate 이전 주 대비 증감률 (-1.0 ~ 1.0, 없으면 0.0)
  */
 data class WeeklyStats(
     val weekStartDate: LocalDate,
@@ -35,7 +36,8 @@ data class WeeklyStats(
     val totalFocusTime: Duration,
     val dailyBreakdown: List<DailyFocusTime>,
     val averageSessionsPerDay: Double,
-    val mostProductiveDay: DayOfWeek?
+    val mostProductiveDay: DayOfWeek?,
+    val growthRate: Double
 ) {
     /**
      * 총 완료 세션 수를 계산합니다

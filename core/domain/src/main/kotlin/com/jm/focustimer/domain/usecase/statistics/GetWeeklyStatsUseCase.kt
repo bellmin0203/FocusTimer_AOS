@@ -82,13 +82,31 @@ class GetWeeklyStatsUseCase @Inject constructor(
             0.0
         }
 
+        // 지난주 데이터 조회 및 증감률 계산
+        val prevWeekStartDate = weekStartDate.minusWeeks(1)
+        val prevWeekEndDate = weekEndDate.minusWeeks(1)
+        val startOfPrevWeek = prevWeekStartDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val endOfPrevWeek = prevWeekEndDate.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        
+        val prevSessions = timerSessionRepository.getCompletedSessionsBetween(startOfPrevWeek, endOfPrevWeek).first()
+        val prevTotalFocusTime = prevSessions.sumOf { it.duration.inWholeMilliseconds }.milliseconds
+
+        val growthRate = if (prevTotalFocusTime.inWholeMinutes > 0) {
+            (totalFocusTime.inWholeMinutes - prevTotalFocusTime.inWholeMinutes).toDouble() / prevTotalFocusTime.inWholeMinutes.toDouble()
+        } else if (totalFocusTime.inWholeMinutes > 0) {
+            1.0 // 지난주는 0인데 이번주는 있음 -> 100% 증가로 취급 (혹은 무한대?) 일반적으로 1.0 (100%) 표시
+        } else {
+            0.0 // 둘 다 0
+        }
+
         return WeeklyStats(
             weekStartDate = weekStartDate,
             weekEndDate = weekEndDate,
             totalFocusTime = totalFocusTime,
             dailyBreakdown = dailyBreakdown,
             averageSessionsPerDay = averageSessionsPerDay,
-            mostProductiveDay = mostProductiveDay
+            mostProductiveDay = mostProductiveDay,
+            growthRate = growthRate
         )
     }
 }

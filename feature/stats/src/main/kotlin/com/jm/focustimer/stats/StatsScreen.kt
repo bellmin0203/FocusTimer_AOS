@@ -408,7 +408,8 @@ private object StatsPreviewData {
             )
         },
         averageSessionsPerDay = 4.5,
-        mostProductiveDay = DayOfWeek.MONDAY
+        mostProductiveDay = DayOfWeek.MONDAY,
+        growthRate = 0.5
     )
 
     val monthlyStats = MonthlyStats(

@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -53,6 +54,7 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.round
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -118,11 +120,37 @@ fun WeeklyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
             }
-            StatItem(
-                label = "가장 집중한 요일",
-                value = stats.mostProductiveDay?.let { getDayOfWeekKorean(it) } ?: "-",
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatItem(
+                    label = "가장 집중한 요일",
+                    value = stats.mostProductiveDay?.let { getDayOfWeekKorean(it) } ?: "-",
+                    modifier = Modifier.weight(1f)
+                )
+
+                val growthRateText = if (stats.growthRate >= 0) {
+                    "+${(stats.growthRate * 100).toInt()}%"
+                } else {
+                    "-${abs((stats.growthRate * 100).toInt())}%"
+                }
+
+                val growthRateColor = if (stats.growthRate > 0) {
+                    Color(0xFF4CAF50) // Green
+                } else if (stats.growthRate < 0) {
+                    Color(0xFFE53935) // Red
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+
+                StatItem(
+                    label = "지난주 대비",
+                    value = growthRateText,
+                    modifier = Modifier.weight(1f),
+                    valueColor = growthRateColor
+                )
+            }
         }
     }
 
@@ -153,7 +181,8 @@ fun WeeklyStatsContent(
 private fun StatItem(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    valueColor: Color = MaterialTheme.colorScheme.primary
 ) {
     Column(
         modifier = modifier
@@ -172,7 +201,7 @@ private fun StatItem(
             text = value,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = valueColor
         )
     }
 }
@@ -335,7 +364,8 @@ class WeeklyStatsProvider : PreviewParameterProvider<WeeklyStats> {
                     focusTime = 200.minutes,
                     sessionCount = 12
                 ),
-            )
+            ),
+            growthRate = 0.15
         )
     )
 }
