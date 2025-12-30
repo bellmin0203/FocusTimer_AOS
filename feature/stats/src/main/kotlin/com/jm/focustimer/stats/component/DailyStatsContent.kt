@@ -342,7 +342,7 @@ private fun DailyStatsContentPreview(
     @PreviewParameter(DailyStatsProvider::class) stats: DailyStats
 ) {
     FocusTimerTheme {
-        Box(
+        Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
         ) {

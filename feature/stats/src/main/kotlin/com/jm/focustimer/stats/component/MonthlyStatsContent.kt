@@ -350,10 +350,12 @@ private fun MonthlyStatsContentPreview(
     @PreviewParameter(MonthlyStatsProvider::class) stats: MonthlyStats
 ) {
     FocusTimerTheme {
-        MonthlyStatsContent(
-            stats = stats,
-            onPrevious = {},
-            onNext = {}
-        )
+        Column {
+            MonthlyStatsContent(
+                stats = stats,
+                onPrevious = {},
+                onNext = {}
+            )
+        }
     }
 }

@@ -376,10 +376,12 @@ private fun WeeklyStatsContentPreview(
     @PreviewParameter(WeeklyStatsProvider::class) stats: WeeklyStats
 ) {
     FocusTimerTheme {
-        WeeklyStatsContent(
-            stats = stats,
-            onPrevious = {},
-            onNext = {}
-        )
+        Column {
+            WeeklyStatsContent(
+                stats = stats,
+                onPrevious = {},
+                onNext = {}
+            )
+        }
     }
 }
