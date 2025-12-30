@@ -93,7 +93,7 @@ fun CircularTimerProgress(
 
     // 알파 값 애니메이션 (0.8 ~ 1.0)
     val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
+        initialValue = 0.5f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(
