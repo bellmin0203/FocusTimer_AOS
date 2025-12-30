@@ -1,6 +1,12 @@
 package com.jm.focustimer.designsystem.component
 
 import android.graphics.Paint
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -17,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
@@ -62,8 +70,39 @@ fun CircularTimerProgress(
     knobColor: Color? = null,
     enabled: Boolean = true,
     onProgressChange: ((Float) -> Unit)? = null,
+    isCompleted: Boolean = false,
     content: @Composable () -> Unit = {}
 ) {
+    // 무한 반복 트랜지션 (Pulse 효과)
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+
+    // 스케일 애니메이션
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+
+    // 알파 값 애니메이션 (0.8 ~ 1.0)
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseAlpha"
+    )
     // 최종 색상 결정
     val colors = resolveTimerColors(
         colorScheme = colorScheme,
@@ -74,10 +113,15 @@ fun CircularTimerProgress(
     )
 
     Box(
-        modifier = modifier.then(
+        modifier = if (isCompleted) {
+            modifier.graphicsLayer(
+                scaleX = pulseScale, scaleY = pulseScale, alpha = pulseAlpha
+            )
+        } else {
+            modifier
+        }.then(
             createDragModifierIfEnabled(enabled, onProgressChange)
-        ),
-        contentAlignment = Alignment.Center
+        ), contentAlignment = Alignment.Center
     ) {
         // 타이머 원형 표시
         TimerCircleLayer(

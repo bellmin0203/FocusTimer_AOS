@@ -317,7 +317,8 @@ private fun TimerScreen(
                             labelColor = presetColors.labelColor,
                             onProgressChange = { newProgress ->
                                 onIntent(TimerIntent.DragProgress(newProgress))
-                            }
+                            },
+                            isCompleted = uiState.isCompleted
                         ) {
                             Column(
                                 modifier = Modifier
@@ -439,7 +440,8 @@ private fun TimerScreen(
                             labelColor = presetColors.labelColor,
                             onProgressChange = { newProgress ->
                                 onIntent(TimerIntent.DragProgress(newProgress))
-                            }
+                            },
+                            isCompleted = uiState.isCompleted
                         ) {
                             Column(
                                 modifier = Modifier
