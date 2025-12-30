@@ -64,7 +64,7 @@ fun WeeklyStatsContent(
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("M.d")
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
 
     // 날짜 네비게이션 헤더
     Row(
