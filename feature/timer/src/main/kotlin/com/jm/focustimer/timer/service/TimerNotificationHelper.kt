@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.jm.focustimer.timer.R
 import kotlin.time.Duration
@@ -21,8 +20,9 @@ class TimerNotificationHelper(private val context: Context) {
 
     companion object {
         const val NOTIFICATION_ID = 1001
-        private const val CHANNEL_ID = "timer_service_channel"
-        
+        private const val CHANNEL_ID_RUNNING = "timer_service_channel"
+        private const val CHANNEL_ID_COMPLETED = "timer_completed_channel"
+
         private const val REQUEST_CODE_PAUSE = 100
         private const val REQUEST_CODE_RESUME = 101
         private const val REQUEST_CODE_STOP = 102
@@ -33,24 +33,45 @@ class TimerNotificationHelper(private val context: Context) {
      * 알림 채널 생성 (Android 8.0 이상)
      */
     fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.notification_channel_name),
-                NotificationManager.IMPORTANCE_LOW // LOW로 설정하여 소리 없이 표시
-            ).apply {
-                description = context.getString(R.string.notification_channel_description)
-                setShowBadge(false) // 배지 표시 안 함
-            }
-            notificationManager.createNotificationChannel(channel)
+        val runningChannel = NotificationChannel(
+            CHANNEL_ID_RUNNING,
+            context.getString(R.string.notification_channel_running),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = context.getString(R.string.notification_channel_running_description)
+            setShowBadge(false) // 배지 표시 안 함
         }
+
+        val completedChannel = NotificationChannel(
+            CHANNEL_ID_COMPLETED,
+            context.getString(R.string.notification_channel_completed),
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = context.getString(R.string.notification_channel_completed_description)
+            setShowBadge(false)
+            enableVibration(true)
+            enableLights(true)
+        }
+
+        notificationManager.createNotificationChannels(listOf(runningChannel, completedChannel))
     }
 
     /**
      * 타이머 실행 중 알림 생성
      */
-    fun createRunningNotification(remainingTime: Duration, isRunning: Boolean): Notification {
-        val contentText = if (isRunning) {
+    fun createRunningNotification(
+        remainingTime: Duration,
+        isRunning: Boolean,
+        overtime: Duration = Duration.ZERO
+    ): Notification {
+        val isOverTime = overtime > Duration.ZERO
+
+        val contentText = if (isOverTime) {
+            context.getString(
+                R.string.notification_content_completed,
+                overtime.toFormattedString()
+            )
+        } else if (isRunning) {
             context.getString(
                 R.string.notification_content_running,
                 remainingTime.toFormattedString()
@@ -71,7 +92,7 @@ class TimerNotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_RUNNING)
             .setContentTitle(context.getString(R.string.notification_title))
             .setContentText(contentText)
             .setSmallIcon(R.drawable.ic_timer_notification) // 알림 아이콘 (생성 필요)
@@ -82,13 +103,13 @@ class TimerNotificationHelper(private val context: Context) {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         // 타이머가 실행 중이면 일시정지 버튼, 일시정지 상태면 재개 버튼
-        if (isRunning) {
+        if (isRunning && isOverTime.not()) {
             builder.addAction(
                 R.drawable.ic_pause,
                 context.getString(R.string.notification_action_pause),
                 createActionPendingIntent(TimerServiceAction.ACTION_PAUSE, REQUEST_CODE_PAUSE)
             )
-        } else {
+        } else if (isOverTime.not()) {
             builder.addAction(
                 R.drawable.ic_play,
                 context.getString(R.string.notification_action_resume),
@@ -99,7 +120,8 @@ class TimerNotificationHelper(private val context: Context) {
         // 정지 버튼은 항상 표시
         builder.addAction(
             R.drawable.ic_stop,
-            context.getString(R.string.notification_action_stop),
+            if (isOverTime) context.getString(R.string.notification_action_complete)
+            else context.getString(R.string.notification_action_stop),
             createActionPendingIntent(TimerServiceAction.ACTION_STOP, REQUEST_CODE_STOP)
         )
 
@@ -124,7 +146,7 @@ class TimerNotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, CHANNEL_ID_COMPLETED)
             .setContentTitle(context.getString(R.string.timer_completed_label))
             .setContentText(contentText)
             .setSmallIcon(R.drawable.ic_timer_notification)
@@ -136,7 +158,7 @@ class TimerNotificationHelper(private val context: Context) {
             .setAutoCancel(true) // 클릭 시 자동 삭제
             .addAction(
                 R.drawable.ic_stop,
-                context.getString(R.string.notification_action_stop),
+                context.getString(R.string.notification_action_complete),
                 createActionPendingIntent(TimerServiceAction.ACTION_STOP, REQUEST_CODE_STOP)
             )
             .build()

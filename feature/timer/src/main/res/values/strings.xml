@@ -53,8 +53,10 @@
     
     <!-- 알림(Notification) 관련 리소스 -->
     <string name="notification_channel_id">timer_service_channel</string>
-    <string name="notification_channel_name">타이머 알림</string>
-    <string name="notification_channel_description">타이머가 실행 중일 때 표시되는 알림입니다</string>
+    <string name="notification_channel_running">타이머 실행 중</string>
+    <string name="notification_channel_completed">타이머 완료</string>
+    <string name="notification_channel_running_description">타이머가 실행 중일 때 표시되는 알림입니다</string>
+    <string name="notification_channel_completed_description">타이머가 완료되었을 때 알림을 보냅니다.</string>
     <string name="notification_title">타이머 실행 중</string>
     <string name="notification_content_running">남은 시간: %1$s</string>
     <string name="notification_content_paused">일시정지: %1$s</string>
@@ -62,4 +64,5 @@
     <string name="notification_action_pause">일시정지</string>
     <string name="notification_action_resume">재시작</string>
     <string name="notification_action_stop">정지</string>
+    <string name="notification_action_complete">완료</string>
 </resources>

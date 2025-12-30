@@ -101,7 +101,8 @@ class TimerService : Service() {
      */
     private fun handleStop() {
         LogUtil.d("TimerService handleStop")
-        
+        timerManager.stop(timerManager.timerState.value.initialDuration)
+
         // Foreground 상태 해제 및 서비스 종료
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -122,7 +123,8 @@ class TimerService : Service() {
                         // 타이머가 실행 중일 때 알림 업데이트
                         val notification = notificationHelper.createRunningNotification(
                             remainingTime = state.remainingTime,
-                            isRunning = true
+                            isRunning = true,
+                            overtime = state.overtime
                         )
                         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
                         notificationManager.notify(
@@ -135,7 +137,8 @@ class TimerService : Service() {
                         // 타이머가 일시정지 상태일 때 알림 업데이트
                         val notification = notificationHelper.createRunningNotification(
                             remainingTime = state.remainingTime,
-                            isRunning = false
+                            isRunning = false,
+                            overtime = state.overtime
                         )
                         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
                         notificationManager.notify(
