@@ -100,7 +100,7 @@ class SettingViewModel @Inject constructor(
         */
         SettingType.Toggle(
             title = "알림 진동",
-            description = "알림 발생 시 진동을 사용할지 설정합니다.",
+            description = "타이머 완료 알림 발생 시 진동을 사용할지 설정합니다.",
             stateFlow = settingsRepository.isNotificationVibrate,
             onToggle = ::updateIsNotificationVibrate,
             category = SettingCategory.NOTIFICATION,
