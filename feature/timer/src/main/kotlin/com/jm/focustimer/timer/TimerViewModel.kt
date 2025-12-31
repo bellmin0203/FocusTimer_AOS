@@ -190,28 +190,6 @@ class TimerViewModel @Inject constructor(
                                 progress = progress
                             )
                         }
-
-                        val currentState = _uiState.value
-
-                        // 틱 소리 재생 (매 초마다, 설정이 활성화된 경우)
-//                        if (currentState.isTickSoundEnabled) {
-//                            notificationSoundPlayer.playTick()
-//                        }
-
-                        // 마지막 5초는 햅틱 피드백 (설정이 활성화된 경우)
-//                        if (remainingTime in HAPTIC_FEEDBACK_RANGE && currentState.isHapticFeedbackEnabled) {
-//                            LogUtil.d("startTimer: 마지막 ${HAPTIC_FEEDBACK_START_TIME.inWholeSeconds}초, 햅틱 피드백 전송")
-//                            emitSideEffect(HapticFeedback(HapticPattern.TICK))
-//                        }
-//
-//                        // TODO: jongmin, 리마인더에 대한 설정 메뉴 구현 (몇 초 남았을 때 리마인더할 지)
-//                        if (timerState.isShowReminder) {
-//                            emitSideEffect(ShowReminder(remainingTime))
-//                            // 리마인더 햅틱 피드백 (설정이 활성화된 경우)
-//                            if (currentState.isHapticFeedbackEnabled) {
-//                                emitSideEffect(HapticFeedback(HapticPattern.REMINDER))
-//                            }
-//                        }
                     }
 
                     is TimerStatus.Paused -> {
@@ -619,8 +597,7 @@ class TimerViewModel @Inject constructor(
             val result = managePresetUseCase.addPreset(
                 name = name,
                 duration = duration,
-                colorIndex = colorIndex,
-                currentPresetCount = _uiState.value.presets.size
+                colorIndex = colorIndex
             )
 
             result.fold(
@@ -635,12 +612,20 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("프리셋 저장 실패", error)
-                    val presetError = when (error) {
-                        is PresetException.InvalidDuration -> PresetError.NoTime
-                        is PresetException.MaxCountExceeded -> PresetError.MaxCount
-                        else -> PresetError.FailSave
+                    val timerError = when (error) {
+                        is PresetException.InvalidDuration -> TimerError.Preset(PresetError.NoTime)
+                        is PresetException.MaxCountExceeded -> TimerError.Preset(
+                            PresetError.MaxCount,
+                            listOf(error.maxCount.toString())
+                        )
+                        is PresetException.InvalidName -> TimerError.Preset(PresetError.InvalidName)
+                        is PresetException.NameTooLong -> TimerError.Preset(
+                            PresetError.NameTooLong,
+                            listOf(error.maxLength.toString())
+                        )
+                        else -> TimerError.Preset(PresetError.FailSave)
                     }
-                    emitSideEffect(ShowError(TimerError.Preset(presetError)))
+                    emitSideEffect(ShowError(timerError))
                 }
             )
         }

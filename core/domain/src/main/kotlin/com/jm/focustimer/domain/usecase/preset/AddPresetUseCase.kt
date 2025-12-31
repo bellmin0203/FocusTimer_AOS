@@ -33,29 +33,29 @@ class AddPresetUseCase @Inject constructor(
         val currentCount = presetRepository.getTotalPresetCount()
         if (currentCount >= MAX_PRESET_COUNT) {
             return Result.failure(
-                IllegalStateException("프리셋은 최대 ${MAX_PRESET_COUNT}개까지 저장할 수 있습니다.")
+                PresetException.MaxCountExceeded(MAX_PRESET_COUNT)
             )
         }
 
         // 이름 유효성 검사
         if (name.isBlank()) {
-            return Result.failure(IllegalArgumentException("프리셋 이름을 입력해주세요."))
+            return Result.failure(PresetException.InvalidName())
         }
 
         if (name.length > MAX_NAME_LENGTH) {
             return Result.failure(
-                IllegalArgumentException("프리셋 이름은 ${MAX_NAME_LENGTH}자 이하로 입력해주세요.")
+                PresetException.NameTooLong(MAX_NAME_LENGTH)
             )
         }
 
         // 시간 유효성 검사
         if (duration.inWholeSeconds <= 0) {
-            return Result.failure(IllegalArgumentException("타이머 시간은 0보다 커야 합니다."))
+            return Result.failure(PresetException.InvalidDuration())
         }
 
         // 컬러 인덱스 유효성 검사
         if (colorIndex !in 0..5) {
-            return Result.failure(IllegalArgumentException("컬러 인덱스는 0에서 5 사이여야 합니다."))
+            return Result.failure(PresetException.InvalidColor())
         }
 
         val preset = Preset(
@@ -78,4 +78,20 @@ class AddPresetUseCase @Inject constructor(
         const val MAX_PRESET_COUNT = 5
         const val MAX_NAME_LENGTH = 20
     }
+}
+
+/**
+ * 프리셋 도메인 관련 예외
+ */
+sealed class PresetException(message: String? = null) : Exception(message) {
+    class TimerRunning : PresetException()
+    class NotFound : PresetException()
+    class InvalidDuration : PresetException()
+    class InvalidName : PresetException()
+    class InvalidColor : PresetException()
+    data class MaxCountExceeded(val maxCount: Int) : PresetException()
+    data class NameTooLong(val maxLength: Int) : PresetException()
+    class FailSave : PresetException()
+    class FailDelete : PresetException()
+    class FailUpdate : PresetException()
 }

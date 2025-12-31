@@ -1,13 +1,12 @@
 package com.jm.focustimer.timer.model
 
-import com.jm.focustimer.domain.usecase.preset.AddPresetUseCase
 import com.jm.focustimer.timer.R
 import com.jm.focustimer.ui.util.UiText
 
 
 sealed class TimerError {
     data class SetTime(val code: SetTimeError) : TimerError()
-    data class Preset(val code: PresetError) : TimerError()
+    data class Preset(val code: PresetError, val args: List<String> = emptyList()) : TimerError()
     data class Run(val message: String? = null) : TimerError() // 타이머 실행 관련 에러
     data class Overtime(val message: String? = null) :
         TimerError() // 초과 시간 추적 관련 에러
@@ -23,7 +22,7 @@ enum class SetTimeError(val messageResId: Int) {
 }
 
 // PresetError - 프리셋 관련 에러, 각 에러에 메시지 리소스 ID 부여
-enum class PresetError(val messageResId: Int, val msgArgs: List<String> = emptyList()) {
+enum class PresetError(val messageResId: Int) {
     /** 타이머 실행 중에는 프리셋 변경 불가 */
     TimerRunning(R.string.timer_error_preset_running),
 
@@ -33,8 +32,14 @@ enum class PresetError(val messageResId: Int, val msgArgs: List<String> = emptyL
     /** 시간이 없는 상태에서 프리셋 저장 시도 */
     NoTime(R.string.timer_error_preset_no_time),
 
-    /** 최대 프리셋 개수 초과 */
-    MaxCount(R.string.timer_error_preset_max_count, listOf("${AddPresetUseCase.MAX_PRESET_COUNT}")),
+    /** 최대 프리셋 개수 초과 (args[0] = maxCount) */
+    MaxCount(R.string.timer_error_preset_max_count),
+
+    /** 이름이 비어있음 */
+    InvalidName(R.string.preset_dialog_preset_name_blank_error),
+
+    /** 이름 길이 초과 (args[0] = maxLength) */
+    NameTooLong(R.string.preset_dialog_preset_name_length_error),
 
     /** 프리셋 저장 실패 */
     FailSave(R.string.timer_error_preset_fail_save),
@@ -50,8 +55,8 @@ fun TimerError.toUiText(): UiText {
     return when (this) {
         is TimerError.SetTime -> UiText.StringResource(this.code.messageResId)
         is TimerError.Preset -> {
-            if (this.code.msgArgs.isNotEmpty()) {
-                UiText.StringResource(this.code.messageResId, this.code.msgArgs)
+            if (this.args.isNotEmpty()) {
+                UiText.StringResource(this.code.messageResId, this.args)
             } else {
                 UiText.StringResource(this.code.messageResId)
             }
