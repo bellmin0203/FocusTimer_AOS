@@ -21,12 +21,12 @@ class UpdatePresetUseCase @Inject constructor(
     suspend operator fun invoke(preset: Preset): Result<Unit> {
         // 이름 유효성 검사
         if (preset.name.isBlank()) {
-            return Result.failure(IllegalArgumentException("프리셋 이름을 입력해주세요."))
+            return Result.failure(IllegalArgumentException("타이머 이름을 입력해주세요."))
         }
 
         if (preset.name.length > MAX_NAME_LENGTH) {
             return Result.failure(
-                IllegalArgumentException("프리셋 이름은 ${MAX_NAME_LENGTH}자 이하로 입력해주세요.")
+                IllegalArgumentException("타이머 이름은 ${MAX_NAME_LENGTH}자 이하로 입력해주세요.")
             )
         }
 

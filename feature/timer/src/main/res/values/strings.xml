@@ -72,7 +72,7 @@
     <string name="content_description_pause">일시정지</string>
     <string name="content_description_play">재생</string>
     <string name="content_description_reset">초기화</string>
-    <string name="content_description_manage_presets">프리셋 관리</string>
+    <string name="content_description_manage_presets">타이머 관리</string>
     <string name="content_description_clear">전체 지우기</string>
     <string name="content_description_backspace">지우기</string>
     <string name="content_description_selected">선택됨</string>
@@ -88,5 +88,5 @@
     <string name="time_input_label_second">초</string>
 
     <!-- Dialogs -->
-    <string name="delete_preset_dialog_message">\'%1$s\' 프리셋을 삭제하시겠습니까?</string>
+    <string name="delete_preset_dialog_message">\'%1$s\' 타이머를 삭제하시겠습니까?</string>
 </resources>
