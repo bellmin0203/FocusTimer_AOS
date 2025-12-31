@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -31,6 +33,7 @@ import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.domain.model.statistics.MonthlyStats
 import com.jm.focustimer.domain.model.statistics.WeeklyFocusTime
+import com.jm.focustimer.stats.R
 import com.jm.focustimer.stats.StatsCard
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -77,7 +80,7 @@ fun MonthlyStatsContent(
         IconButton(onClick = onPrevious) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "이전 달"
+                contentDescription = stringResource(R.string.content_description_prev_month)
             )
         }
 
@@ -91,25 +94,25 @@ fun MonthlyStatsContent(
         IconButton(onClick = onNext) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "다음 달"
+                contentDescription = stringResource(R.string.content_description_next_month)
             )
         }
     }
 
     // 요약 카드
-    StatsCard(title = "월간 요약") {
+    StatsCard(title = stringResource(R.string.monthly_summary_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    label = "총 집중 시간",
+                    label = stringResource(R.string.achievement_total_time),
                     value = formatDuration(stats.totalFocusTime),
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "주 평균 집중 시간",
+                    label = stringResource(R.string.monthly_average_weekly),
                     value = formatDuration(stats.averageWeeklyFocusTime),
                     modifier = Modifier.weight(1f)
                 )
@@ -119,12 +122,12 @@ fun MonthlyStatsContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    label = "가장 집중한 주",
-                    value = stats.mostProductiveWeek?.let { "${it}주차" } ?: "-",
+                    label = stringResource(R.string.monthly_most_productive_week),
+                    value = stats.mostProductiveWeek?.let { stringResource(R.string.format_week_order, it) } ?: "-",
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "지난달 대비",
+                    label = stringResource(R.string.monthly_growth_rate),
                     value = formatGrowthRate(stats.growthRate),
                     valueColor = getGrowthRateColor(stats.growthRate),
                     modifier = Modifier.weight(1f)
@@ -136,7 +139,7 @@ fun MonthlyStatsContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // 주별 집중 시간 차트
-    StatsCard(title = "주별 집중 시간") {
+    StatsCard(title = stringResource(R.string.monthly_chart_title)) {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
             Box(
                 modifier = Modifier
@@ -145,7 +148,7 @@ fun MonthlyStatsContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "이번 달 집중 기록이 없습니다.",
+                    text = stringResource(R.string.monthly_no_data),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -187,6 +190,7 @@ private fun StatItem(
 
 @Composable
 private fun WeeklyChart(stats: MonthlyStats) {
+    val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val markerBackgroundColor = MaterialTheme.colorScheme.surfaceContainer
@@ -222,10 +226,10 @@ private fun WeeklyChart(stats: MonthlyStats) {
                         val hours = minutes / 60
                         val remainingMinutes = minutes % 60
                         val timeText = when {
-                            hours > 0 && remainingMinutes > 0 -> "${hours}시간 ${remainingMinutes}분"
-                            hours > 0 -> "${hours}시간"
-                            remainingMinutes > 0 -> "${remainingMinutes}분"
-                            else -> "0분"
+                            hours > 0 && remainingMinutes > 0 -> context.getString(R.string.format_hours_minutes, hours, remainingMinutes)
+                            hours > 0 -> context.getString(R.string.format_hours, hours)
+                            remainingMinutes > 0 -> context.getString(R.string.format_minutes, remainingMinutes)
+                            else -> context.getString(R.string.format_zero_minutes)
                         }
                         timeText
                     }
@@ -247,16 +251,16 @@ private fun WeeklyChart(stats: MonthlyStats) {
             startAxis = VerticalAxis.rememberStart(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
                 guideline = null,
-                title = "분",
+                title = stringResource(R.string.format_minutes, 0).replace("0", ""), // "분"
                 titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface)
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
                 guideline = null,
-                title = "주",
+                title = stringResource(R.string.format_week, 0).replace("0", ""), // "주"
                 titleComponent = rememberTextComponent(color = MaterialTheme.colorScheme.onSurface),
                 valueFormatter = { _, value, _ ->
-                    "${value.toInt()}주"
+                    context.getString(R.string.format_week, value.toInt())
                 }
             ),
             marker = marker
@@ -269,21 +273,23 @@ private fun WeeklyChart(stats: MonthlyStats) {
 /**
  * Duration을 "X시간 Y분" 형식으로 변환
  */
+@Composable
 private fun formatDuration(duration: kotlin.time.Duration): String {
     val hours = duration.inWholeHours
     val minutes = (duration.inWholeMinutes % 60)
 
     return when {
-        hours > 0 && minutes > 0 -> "${hours}시간 ${minutes}분"
-        hours > 0 -> "${hours}시간"
-        minutes > 0 -> "${minutes}분"
-        else -> "0분"
+        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
+        hours > 0 -> stringResource(R.string.format_hours, hours)
+        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
+        else -> stringResource(R.string.format_zero_minutes)
     }
 }
 
 /**
  * 월 집중 시간 증감률을 퍼센트 형식으로 변환
  */
+@Composable
 private fun formatGrowthRate(growthRate: Double): String {
     val percentage = (growthRate * 100).toInt()
     return when {

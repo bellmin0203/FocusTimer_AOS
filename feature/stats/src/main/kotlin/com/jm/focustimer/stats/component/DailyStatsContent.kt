@@ -22,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -31,6 +33,7 @@ import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.domain.model.statistics.DailyStats
 import com.jm.focustimer.domain.model.statistics.HourlyStats
+import com.jm.focustimer.stats.R
 import com.jm.focustimer.stats.StatsCard
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -83,7 +86,7 @@ fun DailyStatsContent(
         IconButton(onClick = onPrevious) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "이전 날짜"
+                contentDescription = stringResource(R.string.content_description_prev_day)
             )
         }
 
@@ -97,26 +100,26 @@ fun DailyStatsContent(
         IconButton(onClick = onNext) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "다음 날짜"
+                contentDescription = stringResource(R.string.content_description_next_day)
             )
         }
     }
 
     // 요약 카드 (Grid Layout)
-    StatsCard(title = "하루 요약") {
+    StatsCard(title = stringResource(R.string.daily_summary_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    label = "총 집중 시간",
+                    label = stringResource(R.string.achievement_total_time),
                     value = formatDuration(stats.totalFocusTime),
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "가장 집중한 시간",
-                    value = stats.mostProductiveHour?.let { "${it}:00" } ?: "-",
+                    label = stringResource(R.string.daily_most_productive_hour),
+                    value = stats.mostProductiveHour?.let { stringResource(R.string.format_time, it) } ?: "-",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -126,7 +129,7 @@ fun DailyStatsContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // 시간대별 집중 시간 차트
-    StatsCard(title = "24시간 집중 시간") {
+    StatsCard(title = stringResource(R.string.daily_chart_title)) {
         if (stats.totalFocusTime.inWholeMilliseconds == 0L) {
             Box(
                 modifier = Modifier
@@ -135,7 +138,7 @@ fun DailyStatsContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "집중 기록이 없습니다.",
+                    text = stringResource(R.string.daily_no_data),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -176,6 +179,7 @@ private fun StatItem(
 
 @Composable
 private fun HourlyChart(stats: DailyStats) {
+    val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
     // UX 개선 1: 테마 색상 적용
@@ -196,7 +200,7 @@ private fun HourlyChart(stats: DailyStats) {
 
     val bottomAxisValueFormatter = remember {
         CartesianValueFormatter { _, x, _ ->
-            "${x.toInt()}시"
+            context.getString(R.string.format_time, x.toInt())
         }
     }
 
@@ -237,10 +241,10 @@ private fun HourlyChart(stats: DailyStats) {
                         val hours = minutes / 60
                         val remainingMinutes = minutes % 60
                         val timeText = when {
-                            hours > 0 && remainingMinutes > 0 -> "${hours}시간 ${remainingMinutes}분"
-                            hours > 0 -> "${hours}시간"
-                            remainingMinutes > 0 -> "${remainingMinutes}분"
-                            else -> "0분"
+                            hours > 0 && remainingMinutes > 0 -> context.getString(R.string.format_hours_minutes, hours, remainingMinutes)
+                            hours > 0 -> context.getString(R.string.format_hours, hours)
+                            remainingMinutes > 0 -> context.getString(R.string.format_minutes, remainingMinutes)
+                            else -> context.getString(R.string.format_zero_minutes)
                         }
                         timeText
                     }
@@ -293,15 +297,16 @@ private fun HourlyChart(stats: DailyStats) {
 /**
  * Duration을 "X시간 Y분" 형식으로 변환
  */
+@Composable
 private fun formatDuration(duration: kotlin.time.Duration): String {
     val hours = duration.inWholeHours
     val minutes = (duration.inWholeMinutes % 60)
 
     return when {
-        hours > 0 && minutes > 0 -> "${hours}시간 ${minutes}분"
-        hours > 0 -> "${hours}시간"
-        minutes > 0 -> "${minutes}분"
-        else -> "0분"
+        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
+        hours > 0 -> stringResource(R.string.format_hours, hours)
+        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
+        else -> stringResource(R.string.format_zero_minutes)
     }
 }
 

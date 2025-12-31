@@ -521,7 +521,7 @@ private fun TimerScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
+                            contentDescription = stringResource(R.string.content_description_menu),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -785,7 +785,7 @@ private fun TimerControlButtons(
                 ContextCompat.startForegroundService(context, intent)
             },
             icon = FocusTimerIcons.Check,
-            contentDescription = "Complete",
+            contentDescription = stringResource(R.string.content_description_complete),
             containerColor = presetColors.progressColor,
             contentColor = Color.White
         )
@@ -838,7 +838,7 @@ private fun TimerControlButtons(
                 }
             },
             icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
-            contentDescription = if (uiState.isRunning) "Pause" else "Play",
+            contentDescription = if (uiState.isRunning) stringResource(R.string.content_description_pause) else stringResource(R.string.content_description_play),
             containerColor = presetColors.progressColor,
             contentColor = Color.White
         )
@@ -863,7 +863,7 @@ private fun TimerControlButtons(
                     )
                 },
                 icon = FocusTimerIcons.RestartAlt,
-                contentDescription = "Reset"
+                contentDescription = stringResource(R.string.content_description_reset)
             )
         }
     }
@@ -890,7 +890,7 @@ private fun PresetListRow(
                 label = {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Manage Presets",
+                        contentDescription = stringResource(R.string.content_description_manage_presets),
                         modifier = Modifier.size(16.dp)
                     )
                 },

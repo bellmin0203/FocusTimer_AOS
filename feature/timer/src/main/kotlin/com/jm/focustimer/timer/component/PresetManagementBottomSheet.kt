@@ -234,7 +234,7 @@ private fun PresetManagementCard(
                 IconButton(onClick = onEdit) {
                     Icon(
                         imageVector = FocusTimerIcons.Edit,
-                        contentDescription = "수정",
+                        contentDescription = stringResource(R.string.content_description_edit),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -242,7 +242,7 @@ private fun PresetManagementCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = FocusTimerIcons.Delete,
-                        contentDescription = "삭제",
+                        contentDescription = stringResource(R.string.content_description_delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

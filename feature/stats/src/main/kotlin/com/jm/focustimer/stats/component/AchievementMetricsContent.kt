@@ -24,11 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.domain.model.statistics.AchievementMetrics
+import com.jm.focustimer.stats.R
 import com.jm.focustimer.stats.StatsCard
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -40,7 +42,7 @@ import kotlin.time.Duration.Companion.minutes
 fun AchievementMetricsContent(metrics: AchievementMetrics) {
     Column {
         Text(
-            text = "성취 지표",
+            text = stringResource(R.string.achievement_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -53,14 +55,14 @@ fun AchievementMetricsContent(metrics: AchievementMetrics) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 MetricCard(
-                    title = "집중률",
-                    value = "${metrics.focusRatePercent}%",
+                    title = stringResource(R.string.achievement_focus_rate),
+                    value = stringResource(R.string.format_percent, metrics.focusRatePercent),
                     icon = Icons.Default.CheckCircle,
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
-                    title = "연속 일수",
-                    value = "${metrics.consecutiveFocusDays}일",
+                    title = stringResource(R.string.achievement_consecutive_days),
+                    value = stringResource(R.string.format_days, metrics.consecutiveFocusDays),
                     icon = Icons.Default.CalendarToday,
                     modifier = Modifier.weight(1f)
                 )
@@ -71,13 +73,13 @@ fun AchievementMetricsContent(metrics: AchievementMetrics) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 MetricCard(
-                    title = "최장 시간",
+                    title = stringResource(R.string.achievement_longest_time),
                     value = formatDuration(metrics.longestFocusTime),
                     icon = Icons.Default.Timer,
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
-                    title = "평균 세션",
+                    title = stringResource(R.string.achievement_average_session),
                     value = formatDuration(metrics.averageSessionLength),
                     icon = Icons.Default.AccessTime,
                     modifier = Modifier.weight(1f)
@@ -88,19 +90,19 @@ fun AchievementMetricsContent(metrics: AchievementMetrics) {
         Spacer(modifier = Modifier.height(24.dp))
 
         // 상세 통계 (2x2 Grid로 변경)
-        StatsCard(title = "상세 통계") {
+        StatsCard(title = stringResource(R.string.achievement_detail_title)) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     DetailStatItem(
-                        label = "전체 세션",
-                        value = "${metrics.totalSessions}개",
+                        label = stringResource(R.string.achievement_total_sessions),
+                        value = stringResource(R.string.format_count, metrics.totalSessions),
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
-                        label = "총 집중 시간",
+                        label = stringResource(R.string.achievement_total_time),
                         value = formatDuration(metrics.totalFocusTime),
                         modifier = Modifier.weight(1f)
                     )
@@ -110,13 +112,13 @@ fun AchievementMetricsContent(metrics: AchievementMetrics) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     DetailStatItem(
-                        label = "완료된 세션",
-                        value = "${metrics.completedSessions}개",
+                        label = stringResource(R.string.achievement_completed_sessions),
+                        value = stringResource(R.string.format_count, metrics.completedSessions),
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
-                        label = "미완료 세션",
-                        value = "${metrics.incompleteSessions}개",
+                        label = stringResource(R.string.achievement_incomplete_sessions),
+                        value = stringResource(R.string.format_count, metrics.incompleteSessions),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -206,15 +208,16 @@ private fun DetailStatItem(
 /**
  * Duration을 "Xh Ym" 형식으로 변환
  */
+@Composable
 private fun formatDuration(duration: Duration): String {
     val hours = duration.inWholeHours
     val minutes = (duration.inWholeMinutes % 60)
 
     return when {
-        hours > 0 && minutes > 0 -> "${hours}시간 ${minutes}분"
-        hours > 0 -> "${hours}시간"
-        minutes > 0 -> "${minutes}분"
-        else -> "0분"
+        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
+        hours > 0 -> stringResource(R.string.format_hours, hours)
+        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
+        else -> stringResource(R.string.format_zero_minutes)
     }
 }
 

@@ -16,6 +16,7 @@ import com.jm.focustimer.domain.repository.SettingsRepository
 import com.jm.focustimer.domain.usecase.preset.GetAllPresetsUseCase
 import com.jm.focustimer.setting.model.SettingCategory
 import com.jm.focustimer.setting.model.SettingType
+import com.jm.focustimer.ui.util.UiText
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,16 +65,16 @@ class SettingViewModel @Inject constructor(
     */
     private fun createAppearanceSettings(): List<SettingType> = listOf(
         SettingType.Selector(
-            title = "앱 테마",
-            description = "앱의 전반적인 테마를 설정합니다.",
+            title = UiText.StringResource(R.string.pref_title_theme),
+            description = UiText.StringResource(R.string.pref_desc_theme),
             category = SettingCategory.APPEARANCE,
             stateFlow = settingsRepository.themeMode,
             options = ThemeMode.entries,
             displayName = { mode ->
                 when (mode) {
-                    ThemeMode.SYSTEM -> "시스템 설정"
-                    ThemeMode.LIGHT -> "라이트 모드"
-                    ThemeMode.DARK -> "다크 모드"
+                    ThemeMode.SYSTEM -> UiText.StringResource(R.string.pref_theme_system)
+                    ThemeMode.LIGHT -> UiText.StringResource(R.string.pref_theme_light)
+                    ThemeMode.DARK -> UiText.StringResource(R.string.pref_theme_dark)
                 }
             },
             onSelect = ::updateThemeMode,
@@ -88,19 +89,19 @@ class SettingViewModel @Inject constructor(
         // 완료 알림 소리 - 임시적으로 주석처리
         /*
         SettingType.Selector(
-            title = "완료 알림 소리",
-            description = "타이머 완료 시 재생될 알림 소리를 선택합니다.",
+            title = UiText.StringResource(R.string.pref_title_sound),
+            description = UiText.StringResource(R.string.pref_desc_sound),
             category = SettingCategory.NOTIFICATION,
             stateFlow = settingsRepository.notificationSoundType,
             options = NotificationSoundType.entries.filterNot { it == NotificationSoundType.CUSTOM },
-            displayName = { it.displayName },
+            displayName = { UiText.DynamicString(it.displayName) }, // NotificationSoundType enum itself might need localization later
             onSelect = ::updateNotificationSoundType,
             defaultValue = NotificationSoundType.DEFAULT
         ),
         */
         SettingType.Toggle(
-            title = "알림 진동",
-            description = "타이머 완료 알림 발생 시 진동을 사용할지 설정합니다.",
+            title = UiText.StringResource(R.string.pref_title_vibration),
+            description = UiText.StringResource(R.string.pref_desc_vibration),
             stateFlow = settingsRepository.isNotificationVibrate,
             onToggle = ::updateIsNotificationVibrate,
             category = SettingCategory.NOTIFICATION,
@@ -123,47 +124,47 @@ class SettingViewModel @Inject constructor(
      * 타이머 설정 항목 생성
      */
     private fun createTimerSettings(presets: List<Preset>): List<SettingType> {
-        val sessionDurationOptions = listOf(
-            5.minutes, 10.minutes, 15.minutes, 25.minutes,
-            30.minutes, 45.minutes, 60.minutes
-        )
-
         return listOf(
             SettingType.Toggle(
-                title = "마지막 세션 기억",
-                description = "앱 종료 시 마지막 타이머 세션 설정을 기억합니다.",
+                title = UiText.StringResource(R.string.pref_title_remember_session),
+                description = UiText.StringResource(R.string.pref_desc_remember_session),
                 stateFlow = settingsRepository.isRememberLastSession,
                 onToggle = ::updateIsRememberLastSession,
                 category = SettingCategory.TIMER,
                 defaultValue = DEFAULT_IS_REMEMBER_LAST_SESSION
             ),
             SettingType.Toggle(
-                title = "화면 켜짐 유지",
-                description = "타이머가 실행되는 동안 화면이 계속 켜져 있도록 설정합니다.",
+                title = UiText.StringResource(R.string.pref_title_screen_on),
+                description = UiText.StringResource(R.string.pref_desc_screen_on),
                 stateFlow = settingsRepository.isScreenOn,
                 onToggle = ::updateIsScreenOn,
                 category = SettingCategory.TIMER,
                 defaultValue = DEFAULT_IS_SCREEN_ON
             ),
             SettingType.Selector(
-                title = "기본 세션 지속 시간",
-                description = "마지막 세션을 기억하지 않을 때 사용할 기본 타이머 시간입니다.",
+                title = UiText.StringResource(R.string.pref_title_default_duration),
+                description = UiText.StringResource(R.string.pref_desc_default_duration),
                 category = SettingCategory.TIMER,
                 stateFlow = settingsRepository.defaultSessionDuration,
                 options = sessionDurationOptions,
-                displayName = { duration -> "${duration.inWholeMinutes}분" },
+                displayName = { duration -> 
+                    UiText.StringResource(R.string.format_minutes, listOf(duration.inWholeMinutes))
+                },
                 onSelect = ::updateDefaultSessionDuration,
                 defaultValue = DEFAULT_SESSION_DURATION
             ),
             SettingType.Selector(
-                title = "기본 프리셋",
-                description = "앱 시작 시 자동으로 선택될 프리셋입니다.",
+                title = UiText.StringResource(R.string.pref_title_default_preset),
+                description = UiText.StringResource(R.string.pref_desc_default_preset),
                 category = SettingCategory.TIMER,
                 stateFlow = settingsRepository.defaultPresetId.map { id ->
                     presets.find { it.id == id }
                 },
                 options = listOf(null) + presets,
-                displayName = { preset -> preset?.name ?: "없음" },
+                displayName = { preset -> 
+                    if (preset == null) UiText.StringResource(R.string.pref_preset_none)
+                    else UiText.DynamicString(preset.name)
+                },
                 onSelect = { preset -> updateDefaultPresetId(preset?.id) },
                 defaultValue = null
             )
@@ -183,16 +184,16 @@ class SettingViewModel @Inject constructor(
 //            defaultValue = DEFAULT_IS_HAPTIC_FEEDBACK
 //        ),
         SettingType.Toggle(
-            title = "컨트롤 최소화",
-            description = "타이머 화면에서 컨트롤 버튼을 최소화하여 표시합니다.",
+            title = UiText.StringResource(R.string.pref_title_minimized_controls),
+            description = UiText.StringResource(R.string.pref_desc_minimized_controls),
             stateFlow = settingsRepository.isMinimizedControls,
             onToggle = ::updateIsMinimizedControls,
             category = SettingCategory.INTERACTION,
             defaultValue = DEFAULT_IS_MINIMIZED_CONTROLS
         ),
         SettingType.Toggle(
-            title = "완료 시 시각 알림",
-            description = "타이머가 끝나면 원형 타이머가 부드럽게 움직이며 완료를 알려줍니다.",
+            title = UiText.StringResource(R.string.pref_title_pulse_animation),
+            description = UiText.StringResource(R.string.pref_desc_pulse_animation),
             stateFlow = settingsRepository.isPulseAnimationEnabled,
             onToggle = ::updateIsPulseAnimationEnabled,
             category = SettingCategory.INTERACTION,

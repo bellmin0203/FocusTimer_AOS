@@ -31,12 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.icon.FocusTimerIcons
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
+import com.jm.focustimer.timer.R
 import com.jm.focustimer.ui.component.Picker
 import com.jm.focustimer.ui.component.PickerState
 import com.jm.focustimer.ui.component.rememberPickerState
@@ -124,7 +126,7 @@ fun TimeInputBottomSheet(
         ) {
             // 제목
             Text(
-                text = "타이머 설정",
+                text = stringResource(R.string.time_input_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -209,7 +211,7 @@ private fun TimeInputControls(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = "설정",
+                    text = stringResource(R.string.time_input_set_button),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -382,7 +384,7 @@ private fun StartButton(
         enabled = isTimeSet
     ) {
         Text(
-            text = "시작",
+            text = stringResource(R.string.time_input_start_button),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -441,17 +443,17 @@ private fun TimeFieldLabels(selectedField: TimeField) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         TimeFieldLabel(
-            text = "시간",
+            text = stringResource(R.string.time_input_label_hour),
             isSelected = selectedField == TimeField.HOUR
         )
         Spacer(modifier = Modifier.width(16.dp))
         TimeFieldLabel(
-            text = "분",
+            text = stringResource(R.string.time_input_label_minute),
             isSelected = selectedField == TimeField.MINUTE
         )
         Spacer(modifier = Modifier.width(16.dp))
         TimeFieldLabel(
-            text = "초",
+            text = stringResource(R.string.time_input_label_second),
             isSelected = selectedField == TimeField.SECOND
         )
     }
@@ -632,7 +634,7 @@ private fun NumericKeypad(
         ) {
             KeypadIconButton(
                 icon = FocusTimerIcons.Refresh,
-                contentDescription = "Clear",
+                contentDescription = stringResource(R.string.content_description_clear),
                 onClick = onClearClick,
                 modifier = Modifier.weight(1f)
             )
@@ -643,7 +645,7 @@ private fun NumericKeypad(
             )
             KeypadIconButton(
                 icon = FocusTimerIcons.Backspace,
-                contentDescription = "Backspace",
+                contentDescription = stringResource(R.string.content_description_backspace),
                 onClick = onBackspaceClick,
                 modifier = Modifier.weight(1f)
             )

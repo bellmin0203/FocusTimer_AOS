@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -96,12 +97,12 @@ private fun StatsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("통계") },
+                title = { Text(stringResource(R.string.stats_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "뒤로가기"
+                            contentDescription = stringResource(R.string.content_description_back)
                         )
                     }
                 },
@@ -109,13 +110,13 @@ private fun StatsScreen(
                     IconButton(onClick = { showAchievementSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.EmojiEvents,
-                            contentDescription = "성취 기록 보기"
+                            contentDescription = stringResource(R.string.content_description_achievements)
                         )
                     }
                     IconButton(onClick = onToday) {
                         Icon(
                             imageVector = Icons.Default.Today,
-                            contentDescription = "오늘"
+                            contentDescription = stringResource(R.string.content_description_today)
                         )
                     }
                 }
@@ -135,17 +136,17 @@ private fun StatsScreen(
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.DAILY,
                     onClick = { onPeriodSelected(StatsPeriod.DAILY) },
-                    text = { Text("일간") }
+                    text = { Text(stringResource(R.string.stats_tab_daily)) }
                 )
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.WEEKLY,
                     onClick = { onPeriodSelected(StatsPeriod.WEEKLY) },
-                    text = { Text("주간") }
+                    text = { Text(stringResource(R.string.stats_tab_weekly)) }
                 )
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.MONTHLY,
                     onClick = { onPeriodSelected(StatsPeriod.MONTHLY) },
-                    text = { Text("월간") }
+                    text = { Text(stringResource(R.string.stats_tab_monthly)) }
                 )
             }
 
@@ -161,7 +162,7 @@ private fun StatsScreen(
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "통계를 불러오는 중...",
+                        text = stringResource(R.string.stats_loading),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -240,7 +241,7 @@ private fun StatsScreen(
                             uiState.achievementMetrics?.let { metrics ->
                                 AchievementMetricsContent(metrics = metrics)
                             } ?: run {
-                                Text("아직 기록된 성취가 없습니다.")
+                                Text(stringResource(R.string.stats_no_achievements))
                             }
                         }
                     }

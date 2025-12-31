@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -31,6 +33,7 @@ import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
 import com.jm.focustimer.domain.model.statistics.DailyFocusTime
 import com.jm.focustimer.domain.model.statistics.WeeklyStats
+import com.jm.focustimer.stats.R
 import com.jm.focustimer.stats.StatsCard
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -78,12 +81,12 @@ fun WeeklyStatsContent(
         IconButton(onClick = onPrevious) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "이전 주"
+                contentDescription = stringResource(R.string.content_description_prev_week)
             )
         }
 
         Text(
-            text = "${stats.weekStartDate.format(dateFormatter)} ~ ${
+            text = "${stats.weekStartDate.format(dateFormatter)} ~ ${ 
                 stats.weekEndDate.format(
                     dateFormatter
                 )
@@ -96,25 +99,25 @@ fun WeeklyStatsContent(
         IconButton(onClick = onNext) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "다음 주"
+                contentDescription = stringResource(R.string.content_description_next_week)
             )
         }
     }
 
     // 요약 카드 (Grid)
-    StatsCard(title = "주간 요약") {
+    StatsCard(title = stringResource(R.string.weekly_summary_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    label = "총 집중 시간",
+                    label = stringResource(R.string.achievement_total_time),
                     value = formatDuration(stats.totalFocusTime),
                     modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "하루 평균 집중 시간",
+                    label = stringResource(R.string.weekly_average_daily),
                     value = formatDuration(stats.averageDailyFocusTime),
                     modifier = Modifier.weight(1f)
                 )
@@ -124,13 +127,13 @@ fun WeeklyStatsContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    label = "가장 집중한 요일",
+                    label = stringResource(R.string.weekly_most_productive_day),
                     value = stats.mostProductiveDay?.let { getDayOfWeekKorean(it) } ?: "-",
                     modifier = Modifier.weight(1f)
                 )
 
                 StatItem(
-                    label = "지난주 대비",
+                    label = stringResource(R.string.weekly_growth_rate),
                     value = formatGrowthRate(stats.growthRate),
                     valueColor = getGrowthRateColor(stats.growthRate),
                     modifier = Modifier.weight(1f)
@@ -142,7 +145,7 @@ fun WeeklyStatsContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // 일별 집중 시간 차트
-    StatsCard(title = "일별 집중 시간") {
+    StatsCard(title = stringResource(R.string.weekly_chart_title)) {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
             Box(
                 modifier = Modifier
@@ -151,7 +154,7 @@ fun WeeklyStatsContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "이번 주 집중 기록이 없습니다.",
+                    text = stringResource(R.string.weekly_no_data),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -193,6 +196,7 @@ private fun StatItem(
 
 @Composable
 private fun DailyChart(stats: WeeklyStats) {
+    val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val markerBackgroundColor = MaterialTheme.colorScheme.surfaceContainer
@@ -230,10 +234,10 @@ private fun DailyChart(stats: WeeklyStats) {
                         val hours = minutes / 60
                         val remainingMinutes = minutes % 60
                         val timeText = when {
-                            hours > 0 && remainingMinutes > 0 -> "${hours}시간 ${remainingMinutes}분"
-                            hours > 0 -> "${hours}시간"
-                            remainingMinutes > 0 -> "${remainingMinutes}분"
-                            else -> "0분"
+                            hours > 0 && remainingMinutes > 0 -> context.getString(R.string.format_hours_minutes, hours, remainingMinutes)
+                            hours > 0 -> context.getString(R.string.format_hours, hours)
+                            remainingMinutes > 0 -> context.getString(R.string.format_minutes, remainingMinutes)
+                            else -> context.getString(R.string.format_zero_minutes)
                         }
                         timeText
                     }
@@ -264,7 +268,7 @@ private fun DailyChart(stats: WeeklyStats) {
                 valueFormatter = { _, value, _ ->
                     val index = value.toInt()
                     if (index in stats.dailyBreakdown.indices) {
-                        getDayOfWeekShort(stats.dailyBreakdown[index].dayOfWeek)
+                        getDayOfWeekShort(context, stats.dailyBreakdown[index].dayOfWeek)
                     } else {
                         ""
                     }
@@ -280,22 +284,24 @@ private fun DailyChart(stats: WeeklyStats) {
 /**
  * Duration을 "X시간 Y분" 형식으로 변환
  */
+@Composable
 private fun formatDuration(duration: kotlin.time.Duration): String {
     val hours = duration.inWholeHours
     val minutes = (duration.inWholeMinutes % 60)
 
     return when {
-        hours > 0 && minutes > 0 -> "${hours}시간 ${minutes}분"
-        hours > 0 -> "${hours}시간"
-        minutes > 0 -> "${minutes}분"
-        else -> "0분"
+        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
+        hours > 0 -> stringResource(R.string.format_hours, hours)
+        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
+        else -> stringResource(R.string.format_zero_minutes)
     }
 }
 
+@Composable
 private fun formatGrowthRate(growthRate: Double): String {
     val percentage = (growthRate * 100).toInt()
     return when {
-        percentage > 0 -> "↗ +${percentage}%"
+        percentage > 0 -> "↗ +${percentage}%" // TODO: Add to strings.xml if precise formatting is needed
         percentage < 0 -> "↘ ${percentage}%"
         else -> "→ 0%"
     }
@@ -313,30 +319,31 @@ private fun getGrowthRateColor(growthRate: Double): Color {
 /**
  * 요일을 한글로 변환
  */
+@Composable
 private fun getDayOfWeekKorean(dayOfWeek: DayOfWeek): String {
     return when (dayOfWeek) {
-        DayOfWeek.MONDAY -> "월요일"
-        DayOfWeek.TUESDAY -> "화요일"
-        DayOfWeek.WEDNESDAY -> "수요일"
-        DayOfWeek.THURSDAY -> "목요일"
-        DayOfWeek.FRIDAY -> "금요일"
-        DayOfWeek.SATURDAY -> "토요일"
-        DayOfWeek.SUNDAY -> "일요일"
+        DayOfWeek.MONDAY -> stringResource(R.string.day_monday)
+        DayOfWeek.TUESDAY -> stringResource(R.string.day_tuesday)
+        DayOfWeek.WEDNESDAY -> stringResource(R.string.day_wednesday)
+        DayOfWeek.THURSDAY -> stringResource(R.string.day_thursday)
+        DayOfWeek.FRIDAY -> stringResource(R.string.day_friday)
+        DayOfWeek.SATURDAY -> stringResource(R.string.day_saturday)
+        DayOfWeek.SUNDAY -> stringResource(R.string.day_sunday)
     }
 }
 
 /**
- * 요일을 짧은 한글로 변환
+ * 요일을 짧은 한글로 변환 (Context required for non-composable scope)
  */
-private fun getDayOfWeekShort(dayOfWeek: DayOfWeek): String {
+private fun getDayOfWeekShort(context: android.content.Context, dayOfWeek: DayOfWeek): String {
     return when (dayOfWeek) {
-        DayOfWeek.MONDAY -> "월"
-        DayOfWeek.TUESDAY -> "화"
-        DayOfWeek.WEDNESDAY -> "수"
-        DayOfWeek.THURSDAY -> "목"
-        DayOfWeek.FRIDAY -> "금"
-        DayOfWeek.SATURDAY -> "토"
-        DayOfWeek.SUNDAY -> "일"
+        DayOfWeek.MONDAY -> context.getString(R.string.day_short_monday)
+        DayOfWeek.TUESDAY -> context.getString(R.string.day_short_tuesday)
+        DayOfWeek.WEDNESDAY -> context.getString(R.string.day_short_wednesday)
+        DayOfWeek.THURSDAY -> context.getString(R.string.day_short_thursday)
+        DayOfWeek.FRIDAY -> context.getString(R.string.day_short_friday)
+        DayOfWeek.SATURDAY -> context.getString(R.string.day_short_saturday)
+        DayOfWeek.SUNDAY -> context.getString(R.string.day_short_sunday)
     }
 }
 

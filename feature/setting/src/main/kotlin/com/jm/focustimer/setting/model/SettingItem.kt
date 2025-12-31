@@ -1,5 +1,6 @@
 package com.jm.focustimer.setting.model
 
+import com.jm.focustimer.ui.util.UiText
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -10,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
  * @param category 설정의 카테고리
  */
 sealed class SettingType {
-    abstract val title: String
-    abstract val description: String?
+    abstract val title: UiText
+    abstract val description: UiText?
     abstract val category: SettingCategory
 
     /**
@@ -22,8 +23,8 @@ sealed class SettingType {
      * @param defaultValue 초기 로딩 시 보여줄 기본값
      */
     data class Toggle(
-        override val title: String,
-        override val description: String? = null,
+        override val title: UiText,
+        override val description: UiText? = null,
         override val category: SettingCategory,
         val stateFlow: Flow<Boolean>,
         val onToggle: (Boolean) -> Unit,
@@ -41,12 +42,12 @@ sealed class SettingType {
      * @param defaultValue 초기 로딩 시 보여줄 기본값
      */
     data class Selector<T>(
-        override val title: String,
-        override val description: String? = null,
+        override val title: UiText,
+        override val description: UiText? = null,
         override val category: SettingCategory,
         val stateFlow: Flow<T>,
         val options: List<T>,
-        val displayName: (T) -> String,
+        val displayName: (T) -> UiText,
         val onSelect: (T) -> Unit,
         val defaultValue: T
     ) : SettingType()

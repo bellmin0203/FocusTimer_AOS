@@ -278,7 +278,7 @@ private fun ColorOption(
         if (isSelected) {
             Icon(
                 imageVector = FocusTimerIcons.Check,
-                contentDescription = "선택됨",
+                contentDescription = stringResource(R.string.content_description_selected),
                 tint = androidx.compose.ui.graphics.Color.White,
                 modifier = Modifier.size(20.dp)
             )
@@ -479,7 +479,7 @@ fun DeletePresetDialog(
             Text(text = stringResource(R.string.delete_preset_dialog_title))
         },
         text = {
-            Text(text = "'$presetName' 프리셋을 삭제하시겠습니까?")
+            Text(text = stringResource(R.string.delete_preset_dialog_message, presetName))
         },
         confirmButton = {
             TextButton(

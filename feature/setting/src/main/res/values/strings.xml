@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setting_title">설정</string>
+    <string name="content_description_back">뒤로가기</string>
+
+    <!-- Categories -->
+    <string name="pref_category_appearance">외관</string>
+    <string name="pref_category_notification">알림</string>
+    <string name="pref_category_timer">타이머</string>
+    <string name="pref_category_interaction">상호작용</string>
+
+    <!-- Appearance -->
+    <string name="pref_title_theme">앱 테마</string>
+    <string name="pref_desc_theme">앱의 전반적인 테마를 설정합니다.</string>
+    <string name="pref_theme_system">시스템 설정</string>
+    <string name="pref_theme_light">라이트 모드</string>
+    <string name="pref_theme_dark">다크 모드</string>
+
+    <!-- Notification -->
+    <string name="pref_title_vibration">알림 진동</string>
+    <string name="pref_desc_vibration">타이머 완료 알림 발생 시 진동을 사용할지 설정합니다.</string>
+
+    <!-- Timer -->
+    <string name="pref_title_remember_session">마지막 세션 기억</string>
+    <string name="pref_desc_remember_session">앱 종료 시 마지막 타이머 세션 설정을 기억합니다.</string>
+    <string name="pref_title_screen_on">화면 켜짐 유지</string>
+    <string name="pref_desc_screen_on">타이머가 실행되는 동안 화면이 계속 켜져 있도록 설정합니다.</string>
+    <string name="pref_title_default_duration">기본 세션 지속 시간</string>
+    <string name="pref_desc_default_duration">마지막 세션을 기억하지 않을 때 사용할 기본 타이머 시간입니다.</string>
+    <string name="pref_title_default_preset">기본 프리셋</string>
+    <string name="pref_desc_default_preset">앱 시작 시 자동으로 선택될 프리셋입니다.</string>
+    <string name="pref_preset_none">없음</string>
+
+    <!-- Interaction -->
+    <string name="pref_title_minimized_controls">컨트롤 최소화</string>
+    <string name="pref_desc_minimized_controls">타이머 화면에서 컨트롤 버튼을 최소화하여 표시합니다.</string>
+    <string name="pref_title_pulse_animation">완료 시 시각 알림</string>
+    <string name="pref_desc_pulse_animation">타이머가 끝나면 원형 타이머가 부드럽게 움직이며 완료를 알려줍니다.</string>
+
+    <!-- Formats -->
+    <string name="format_minutes">%d분</string>
+</resources>

@@ -6,18 +6,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import com.jm.focustimer.designsystem.component.ThemePreviews
 import com.jm.focustimer.designsystem.theme.FocusTimerTheme
+import com.jm.focustimer.ui.R
 
 /**
  * Focus Timer Alert Dialog
  */
 @Composable
 fun FocusAlertDialog(
-    onDismissRequest: () -> Unit,
-    title: String,
     modifier: Modifier = Modifier,
+    title: String,
     text: String? = null,
+    onDismissRequest: () -> Unit,
     confirmButton: @Composable () -> Unit,
     dismissButton: @Composable (() -> Unit)? = null
 ) {
@@ -47,20 +49,20 @@ fun FocusAlertDialog(
  * 확인/취소 다이얼로그
  */
 @Composable
-fun FocusConfirmDialog(
-    onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit,
+fun FocusTimerAlertDialog(
+    modifier: Modifier = Modifier,
     title: String,
     text: String,
-    modifier: Modifier = Modifier,
-    confirmText: String = "확인",
-    dismissText: String = "취소"
+    onConfirm: () -> Unit,
+    onDismissRequest: () -> Unit,
+    confirmText: String = stringResource(R.string.action_confirm),
+    dismissText: String = stringResource(R.string.action_cancel)
 ) {
     FocusAlertDialog(
-        onDismissRequest = onDismissRequest,
+        modifier = modifier,
         title = title,
         text = text,
-        modifier = modifier,
+        onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
@@ -141,7 +143,7 @@ private fun FocusAlertDialogWithDismissPreview() {
 @Composable
 private fun FocusConfirmDialogPreview() {
     FocusTimerTheme {
-        FocusConfirmDialog(
+        FocusTimerAlertDialog(
             onDismissRequest = {},
             onConfirm = {},
             title = "세션 종료",
@@ -157,7 +159,7 @@ private fun FocusConfirmDialogPreview() {
 @Composable
 private fun FocusConfirmDialogCustomTextPreview() {
     FocusTimerTheme {
-        FocusConfirmDialog(
+        FocusTimerAlertDialog(
             onDismissRequest = {},
             onConfirm = {},
             title = "타이머 리셋",
