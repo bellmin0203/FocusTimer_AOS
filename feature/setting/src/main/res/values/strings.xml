@@ -21,14 +21,14 @@
     <string name="pref_desc_vibration">타이머 완료 알림 발생 시 진동을 사용할지 설정합니다.</string>
 
     <!-- Timer -->
-    <string name="pref_title_remember_session">마지막 세션 기억</string>
-    <string name="pref_desc_remember_session">앱 종료 시 마지막 타이머 세션 설정을 기억합니다.</string>
+    <string name="pref_title_remember_session">마지막 타이머 기억</string>
+    <string name="pref_desc_remember_session">앱 종료 시 마지막 타이머 시간 설정을 기억합니다.</string>
     <string name="pref_title_screen_on">화면 켜짐 유지</string>
     <string name="pref_desc_screen_on">타이머가 실행되는 동안 화면이 계속 켜져 있도록 설정합니다.</string>
-    <string name="pref_title_default_duration">기본 세션 지속 시간</string>
-    <string name="pref_desc_default_duration">마지막 세션을 기억하지 않을 때 사용할 기본 타이머 시간입니다.</string>
-    <string name="pref_title_default_preset">기본 프리셋</string>
-    <string name="pref_desc_default_preset">앱 시작 시 자동으로 선택될 프리셋입니다.</string>
+    <string name="pref_title_default_duration">기본 타이머 시간</string>
+    <string name="pref_desc_default_duration">마지막 타이머 시간을 기억하지 않을 때 사용할 기본 타이머 시간입니다.</string>
+    <string name="pref_title_default_preset">기본 타이머</string>
+    <string name="pref_desc_default_preset">앱 시작 시 자동으로 선택될 타이머입니다.</string>
     <string name="pref_preset_none">없음</string>
 
     <!-- Interaction -->
