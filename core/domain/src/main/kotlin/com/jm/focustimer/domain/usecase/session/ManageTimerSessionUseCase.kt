@@ -43,7 +43,7 @@ class ManageTimerSessionUseCase @Inject constructor(
         overtime: Duration,
     ): Result<Unit> {
         if (startTime == null) {
-            return Result.failure(IllegalStateException("세션 시작 시간을 찾을 수 없습니다"))
+            return Result.failure(SessionException.MissingStartTime())
         }
 
         val session = TimerSession(
@@ -69,7 +69,7 @@ class ManageTimerSessionUseCase @Inject constructor(
         initialDuration: Duration,
     ): Result<Unit> {
         if (startTime == null) {
-            return Result.failure(IllegalStateException("세션 시작 시간을 찾을 수 없습니다"))
+            return Result.failure(SessionException.MissingStartTime())
         }
 
         val session = TimerSession(

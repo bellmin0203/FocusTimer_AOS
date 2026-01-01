@@ -7,8 +7,10 @@ import com.jm.focustimer.domain.repository.SettingsRepository
 import com.jm.focustimer.domain.usecase.preset.ManagePresetUseCase
 import com.jm.focustimer.domain.usecase.preset.PresetException
 import com.jm.focustimer.domain.usecase.session.ManageTimerSessionUseCase
+import com.jm.focustimer.domain.usecase.session.SessionException
 import com.jm.focustimer.timer.model.HapticPattern
 import com.jm.focustimer.timer.model.PresetError
+import com.jm.focustimer.timer.model.SessionError
 import com.jm.focustimer.timer.model.SetTimeError
 import com.jm.focustimer.timer.model.TimerError
 import com.jm.focustimer.timer.model.TimerIntent
@@ -245,6 +247,7 @@ class TimerViewModel @Inject constructor(
                                         },
                                         onFailure = { error ->
                                             LogUtil.e("세션 자동 완료 업데이트 실패", error)
+                                            emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, true)))
                                         }
                                     )
                                 }
@@ -358,13 +361,10 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("세션 저장 실패", error)
-                    emitSideEffect(
-                        TimerSideEffect.ShowSnackbar(
-                            R.string.snackbar_session_save_failed
-                        )
-                    )
+                    // 세션 저장 실패 시 알림 표시
+                    emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, false)))
 
-                    // 세션 저장 실패 시에도 타이머는 시작
+                    // 세션 저장 실패 시에도 타이머는 시작 (사용자 경험 우선)
                     timerManager.start(
                         initialDuration = _uiState.value.initialTime,
                         duration = _uiState.value.remainingTime,
@@ -432,6 +432,8 @@ class TimerViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         LogUtil.e("세션 업데이트 실패", error)
+                        // 에러 발생 시 UI에 알림
+                        emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, true)))
                     }
                 )
             }
@@ -479,11 +481,7 @@ class TimerViewModel @Inject constructor(
                         },
                         onFailure = { error ->
                             LogUtil.e("세션 초과 시간 업데이트 실패", error)
-                            emitSideEffect(
-                                TimerSideEffect.ShowSnackbar(
-                                    R.string.snackbar_session_update_failed
-                                )
-                            )
+                            emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, true)))
                         }
                     )
                 }
@@ -759,6 +757,23 @@ class TimerViewModel @Inject constructor(
         return if (remainingTime > Duration.ZERO) {
             (remainingTime / MAX_TIME).coerceIn(0.0, 1.0).toFloat()
         } else 0f
+    }
+
+    /**
+     * SessionException을 TimerError로 변환
+     */
+    private fun mapSessionExceptionToTimerError(
+        error: Throwable,
+        isUpdate: Boolean
+    ): TimerError.Session {
+        val code = when (error) {
+            is SessionException.SessionNotFound -> SessionError.NotFound
+            is SessionException.InvalidDuration -> SessionError.InvalidDuration
+            is SessionException.InvalidTimeRange -> SessionError.InvalidTimeRange
+            is SessionException.MissingStartTime -> SessionError.MissingStartTime
+            else -> if (isUpdate) SessionError.FailUpdate else SessionError.FailSave
+        }
+        return TimerError.Session(code)
     }
 
     /**

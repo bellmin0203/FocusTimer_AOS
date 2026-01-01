@@ -13,7 +13,7 @@ internal object TimerSessionValidator {
      * 세션의 유효성을 검증합니다.
      *
      * @param session 검증할 세션
-     * @throws IllegalArgumentException 유효하지 않은 세션인 경우
+     * @throws SessionException 유효하지 않은 세션인 경우
      */
     fun validate(session: TimerSession) {
         validateDuration(session.duration.inWholeMilliseconds)
@@ -24,11 +24,11 @@ internal object TimerSessionValidator {
      * 지속 시간의 유효성을 검증합니다.
      *
      * @param durationMillis 지속 시간 (밀리초)
-     * @throws IllegalArgumentException 지속 시간이 0 이하인 경우
+     * @throws SessionException.InvalidDuration 지속 시간이 0 이하인 경우
      */
     private fun validateDuration(durationMillis: Long) {
         if (durationMillis <= 0) {
-            throw IllegalArgumentException("세션 지속 시간은 0보다 커야 합니다.")
+            throw SessionException.InvalidDuration()
         }
     }
 
@@ -37,12 +37,12 @@ internal object TimerSessionValidator {
      *
      * @param startTimeMillis 시작 시간 (밀리초)
      * @param endTimeMillis 종료 시간 (밀리초, nullable)
-     * @throws IllegalArgumentException 종료 시간이 시작 시간보다 이른 경우
+     * @throws SessionException.InvalidTimeRange 종료 시간이 시작 시간보다 이른 경우
      */
     private fun validateTimeRange(startTimeMillis: Long, endTimeMillis: Long?) {
         endTimeMillis?.let { endTime ->
             if (endTime < startTimeMillis) {
-                throw IllegalArgumentException("세션 종료 시간은 시작 시간보다 늦어야 합니다.")
+                throw SessionException.InvalidTimeRange()
             }
         }
     }
