@@ -26,6 +26,7 @@ dependencies {
     implementation(projects.feature.timer)
     implementation(projects.feature.stats)
     implementation(projects.feature.setting)
+    implementation(projects.feature.widget)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

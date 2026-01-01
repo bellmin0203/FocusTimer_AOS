@@ -49,4 +49,5 @@ include(
     ":feature:timer",
     ":feature:stats",
     ":feature:setting",
+    ":feature:widget",
 )
