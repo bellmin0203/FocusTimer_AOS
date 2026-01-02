@@ -23,17 +23,20 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.preview.ExperimentalGlancePreviewApi
+import androidx.glance.preview.Preview
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 
 /**
  * Focus Timer Glance Widget
- * 
+ *
  * Jetpack Glance를 사용한 타이머 위젯
  */
 class FocusTimerWidget : GlanceAppWidget() {
 
-    override val stateDefinition = androidx.glance.state.PreferencesGlanceStateDefinition
+    override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -46,7 +49,7 @@ class FocusTimerWidget : GlanceAppWidget() {
 
 /**
  * 위젯 메인 컨텐츠 (Composable)
- * 
+ *
  * Glance는 일반 Compose의 State를 지원하지 않으므로,
  * 위젯 업데이트 시마다 DataStore에서 상태를 직접 읽어옵니다.
  */
@@ -54,18 +57,18 @@ class FocusTimerWidget : GlanceAppWidget() {
 private fun WidgetContent(context: Context) {
     // Glance 위젯은 currentState를 사용하여 DataStore에서 상태를 동기적으로 읽습니다
     val preferences = currentState<Preferences>()
-    
+
     val status = preferences[stringPreferencesKey("status")] ?: "idle"
     val remainingTime = preferences[stringPreferencesKey("remaining_time")] ?: "00:00"
     val overtime = preferences[stringPreferencesKey("overtime")] ?: "+00:00"
-    
+
     val widgetState = when (status) {
         "running" -> FocusTimerWidgetState.Running(remainingTime)
         "paused" -> FocusTimerWidgetState.Paused(remainingTime)
         "completed" -> FocusTimerWidgetState.Completed(overtime)
         else -> FocusTimerWidgetState.Idle
     }
-    
+
     FocusTimerWidgetContent(
         state = widgetState,
         onStartClick = { actionStartTimer(context) },
@@ -100,10 +103,12 @@ private fun FocusTimerWidgetContent(
                 remainingTime = state.remainingTime,
                 onPauseClick = onPauseClick
             )
+
             is FocusTimerWidgetState.Paused -> PausedContent(
                 remainingTime = state.remainingTime,
                 onResumeClick = onResumeClick
             )
+
             is FocusTimerWidgetState.Completed -> CompletedContent(
                 overtime = state.overtime,
                 onStartClick = onStartClick
@@ -129,9 +134,9 @@ private fun IdleContent(onStartClick: () -> Unit) {
                 color = GlanceTheme.colors.onBackground
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(8.dp))
-        
+
         Text(
             text = "00:00",
             style = TextStyle(
@@ -139,9 +144,9 @@ private fun IdleContent(onStartClick: () -> Unit) {
                 color = GlanceTheme.colors.primary
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(16.dp))
-        
+
         // 시작 버튼
         Box(
             modifier = GlanceModifier
@@ -181,9 +186,9 @@ private fun RunningContent(
                 color = GlanceTheme.colors.onBackground
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(8.dp))
-        
+
         Text(
             text = remainingTime,
             style = TextStyle(
@@ -191,9 +196,9 @@ private fun RunningContent(
                 color = GlanceTheme.colors.primary
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(16.dp))
-        
+
         // 일시정지 버튼
         Box(
             modifier = GlanceModifier
@@ -233,9 +238,9 @@ private fun PausedContent(
                 color = GlanceTheme.colors.onBackground
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(8.dp))
-        
+
         Text(
             text = remainingTime,
             style = TextStyle(
@@ -243,9 +248,9 @@ private fun PausedContent(
                 color = GlanceTheme.colors.secondary
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(16.dp))
-        
+
         // 재개 버튼
         Box(
             modifier = GlanceModifier
@@ -285,9 +290,9 @@ private fun CompletedContent(
                 color = GlanceTheme.colors.tertiary
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(8.dp))
-        
+
         Text(
             text = overtime,
             style = TextStyle(
@@ -295,9 +300,9 @@ private fun CompletedContent(
                 color = GlanceTheme.colors.tertiary
             )
         )
-        
+
         Spacer(modifier = GlanceModifier.height(16.dp))
-        
+
         // 다시 시작 버튼
         Box(
             modifier = GlanceModifier
@@ -315,4 +320,41 @@ private fun CompletedContent(
             )
         }
     }
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+private fun PreviewIdleContent() {
+    IdleContent(onStartClick = {})
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+private fun PreviewRunningContent() {
+    RunningContent(
+        remainingTime = "25:00",
+        onPauseClick = {}
+    )
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+private fun PreviewPausedContent() {
+    PausedContent(
+        remainingTime = "20:00",
+        onResumeClick = {}
+    )
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+private fun PreviewCompletedContent() {
+    CompletedContent(
+        overtime = "+01:30",
+        onStartClick = {}
+    )
 }

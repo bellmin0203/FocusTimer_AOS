@@ -18,6 +18,8 @@ dependencies {
     // Glance (Widget)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
+    debugImplementation(libs.glance.preview)
+    debugImplementation(libs.glance.appwidget.preview)
 
     // Work Manager for periodic updates
     implementation(libs.work.runtime.ktx)
