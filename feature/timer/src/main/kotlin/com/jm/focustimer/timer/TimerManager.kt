@@ -47,6 +47,7 @@ interface TimerManager {
     fun resume()
     fun stop(initialDuration: Duration)
     fun cancelAll()
+    fun setPresetColorIndex(colorIndex: Int)
 }
 
 @Singleton
@@ -247,4 +248,8 @@ class TimerManagerImpl @Inject constructor(
         reminderThresholds = emptyList(),
         isShowReminder = false
     )
+
+    override fun setPresetColorIndex(colorIndex: Int) {
+        _timerState.update { it.copy(presetColorIndex = colorIndex) }
+    }
 }

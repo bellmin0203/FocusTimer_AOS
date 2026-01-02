@@ -563,6 +563,8 @@ class TimerViewModel @Inject constructor(
                     LogUtil.d("프리셋 선택됨, name=${preset.name}, duration=${preset.duration}")
                     handleSetTime(preset.duration)
                     _uiState.update { it.copy(selectedPresetId = presetId) }
+                    // TimerManager에 preset color index 설정
+                    timerManager.setPresetColorIndex(preset.colorIndex)
                     emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_selected,

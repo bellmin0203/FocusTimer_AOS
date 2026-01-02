@@ -84,7 +84,8 @@ class TimerService : Service() {
         startForeground(TimerNotificationHelper.NOTIFICATION_ID, notification)
         
         // 위젯 업데이트: 타이머 시작
-        widgetUpdater.onTimerStarted(duration)
+        val presetColorIndex = timerManager.timerState.value.presetColorIndex
+        widgetUpdater.onTimerStarted(duration, presetColorIndex)
     }
 
     /**
@@ -95,8 +96,8 @@ class TimerService : Service() {
         timerManager.pause()
         
         // 위젯 업데이트: 타이머 일시정지
-        val remainingTime = timerManager.timerState.value.remainingTime
-        widgetUpdater.onTimerPaused(remainingTime)
+        val state = timerManager.timerState.value
+        widgetUpdater.onTimerPaused(state.remainingTime, state.presetColorIndex)
     }
 
     /**
@@ -107,8 +108,8 @@ class TimerService : Service() {
         timerManager.resume()
         
         // 위젯 업데이트: 타이머 재개
-        val remainingTime = timerManager.timerState.value.remainingTime
-        widgetUpdater.onTimerResumed(remainingTime)
+        val state = timerManager.timerState.value
+        widgetUpdater.onTimerResumed(state.remainingTime, state.presetColorIndex)
     }
 
     /**
@@ -116,10 +117,11 @@ class TimerService : Service() {
      */
     private fun handleStop() {
         LogUtil.d("TimerService handleStop")
+        val presetColorIndex = timerManager.timerState.value.presetColorIndex
         timerManager.stop(timerManager.timerState.value.initialDuration)
 
         // 위젯 업데이트: 타이머 중지
-        widgetUpdater.onTimerStopped()
+        widgetUpdater.onTimerStopped(presetColorIndex)
         
         // Foreground 상태 해제 및 서비스 종료
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -151,7 +153,7 @@ class TimerService : Service() {
                         )
                         
                         // 위젯 업데이트: 타이머 틱
-                        widgetUpdater.onTimerTick(state.remainingTime)
+                        widgetUpdater.onTimerTick(state.remainingTime, state.presetColorIndex)
                     }
                     
                     is TimerStatus.Paused -> {
@@ -168,7 +170,7 @@ class TimerService : Service() {
                         )
                         
                         // 위젯 업데이트: 일시정지 (이미 handlePause에서 처리되지만 안전장치)
-                        widgetUpdater.onTimerPaused(state.remainingTime)
+                        widgetUpdater.onTimerPaused(state.remainingTime, state.presetColorIndex)
                     }
                     
                     is TimerStatus.Completed -> {
@@ -183,7 +185,7 @@ class TimerService : Service() {
                         )
                         
                         // 위젯 업데이트: 타이머 완료
-                        widgetUpdater.onTimerCompleted(state.overtime)
+                        widgetUpdater.onTimerCompleted(state.overtime, state.presetColorIndex)
                     }
                     
                     is TimerStatus.Idle -> {
@@ -191,7 +193,7 @@ class TimerService : Service() {
                         LogUtil.d("TimerService Idle 상태 감지, 서비스 종료 확인")
                         
                         // 위젯 업데이트: 타이머 중지
-                        widgetUpdater.onTimerStopped()
+                        widgetUpdater.onTimerStopped(state.presetColorIndex)
                     }
                 }
             }

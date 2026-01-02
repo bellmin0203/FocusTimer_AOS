@@ -26,46 +26,51 @@ class FocusTimerWidgetStateManager @Inject constructor(
         private val KEY_STATUS = stringPreferencesKey("status")
         private val KEY_REMAINING_TIME = stringPreferencesKey("remaining_time")
         private val KEY_OVERTIME = stringPreferencesKey("overtime")
+        private val KEY_PRESET_COLOR_INDEX = stringPreferencesKey("preset_color_index")
     }
 
     /**
      * 위젯 상태를 Idle로 설정
      */
-    suspend fun setIdle() {
+    suspend fun setIdle(presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = "idle"
             prefs[KEY_REMAINING_TIME] = "00:00"
             prefs[KEY_OVERTIME] = "+00:00"
+            prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
     }
 
     /**
      * 위젯 상태를 Running으로 설정
      */
-    suspend fun setRunning(remainingTime: Duration) {
+    suspend fun setRunning(remainingTime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = "running"
             prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
+            prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
     }
 
     /**
      * 위젯 상태를 Paused로 설정
      */
-    suspend fun setPaused(remainingTime: Duration) {
+    suspend fun setPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = "paused"
             prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
+            prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
     }
 
     /**
      * 위젯 상태를 Completed로 설정
      */
-    suspend fun setCompleted(overtime: Duration) {
+    suspend fun setCompleted(overtime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = "completed"
             prefs[KEY_OVERTIME] = formatDuration(overtime, includeSign = true)
+            prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
     }
 

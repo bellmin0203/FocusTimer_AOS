@@ -35,6 +35,7 @@ data class TimerState(
     val reminderThresholds: List<Duration> = emptyList(),
     val overtime: Duration = Duration.ZERO,
     val isShowReminder: Boolean = false,
+    val presetColorIndex: Int = 0,
 ) {
     val isRunning: Boolean get() = status is TimerStatus.Running
     val isPaused: Boolean get() = status is TimerStatus.Paused

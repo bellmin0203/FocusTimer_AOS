@@ -32,9 +32,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 시작됨
      */
-    fun onTimerStarted(remainingTime: Duration) {
+    fun onTimerStarted(remainingTime: Duration, presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setRunning(remainingTime)
+            stateManager.setRunning(remainingTime, presetColorIndex)
             updateWidget()
         }
     }
@@ -42,9 +42,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 일시정지됨
      */
-    fun onTimerPaused(remainingTime: Duration) {
+    fun onTimerPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setPaused(remainingTime)
+            stateManager.setPaused(remainingTime, presetColorIndex)
             updateWidget()
         }
     }
@@ -52,9 +52,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 재개됨
      */
-    fun onTimerResumed(remainingTime: Duration) {
+    fun onTimerResumed(remainingTime: Duration, presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setRunning(remainingTime)
+            stateManager.setRunning(remainingTime, presetColorIndex)
             updateWidget()
         }
     }
@@ -62,9 +62,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 완료됨
      */
-    fun onTimerCompleted(overtime: Duration = Duration.ZERO) {
+    fun onTimerCompleted(overtime: Duration = Duration.ZERO, presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setCompleted(overtime)
+            stateManager.setCompleted(overtime, presetColorIndex)
             updateWidget()
         }
     }
@@ -72,9 +72,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 중지됨 (리셋)
      */
-    fun onTimerStopped() {
+    fun onTimerStopped(presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setIdle()
+            stateManager.setIdle(presetColorIndex)
             updateWidget()
         }
     }
@@ -85,14 +85,14 @@ class FocusTimerWidgetUpdater @Inject constructor(
      * 매초마다 위젯을 업데이트하는 것은 부담이 될 수 있으므로
      * throttle을 적용하여 5초마다 한 번씩만 업데이트합니다.
      */
-    fun onTimerTick(remainingTime: Duration) {
+    fun onTimerTick(remainingTime: Duration, presetColorIndex: Int = 0) {
         val currentTime = System.currentTimeMillis()
         
 //        // throttle: 마지막 업데이트로부터 일정 시간이 지났을 때만 업데이트
 //        if (currentTime - lastWidgetUpdateTime < widgetUpdateInterval) {
 //            // 상태는 업데이트하지만 위젯 UI는 업데이트하지 않음
 //            scope.launch {
-//                stateManager.setRunning(remainingTime)
+//                stateManager.setRunning(remainingTime, presetColorIndex)
 //            }
 //            return
 //        }
@@ -100,7 +100,7 @@ class FocusTimerWidgetUpdater @Inject constructor(
         lastWidgetUpdateTime = currentTime
         
         scope.launch {
-            stateManager.setRunning(remainingTime)
+            stateManager.setRunning(remainingTime, presetColorIndex)
             updateWidget()
         }
     }

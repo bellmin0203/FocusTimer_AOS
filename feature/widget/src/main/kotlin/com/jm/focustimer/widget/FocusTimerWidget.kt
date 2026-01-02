@@ -2,6 +2,7 @@ package com.jm.focustimer.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -31,6 +32,8 @@ import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
+import com.jm.focustimer.designsystem.theme.TimerColorPresets
 import com.jm.focustimer.widget.theme.FocusTimerGlanceTheme
 
 /**
@@ -65,6 +68,8 @@ private fun WidgetContent(context: Context) {
     val status = preferences[stringPreferencesKey("status")] ?: "idle"
     val remainingTime = preferences[stringPreferencesKey("remaining_time")] ?: "00:00"
     val overtime = preferences[stringPreferencesKey("overtime")] ?: "+00:00"
+    val presetColorIndex =
+        preferences[stringPreferencesKey("preset_color_index")]?.toIntOrNull() ?: 0
 
     val widgetState = when (status) {
         "running" -> FocusTimerWidgetState.Running(remainingTime)
@@ -73,8 +78,13 @@ private fun WidgetContent(context: Context) {
         else -> FocusTimerWidgetState.Idle
     }
 
+    // 선택된 프리셋의 색상 가져오기
+    val presetColor = TimerColorPresets.lightPresets.getOrNull(presetColorIndex)
+        ?: TimerColorPresets.lightPresets[0]
+
     FocusTimerWidgetContent(
         state = widgetState,
+        presetColor = presetColor.progressColor,
         onStartClick = { actionStartTimer(context) },
         onPauseClick = { actionPauseTimer(context) },
         onResumeClick = { actionResumeTimer(context) },
@@ -88,6 +98,7 @@ private fun WidgetContent(context: Context) {
 @Composable
 private fun FocusTimerWidgetContent(
     state: FocusTimerWidgetState,
+    presetColor: Color,
     onStartClick: () -> Unit,
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
@@ -102,18 +113,21 @@ private fun FocusTimerWidgetContent(
         contentAlignment = Alignment.Center
     ) {
         when (state) {
-            is FocusTimerWidgetState.Idle -> IdleContent(onStartClick)
+            is FocusTimerWidgetState.Idle -> IdleContent(presetColor, onStartClick)
             is FocusTimerWidgetState.Running -> RunningContent(
+                presetColor = presetColor,
                 remainingTime = state.remainingTime,
                 onPauseClick = onPauseClick
             )
 
             is FocusTimerWidgetState.Paused -> PausedContent(
+                presetColor = presetColor,
                 remainingTime = state.remainingTime,
                 onResumeClick = onResumeClick
             )
 
             is FocusTimerWidgetState.Completed -> CompletedContent(
+                presetColor = presetColor,
                 overtime = state.overtime,
                 onStartClick = onStartClick
             )
@@ -125,7 +139,7 @@ private fun FocusTimerWidgetContent(
  * Idle 상태 컨텐츠
  */
 @Composable
-private fun IdleContent(onStartClick: () -> Unit) {
+private fun IdleContent(presetColor: Color, onStartClick: () -> Unit) {
     val context = LocalContext.current
     Column(
         modifier = GlanceModifier.fillMaxSize(),
@@ -158,7 +172,8 @@ private fun IdleContent(onStartClick: () -> Unit) {
             contentDescription = context.getString(R.string.widget_start),
             onClick = action(block = onStartClick),
             modifier = GlanceModifier.size(48.dp),
-            contentColor = GlanceTheme.colors.onSecondary
+            contentColor = GlanceTheme.colors.onSecondary,
+            backgroundColor = ColorProvider(presetColor)
         )
     }
 }
@@ -168,6 +183,7 @@ private fun IdleContent(onStartClick: () -> Unit) {
  */
 @Composable
 private fun RunningContent(
+    presetColor: Color,
     remainingTime: String,
     onPauseClick: () -> Unit
 ) {
@@ -203,7 +219,7 @@ private fun RunningContent(
             contentDescription = context.getString(R.string.widget_pause),
             onClick = action(block = onPauseClick),
             modifier = GlanceModifier.size(48.dp),
-            backgroundColor = GlanceTheme.colors.primary,
+            backgroundColor = ColorProvider(presetColor),
             contentColor = GlanceTheme.colors.onSecondary
         )
     }
@@ -214,6 +230,7 @@ private fun RunningContent(
  */
 @Composable
 private fun PausedContent(
+    presetColor: Color,
     remainingTime: String,
     onResumeClick: () -> Unit
 ) {
@@ -249,7 +266,7 @@ private fun PausedContent(
             contentDescription = context.getString(R.string.widget_resume),
             onClick = action(block = onResumeClick),
             modifier = GlanceModifier.size(48.dp),
-            backgroundColor = GlanceTheme.colors.primary,
+            backgroundColor = ColorProvider(presetColor),
             contentColor = GlanceTheme.colors.onSecondary
         )
     }
@@ -260,6 +277,7 @@ private fun PausedContent(
  */
 @Composable
 private fun CompletedContent(
+    presetColor: Color,
     overtime: String,
     onStartClick: () -> Unit
 ) {
@@ -295,7 +313,7 @@ private fun CompletedContent(
             contentDescription = context.getString(R.string.widget_start),
             onClick = action(block = onStartClick),
             modifier = GlanceModifier.size(48.dp),
-            backgroundColor = GlanceTheme.colors.primary,
+            backgroundColor = ColorProvider(presetColor),
             contentColor = GlanceTheme.colors.onSecondary
         )
     }
@@ -306,7 +324,9 @@ private fun CompletedContent(
 @Composable
 private fun PreviewIdleContent() {
     FocusTimerGlanceTheme {
-        IdleContent(onStartClick = {})
+        IdleContent(
+            presetColor = TimerColorPresets.lightPresets[1].progressColor,
+            onStartClick = {})
     }
 }
 
@@ -316,6 +336,7 @@ private fun PreviewIdleContent() {
 private fun PreviewRunningContent() {
     FocusTimerGlanceTheme {
         RunningContent(
+            presetColor = TimerColorPresets.lightPresets[1].progressColor,
             remainingTime = "25:00",
             onPauseClick = {}
         )
@@ -328,6 +349,7 @@ private fun PreviewRunningContent() {
 private fun PreviewPausedContent() {
     FocusTimerGlanceTheme {
         PausedContent(
+            presetColor = TimerColorPresets.lightPresets[2].progressColor,
             remainingTime = "20:00",
             onResumeClick = {}
         )
@@ -340,6 +362,7 @@ private fun PreviewPausedContent() {
 private fun PreviewCompletedContent() {
     FocusTimerGlanceTheme {
         CompletedContent(
+            presetColor = TimerColorPresets.lightPresets[3].progressColor,
             overtime = "+01:30",
             onStartClick = {}
         )
