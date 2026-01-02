@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 // 다크 테마 ColorScheme
-private val DarkColorScheme = darkColorScheme(
+val DarkColorScheme = darkColorScheme(
     // Primary - 브랜드 메인 컬러 (다크 모드에서는 밝은 Green 유지)
     primary = PrimaryGreen,
     onPrimary = DarkBackground,
@@ -49,7 +49,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 // 라이트 테마 ColorScheme
-private val LightColorScheme = lightColorScheme(
+val LightColorScheme = lightColorScheme(
     // Primary - 브랜드 메인 컬러 (라이트 모드 가독성 최적화)
     primary = PrimaryGreenLight,
     onPrimary = Color.White,

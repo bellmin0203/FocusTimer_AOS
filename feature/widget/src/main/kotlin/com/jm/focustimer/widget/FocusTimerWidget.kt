@@ -9,9 +9,12 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.action.action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
@@ -28,6 +31,7 @@ import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.jm.focustimer.widget.theme.FocusTimerGlanceTheme
 
 /**
  * Focus Timer Glance Widget
@@ -40,7 +44,7 @@ class FocusTimerWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            GlanceTheme {
+            FocusTimerGlanceTheme {
                 WidgetContent(context)
             }
         }
@@ -122,13 +126,14 @@ private fun FocusTimerWidgetContent(
  */
 @Composable
 private fun IdleContent(onStartClick: () -> Unit) {
+    val context = LocalContext.current
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Focus Timer",
+            text = context.getString(R.string.widget_title),
             style = TextStyle(
                 fontSize = 18.sp,
                 color = GlanceTheme.colors.onBackground
@@ -138,7 +143,7 @@ private fun IdleContent(onStartClick: () -> Unit) {
         Spacer(modifier = GlanceModifier.height(8.dp))
 
         Text(
-            text = "00:00",
+            text = context.getString(R.string.widget_default_time),
             style = TextStyle(
                 fontSize = 32.sp,
                 color = GlanceTheme.colors.primary
@@ -148,21 +153,13 @@ private fun IdleContent(onStartClick: () -> Unit) {
         Spacer(modifier = GlanceModifier.height(16.dp))
 
         // 시작 버튼
-        Box(
-            modifier = GlanceModifier
-                .size(48.dp)
-                .background(GlanceTheme.colors.primary)
-                .clickable(onClick = action(block = onStartClick)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "▶",
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    color = GlanceTheme.colors.onPrimary
-                )
-            )
-        }
+        CircleIconButton(
+            imageProvider = ImageProvider(R.drawable.ic_widget_play),
+            contentDescription = context.getString(R.string.widget_start),
+            onClick = action(block = onStartClick),
+            modifier = GlanceModifier.size(48.dp),
+            contentColor = GlanceTheme.colors.onSecondary
+        )
     }
 }
 
@@ -174,13 +171,14 @@ private fun RunningContent(
     remainingTime: String,
     onPauseClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "진행 중",
+            text = context.getString(R.string.widget_status_running),
             style = TextStyle(
                 fontSize = 14.sp,
                 color = GlanceTheme.colors.onBackground
@@ -200,21 +198,14 @@ private fun RunningContent(
         Spacer(modifier = GlanceModifier.height(16.dp))
 
         // 일시정지 버튼
-        Box(
-            modifier = GlanceModifier
-                .size(48.dp)
-                .background(GlanceTheme.colors.secondary)
-                .clickable(onClick = action(block = onPauseClick)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "⏸",
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    color = GlanceTheme.colors.onSecondary
-                )
-            )
-        }
+        CircleIconButton(
+            imageProvider = ImageProvider(R.drawable.ic_widget_pause),
+            contentDescription = context.getString(R.string.widget_pause),
+            onClick = action(block = onPauseClick),
+            modifier = GlanceModifier.size(48.dp),
+            backgroundColor = GlanceTheme.colors.primary,
+            contentColor = GlanceTheme.colors.onSecondary
+        )
     }
 }
 
@@ -226,13 +217,14 @@ private fun PausedContent(
     remainingTime: String,
     onResumeClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "일시정지",
+            text = context.getString(R.string.widget_status_paused),
             style = TextStyle(
                 fontSize = 14.sp,
                 color = GlanceTheme.colors.onBackground
@@ -252,21 +244,14 @@ private fun PausedContent(
         Spacer(modifier = GlanceModifier.height(16.dp))
 
         // 재개 버튼
-        Box(
-            modifier = GlanceModifier
-                .size(48.dp)
-                .background(GlanceTheme.colors.primary)
-                .clickable(onClick = action(block = onResumeClick)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "▶",
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    color = GlanceTheme.colors.onPrimary
-                )
-            )
-        }
+        CircleIconButton(
+            imageProvider = ImageProvider(R.drawable.ic_widget_play),
+            contentDescription = context.getString(R.string.widget_resume),
+            onClick = action(block = onResumeClick),
+            modifier = GlanceModifier.size(48.dp),
+            backgroundColor = GlanceTheme.colors.primary,
+            contentColor = GlanceTheme.colors.onSecondary
+        )
     }
 }
 
@@ -278,13 +263,14 @@ private fun CompletedContent(
     overtime: String,
     onStartClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "완료!",
+            text = context.getString(R.string.widget_status_completed),
             style = TextStyle(
                 fontSize = 18.sp,
                 color = GlanceTheme.colors.tertiary
@@ -304,21 +290,14 @@ private fun CompletedContent(
         Spacer(modifier = GlanceModifier.height(16.dp))
 
         // 다시 시작 버튼
-        Box(
-            modifier = GlanceModifier
-                .size(48.dp)
-                .background(GlanceTheme.colors.primary)
-                .clickable(onClick = action(block = onStartClick)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "▶",
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    color = GlanceTheme.colors.onPrimary
-                )
-            )
-        }
+        CircleIconButton(
+            imageProvider = ImageProvider(R.drawable.ic_widget_play),
+            contentDescription = context.getString(R.string.widget_start),
+            onClick = action(block = onStartClick),
+            modifier = GlanceModifier.size(48.dp),
+            backgroundColor = GlanceTheme.colors.primary,
+            contentColor = GlanceTheme.colors.onSecondary
+        )
     }
 }
 
@@ -326,35 +305,43 @@ private fun CompletedContent(
 @Preview
 @Composable
 private fun PreviewIdleContent() {
-    IdleContent(onStartClick = {})
+    FocusTimerGlanceTheme {
+        IdleContent(onStartClick = {})
+    }
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview
 @Composable
 private fun PreviewRunningContent() {
-    RunningContent(
-        remainingTime = "25:00",
-        onPauseClick = {}
-    )
+    FocusTimerGlanceTheme {
+        RunningContent(
+            remainingTime = "25:00",
+            onPauseClick = {}
+        )
+    }
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview
 @Composable
 private fun PreviewPausedContent() {
-    PausedContent(
-        remainingTime = "20:00",
-        onResumeClick = {}
-    )
+    FocusTimerGlanceTheme {
+        PausedContent(
+            remainingTime = "20:00",
+            onResumeClick = {}
+        )
+    }
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview
 @Composable
 private fun PreviewCompletedContent() {
-    CompletedContent(
-        overtime = "+01:30",
-        onStartClick = {}
-    )
+    FocusTimerGlanceTheme {
+        CompletedContent(
+            overtime = "+01:30",
+            onStartClick = {}
+        )
+    }
 }
