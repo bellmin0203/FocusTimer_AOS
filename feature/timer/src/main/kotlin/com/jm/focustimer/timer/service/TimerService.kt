@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.IBinder
 import com.jm.focustimer.timer.TimerManager
 import com.jm.focustimer.timer.usecase.TimerStatus
+import com.jm.focustimer.widget.FocusTimerWidgetUpdater
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +30,9 @@ class TimerService : Service() {
 
     @Inject
     lateinit var timerManager: TimerManager
+    
+    @Inject
+    lateinit var widgetUpdater: FocusTimerWidgetUpdater
 
     private lateinit var notificationHelper: TimerNotificationHelper
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -78,6 +82,9 @@ class TimerService : Service() {
             isRunning = true
         )
         startForeground(TimerNotificationHelper.NOTIFICATION_ID, notification)
+        
+        // 위젯 업데이트: 타이머 시작
+        widgetUpdater.onTimerStarted(duration)
     }
 
     /**
@@ -86,6 +93,10 @@ class TimerService : Service() {
     private fun handlePause() {
         LogUtil.d("TimerService handlePause")
         timerManager.pause()
+        
+        // 위젯 업데이트: 타이머 일시정지
+        val remainingTime = timerManager.timerState.value.remainingTime
+        widgetUpdater.onTimerPaused(remainingTime)
     }
 
     /**
@@ -94,6 +105,10 @@ class TimerService : Service() {
     private fun handleResume() {
         LogUtil.d("TimerService handleResume")
         timerManager.resume()
+        
+        // 위젯 업데이트: 타이머 재개
+        val remainingTime = timerManager.timerState.value.remainingTime
+        widgetUpdater.onTimerResumed(remainingTime)
     }
 
     /**
@@ -103,6 +118,9 @@ class TimerService : Service() {
         LogUtil.d("TimerService handleStop")
         timerManager.stop(timerManager.timerState.value.initialDuration)
 
+        // 위젯 업데이트: 타이머 중지
+        widgetUpdater.onTimerStopped()
+        
         // Foreground 상태 해제 및 서비스 종료
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -111,7 +129,7 @@ class TimerService : Service() {
     /**
      * 타이머 상태 관찰
      *
-     * 타이머 상태가 변경될 때마다 알림을 업데이트합니다.
+     * 타이머 상태가 변경될 때마다 알림과 위젯을 업데이트합니다.
      */
     private fun observeTimerState() {
         timerStateJob = timerManager.timerState
@@ -131,6 +149,9 @@ class TimerService : Service() {
                             TimerNotificationHelper.NOTIFICATION_ID,
                             notification
                         )
+                        
+                        // 위젯 업데이트: 타이머 틱
+                        widgetUpdater.onTimerTick(state.remainingTime)
                     }
                     
                     is TimerStatus.Paused -> {
@@ -145,6 +166,9 @@ class TimerService : Service() {
                             TimerNotificationHelper.NOTIFICATION_ID,
                             notification
                         )
+                        
+                        // 위젯 업데이트: 일시정지 (이미 handlePause에서 처리되지만 안전장치)
+                        widgetUpdater.onTimerPaused(state.remainingTime)
                     }
                     
                     is TimerStatus.Completed -> {
@@ -157,11 +181,17 @@ class TimerService : Service() {
                             TimerNotificationHelper.NOTIFICATION_ID,
                             notification
                         )
+                        
+                        // 위젯 업데이트: 타이머 완료
+                        widgetUpdater.onTimerCompleted(state.overtime)
                     }
                     
                     is TimerStatus.Idle -> {
                         // Idle 상태면 서비스 종료 (이미 stop에서 처리되지만 안전장치)
                         LogUtil.d("TimerService Idle 상태 감지, 서비스 종료 확인")
+                        
+                        // 위젯 업데이트: 타이머 중지
+                        widgetUpdater.onTimerStopped()
                     }
                 }
             }

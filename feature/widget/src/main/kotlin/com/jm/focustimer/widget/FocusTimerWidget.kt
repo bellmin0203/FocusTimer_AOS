@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -12,6 +14,7 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -30,36 +33,46 @@ import androidx.glance.text.TextStyle
  */
 class FocusTimerWidget : GlanceAppWidget() {
 
+    override val stateDefinition = androidx.glance.state.PreferencesGlanceStateDefinition
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        // 위젯 상태 로드
-        val stateManager = FocusTimerWidgetStateManager(context)
-        val widgetState = loadWidgetState(stateManager)
-        
         provideContent {
             GlanceTheme {
-                FocusTimerWidgetContent(
-                    state = widgetState,
-                    onStartClick = { actionStartTimer(context) },
-                    onPauseClick = { actionPauseTimer(context) },
-                    onResumeClick = { actionResumeTimer(context) },
-                    onOpenAppClick = { actionOpenApp(context) }
-                )
+                WidgetContent(context)
             }
         }
     }
+}
 
-    /**
-     * 위젯 상태를 로드합니다
-     */
-    private suspend fun loadWidgetState(stateManager: FocusTimerWidgetStateManager): FocusTimerWidgetState {
-        // DataStore에서 저장된 상태를 로드
-        var currentState: FocusTimerWidgetState = FocusTimerWidgetState.Idle
-        stateManager.widgetState.collect { state ->
-            currentState = state
-            return@collect
-        }
-        return currentState
+/**
+ * 위젯 메인 컨텐츠 (Composable)
+ * 
+ * Glance는 일반 Compose의 State를 지원하지 않으므로,
+ * 위젯 업데이트 시마다 DataStore에서 상태를 직접 읽어옵니다.
+ */
+@Composable
+private fun WidgetContent(context: Context) {
+    // Glance 위젯은 currentState를 사용하여 DataStore에서 상태를 동기적으로 읽습니다
+    val preferences = currentState<Preferences>()
+    
+    val status = preferences[stringPreferencesKey("status")] ?: "idle"
+    val remainingTime = preferences[stringPreferencesKey("remaining_time")] ?: "00:00"
+    val overtime = preferences[stringPreferencesKey("overtime")] ?: "+00:00"
+    
+    val widgetState = when (status) {
+        "running" -> FocusTimerWidgetState.Running(remainingTime)
+        "paused" -> FocusTimerWidgetState.Paused(remainingTime)
+        "completed" -> FocusTimerWidgetState.Completed(overtime)
+        else -> FocusTimerWidgetState.Idle
     }
+    
+    FocusTimerWidgetContent(
+        state = widgetState,
+        onStartClick = { actionStartTimer(context) },
+        onPauseClick = { actionPauseTimer(context) },
+        onResumeClick = { actionResumeTimer(context) },
+        onOpenAppClick = { actionOpenApp(context) }
+    )
 }
 
 /**
