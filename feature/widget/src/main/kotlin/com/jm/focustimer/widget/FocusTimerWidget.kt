@@ -31,7 +31,6 @@ import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import com.jm.focustimer.designsystem.theme.TimerColorPresets
 import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_OVERTIME
 import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_PRESET_COLOR_INDEX
@@ -324,6 +323,12 @@ private fun CompletedContent(
             backgroundColor = ColorProvider(presetColor),
             contentColor = GlanceTheme.colors.onSecondary
         )
+    }
+}
+
+private class ColorProvider(val color: Color) : androidx.glance.unit.ColorProvider {
+    override fun getColor(context: Context): Color {
+        return color
     }
 }
 
