@@ -18,7 +18,7 @@ import kotlin.time.Duration
  */
 @Singleton
 class FocusTimerWidgetUpdater @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val stateManager: FocusTimerWidgetStateManager
 ) {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -47,7 +47,10 @@ class FocusTimerWidgetUpdater @Inject constructor(
      */
     fun onTimerPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setPaused(remainingTime, presetColorIndex)
+            stateManager.setPaused(
+                remainingTime = remainingTime,
+                presetColorIndex = presetColorIndex
+            )
             updateWidget()
         }
     }
@@ -70,7 +73,7 @@ class FocusTimerWidgetUpdater @Inject constructor(
      */
     fun onTimerCompleted(overtime: Duration = Duration.ZERO, presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setCompleted(overtime, presetColorIndex)
+            stateManager.setCompleted(overtime = overtime, presetColorIndex = presetColorIndex)
             updateWidget()
         }
     }
@@ -80,7 +83,7 @@ class FocusTimerWidgetUpdater @Inject constructor(
      */
     fun onTimerStopped(presetColorIndex: Int = 0) {
         scope.launch {
-            stateManager.setIdle(presetColorIndex)
+            stateManager.setIdle(presetColorIndex = presetColorIndex)
             updateWidget()
         }
     }

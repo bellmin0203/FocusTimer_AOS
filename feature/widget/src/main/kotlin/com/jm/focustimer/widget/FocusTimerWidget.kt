@@ -67,19 +67,21 @@ private fun WidgetContent(context: Context) {
     // Glance 위젯은 currentState를 사용하여 DataStore에서 상태를 동기적으로 읽습니다
     val preferences = currentState<Preferences>()
 
-    val status = preferences[KEY_STATUS] ?: "idle"
-    val remainingTime = preferences[KEY_REMAINING_TIME] ?: "00:00"
+    val status = preferences[KEY_STATUS] ?: FocusTimerWidgetState.IDLE
+    val remainingTime =
+        preferences[KEY_REMAINING_TIME] ?: FocusTimerWidgetState.DEFAULT_REMAINING_TIME
     val overtime = preferences[KEY_OVERTIME]
     val presetColorIndex =
         preferences[KEY_PRESET_COLOR_INDEX]?.toIntOrNull() ?: 0
 
     val widgetState = when (status) {
-        "running" -> {
+        FocusTimerWidgetState.RUNNING -> {
             if (overtime != null) FocusTimerWidgetState.Completed(overtime)
             else FocusTimerWidgetState.Running(remainingTime)
         }
-        "paused" -> FocusTimerWidgetState.Paused(remainingTime)
-        "completed" -> FocusTimerWidgetState.Completed(overtime ?: "+00:00")
+
+        FocusTimerWidgetState.PAUSED -> FocusTimerWidgetState.Paused(remainingTime)
+        FocusTimerWidgetState.COMPLETED -> FocusTimerWidgetState.Completed(overtime ?: "+00:00")
         else -> FocusTimerWidgetState.Idle
     }
 

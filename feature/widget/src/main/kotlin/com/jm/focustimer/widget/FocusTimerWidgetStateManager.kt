@@ -20,7 +20,7 @@ import kotlin.time.Duration
  */
 @Singleton
 class FocusTimerWidgetStateManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     companion object {
@@ -35,8 +35,8 @@ class FocusTimerWidgetStateManager @Inject constructor(
      */
     suspend fun setIdle(presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
-            prefs[KEY_STATUS] = "idle"
-            prefs[KEY_REMAINING_TIME] = "00:00"
+            prefs[KEY_STATUS] = FocusTimerWidgetState.IDLE
+            prefs[KEY_REMAINING_TIME] = FocusTimerWidgetState.DEFAULT_REMAINING_TIME
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
             prefs.remove(KEY_OVERTIME)
         }
@@ -45,9 +45,13 @@ class FocusTimerWidgetStateManager @Inject constructor(
     /**
      * 위젯 상태를 Running으로 설정
      */
-    suspend fun setRunning(remainingTime: Duration, overtime: Duration = Duration.ZERO, presetColorIndex: Int = 0) {
+    suspend fun setRunning(
+        remainingTime: Duration,
+        overtime: Duration = Duration.ZERO,
+        presetColorIndex: Int = 0
+    ) {
         updateAllWidgets { prefs ->
-            prefs[KEY_STATUS] = "running"
+            prefs[KEY_STATUS] = FocusTimerWidgetState.RUNNING
             prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
 
@@ -62,7 +66,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
      */
     suspend fun setPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
-            prefs[KEY_STATUS] = "paused"
+            prefs[KEY_STATUS] = FocusTimerWidgetState.PAUSED
             prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
@@ -73,7 +77,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
      */
     suspend fun setCompleted(overtime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
-            prefs[KEY_STATUS] = "completed"
+            prefs[KEY_STATUS] = FocusTimerWidgetState.COMPLETED
             prefs[KEY_OVERTIME] = formatDuration(overtime, includeSign = true)
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }

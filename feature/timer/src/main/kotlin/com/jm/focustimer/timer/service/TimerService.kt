@@ -1,5 +1,6 @@
 package com.jm.focustimer.timer.service
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -30,23 +31,23 @@ class TimerService : Service() {
 
     @Inject
     lateinit var timerManager: TimerManager
-    
+
     @Inject
     lateinit var widgetUpdater: FocusTimerWidgetUpdater
 
     private lateinit var notificationHelper: TimerNotificationHelper
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    
+
     private var timerStateJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
         LogUtil.d("TimerService onCreate")
-        
+
         // 알림 헬퍼 초기화
         notificationHelper = TimerNotificationHelper(this)
         notificationHelper.createNotificationChannel()
-        
+
         // 타이머 상태 관찰 시작
         observeTimerState()
     }
@@ -60,6 +61,7 @@ class TimerService : Service() {
                 val duration = durationMillis.milliseconds
                 handleStart(duration)
             }
+
             TimerServiceAction.ACTION_PAUSE -> handlePause()
             TimerServiceAction.ACTION_RESUME -> handleResume()
             TimerServiceAction.ACTION_STOP -> handleStop()
@@ -75,14 +77,14 @@ class TimerService : Service() {
      */
     private fun handleStart(duration: Duration) {
         LogUtil.d("TimerService handleStart: duration=$duration")
-        
+
         // Foreground Service 시작
         val notification = notificationHelper.createRunningNotification(
             remainingTime = duration,
             isRunning = true
         )
         startForeground(TimerNotificationHelper.NOTIFICATION_ID, notification)
-        
+
         // 위젯 업데이트: 타이머 시작
         val presetColorIndex = timerManager.timerState.value.presetColorIndex
         widgetUpdater.onTimerStarted(duration, presetColorIndex)
@@ -94,7 +96,7 @@ class TimerService : Service() {
     private fun handlePause() {
         LogUtil.d("TimerService handlePause")
         timerManager.pause()
-        
+
         // 위젯 업데이트: 타이머 일시정지
         val state = timerManager.timerState.value
         widgetUpdater.onTimerPaused(state.remainingTime, state.presetColorIndex)
@@ -106,7 +108,7 @@ class TimerService : Service() {
     private fun handleResume() {
         LogUtil.d("TimerService handleResume")
         timerManager.resume()
-        
+
         // 위젯 업데이트: 타이머 재개
         val state = timerManager.timerState.value
         widgetUpdater.onTimerResumed(state.remainingTime, state.presetColorIndex)
@@ -122,7 +124,7 @@ class TimerService : Service() {
 
         // 위젯 업데이트: 타이머 중지
         widgetUpdater.onTimerStopped(presetColorIndex)
-        
+
         // Foreground 상태 해제 및 서비스 종료
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -137,7 +139,7 @@ class TimerService : Service() {
         timerStateJob = timerManager.timerState
             .onEach { state ->
                 LogUtil.d("TimerService observeTimerState: $state")
-                
+
                 when (state.status) {
                     is TimerStatus.Running -> {
                         // 타이머가 실행 중일 때 알림 업데이트
@@ -146,16 +148,21 @@ class TimerService : Service() {
                             isRunning = true,
                             overtime = state.overtime
                         )
-                        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+                        val notificationManager =
+                            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                         notificationManager.notify(
                             TimerNotificationHelper.NOTIFICATION_ID,
                             notification
                         )
-                        
+
                         // 위젯 업데이트: 타이머 틱
-                        widgetUpdater.onTimerTick(remainingTime = state.remainingTime, overtime = state.overtime, presetColorIndex = state.presetColorIndex)
+                        widgetUpdater.onTimerTick(
+                            remainingTime = state.remainingTime,
+                            overtime = state.overtime,
+                            presetColorIndex = state.presetColorIndex
+                        )
                     }
-                    
+
                     is TimerStatus.Paused -> {
                         // 타이머가 일시정지 상태일 때 알림 업데이트
                         val notification = notificationHelper.createRunningNotification(
@@ -163,37 +170,45 @@ class TimerService : Service() {
                             isRunning = false,
                             overtime = state.overtime
                         )
-                        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+                        val notificationManager =
+                            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                         notificationManager.notify(
                             TimerNotificationHelper.NOTIFICATION_ID,
                             notification
                         )
-                        
+
                         // 위젯 업데이트: 일시정지 (이미 handlePause에서 처리되지만 안전장치)
-                        widgetUpdater.onTimerPaused(state.remainingTime, state.presetColorIndex)
+                        widgetUpdater.onTimerPaused(
+                            remainingTime = state.remainingTime,
+                            presetColorIndex = state.presetColorIndex
+                        )
                     }
-                    
+
                     is TimerStatus.Completed -> {
                         // 타이머가 완료되었을 때 알림 업데이트
                         val notification = notificationHelper.createCompletedNotification(
                             overtime = state.overtime
                         )
-                        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+                        val notificationManager =
+                            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                         notificationManager.notify(
                             TimerNotificationHelper.NOTIFICATION_ID,
                             notification
                         )
-                        
+
                         // 위젯 업데이트: 타이머 완료
-                        widgetUpdater.onTimerCompleted(state.overtime, state.presetColorIndex)
+                        widgetUpdater.onTimerCompleted(
+                            overtime = state.overtime,
+                            presetColorIndex = state.presetColorIndex
+                        )
                     }
-                    
+
                     is TimerStatus.Idle -> {
                         // Idle 상태면 서비스 종료 (이미 stop에서 처리되지만 안전장치)
                         LogUtil.d("TimerService Idle 상태 감지, 서비스 종료 확인")
-                        
+
                         // 위젯 업데이트: 타이머 중지
-                        widgetUpdater.onTimerStopped(state.presetColorIndex)
+                        widgetUpdater.onTimerStopped(presetColorIndex = state.presetColorIndex)
                     }
                 }
             }
@@ -203,10 +218,10 @@ class TimerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         LogUtil.d("TimerService onDestroy")
-        
+
         // 타이머 상태 관찰 중단
         timerStateJob?.cancel()
-        
+
         // 코루틴 스코프 취소
         serviceScope.cancel()
     }
