@@ -28,6 +28,9 @@ class FocusTimerWidgetActionReceiver : BroadcastReceiver() {
             WidgetActions.ACTION_RESUME_TIMER -> {
                 widgetInteractor.resumeTimer()
             }
+            WidgetActions.ACTION_STOP_TIMER -> {
+                widgetInteractor.stopTimer()
+            }
             WidgetActions.ACTION_OPEN_APP -> {
                 widgetInteractor.openApp(context)
             }

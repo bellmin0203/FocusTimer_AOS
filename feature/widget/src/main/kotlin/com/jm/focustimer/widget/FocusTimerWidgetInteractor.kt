@@ -87,6 +87,25 @@ class FocusTimerWidgetInteractor @Inject constructor(
             e.printStackTrace()
         }
     }
+
+    /**
+     * 타이머 정지
+     */
+    fun stopTimer() {
+        val serviceIntent = Intent().apply {
+            setClassName(
+                context.packageName,
+                "com.jm.focustimer.timer.service.TimerService"
+            )
+            action = "com.jm.focustimer.action.STOP"
+        }
+
+        try {
+            context.startService(serviceIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     
     /**
      * 앱 열기

@@ -19,6 +19,7 @@ object WidgetActions {
     const val ACTION_START_TIMER = "com.jm.focustimer.widget.ACTION_START_TIMER"
     const val ACTION_PAUSE_TIMER = "com.jm.focustimer.widget.ACTION_PAUSE_TIMER"
     const val ACTION_RESUME_TIMER = "com.jm.focustimer.widget.ACTION_RESUME_TIMER"
+    const val ACTION_STOP_TIMER = "com.jm.focustimer.widget.ACTION_STOP_TIMER"
     const val ACTION_OPEN_APP = "com.jm.focustimer.widget.ACTION_OPEN_APP"
 }
 
@@ -48,6 +49,16 @@ fun actionPauseTimer(context: Context) {
 fun actionResumeTimer(context: Context) {
     val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_RESUME_TIMER
+    }
+    context.sendBroadcast(intent)
+}
+
+/**
+ * 타이머 정지 액션
+ */
+fun actionStopTimer(context: Context) {
+    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+        action = WidgetActions.ACTION_STOP_TIMER
     }
     context.sendBroadcast(intent)
 }

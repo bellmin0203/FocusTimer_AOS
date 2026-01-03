@@ -4,6 +4,7 @@
     <string name="widget_start">시작</string>
     <string name="widget_pause">일시정지</string>
     <string name="widget_resume">재개</string>
+    <string name="widget_complete">완료</string>
     <string name="widget_loading">로딩 중...</string>
     <string name="widget_idle">타이머 준비</string>
     <string name="widget_open_app">앱 열기</string>

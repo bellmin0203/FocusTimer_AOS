@@ -88,6 +88,7 @@ private fun WidgetContent(context: Context) {
         onStartClick = { actionStartTimer(context) },
         onPauseClick = { actionPauseTimer(context) },
         onResumeClick = { actionResumeTimer(context) },
+        onStopClick = { actionStopTimer(context) },
         onOpenAppClick = { actionOpenApp(context) }
     )
 }
@@ -102,6 +103,7 @@ private fun FocusTimerWidgetContent(
     onStartClick: () -> Unit,
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
+    onStopClick: () -> Unit,
     onOpenAppClick: () -> Unit
 ) {
     Box(
@@ -129,7 +131,7 @@ private fun FocusTimerWidgetContent(
             is FocusTimerWidgetState.Completed -> CompletedContent(
                 presetColor = presetColor,
                 overtime = state.overtime,
-                onStartClick = onStartClick
+                onStopClick = onStopClick
             )
         }
     }
@@ -160,7 +162,7 @@ private fun IdleContent(presetColor: Color, onStartClick: () -> Unit) {
             text = context.getString(R.string.widget_default_time),
             style = TextStyle(
                 fontSize = 32.sp,
-                color = GlanceTheme.colors.primary
+                color = GlanceTheme.colors.onSurface
             )
         )
 
@@ -207,7 +209,7 @@ private fun RunningContent(
             text = remainingTime,
             style = TextStyle(
                 fontSize = 32.sp,
-                color = GlanceTheme.colors.primary
+                color = GlanceTheme.colors.onSurface
             )
         )
 
@@ -254,7 +256,7 @@ private fun PausedContent(
             text = remainingTime,
             style = TextStyle(
                 fontSize = 32.sp,
-                color = GlanceTheme.colors.secondary
+                color = GlanceTheme.colors.onSurface
             )
         )
 
@@ -279,7 +281,7 @@ private fun PausedContent(
 private fun CompletedContent(
     presetColor: Color,
     overtime: String,
-    onStartClick: () -> Unit
+    onStopClick: () -> Unit
 ) {
     val context = LocalContext.current
     Column(
@@ -301,7 +303,7 @@ private fun CompletedContent(
             text = overtime,
             style = TextStyle(
                 fontSize = 24.sp,
-                color = GlanceTheme.colors.tertiary
+                color = GlanceTheme.colors.onTertiaryContainer
             )
         )
 
@@ -309,9 +311,9 @@ private fun CompletedContent(
 
         // 다시 시작 버튼
         CircleIconButton(
-            imageProvider = ImageProvider(R.drawable.ic_widget_play),
-            contentDescription = context.getString(R.string.widget_start),
-            onClick = action(block = onStartClick),
+            imageProvider = ImageProvider(R.drawable.ic_widget_check),
+            contentDescription = context.getString(R.string.widget_complete),
+            onClick = action(block = onStopClick),
             modifier = GlanceModifier.size(48.dp),
             backgroundColor = ColorProvider(presetColor),
             contentColor = GlanceTheme.colors.onSecondary
@@ -364,7 +366,7 @@ private fun PreviewCompletedContent() {
         CompletedContent(
             presetColor = TimerColorPresets.lightPresets[3].progressColor,
             overtime = "+01:30",
-            onStartClick = {}
+            onStopClick = {}
         )
     }
 }
