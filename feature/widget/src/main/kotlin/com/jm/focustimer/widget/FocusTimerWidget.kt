@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -34,6 +33,10 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.jm.focustimer.designsystem.theme.TimerColorPresets
+import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_OVERTIME
+import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_PRESET_COLOR_INDEX
+import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_REMAINING_TIME
+import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_STATUS
 import com.jm.focustimer.widget.theme.FocusTimerGlanceTheme
 
 /**
@@ -65,16 +68,19 @@ private fun WidgetContent(context: Context) {
     // Glance 위젯은 currentState를 사용하여 DataStore에서 상태를 동기적으로 읽습니다
     val preferences = currentState<Preferences>()
 
-    val status = preferences[stringPreferencesKey("status")] ?: "idle"
-    val remainingTime = preferences[stringPreferencesKey("remaining_time")] ?: "00:00"
-    val overtime = preferences[stringPreferencesKey("overtime")] ?: "+00:00"
+    val status = preferences[KEY_STATUS] ?: "idle"
+    val remainingTime = preferences[KEY_REMAINING_TIME] ?: "00:00"
+    val overtime = preferences[KEY_OVERTIME]
     val presetColorIndex =
-        preferences[stringPreferencesKey("preset_color_index")]?.toIntOrNull() ?: 0
+        preferences[KEY_PRESET_COLOR_INDEX]?.toIntOrNull() ?: 0
 
     val widgetState = when (status) {
-        "running" -> FocusTimerWidgetState.Running(remainingTime)
+        "running" -> {
+            if (overtime != null) FocusTimerWidgetState.Completed(overtime)
+            else FocusTimerWidgetState.Running(remainingTime)
+        }
         "paused" -> FocusTimerWidgetState.Paused(remainingTime)
-        "completed" -> FocusTimerWidgetState.Completed(overtime)
+        "completed" -> FocusTimerWidgetState.Completed(overtime ?: "+00:00")
         else -> FocusTimerWidgetState.Idle
     }
 

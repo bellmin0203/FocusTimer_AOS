@@ -136,7 +136,7 @@ class TimerService : Service() {
     private fun observeTimerState() {
         timerStateJob = timerManager.timerState
             .onEach { state ->
-                LogUtil.d("TimerService observeTimerState: status=${state.status}")
+                LogUtil.d("TimerService observeTimerState: $state")
                 
                 when (state.status) {
                     is TimerStatus.Running -> {
@@ -153,7 +153,7 @@ class TimerService : Service() {
                         )
                         
                         // 위젯 업데이트: 타이머 틱
-                        widgetUpdater.onTimerTick(state.remainingTime, state.presetColorIndex)
+                        widgetUpdater.onTimerTick(remainingTime = state.remainingTime, overtime = state.overtime, presetColorIndex = state.presetColorIndex)
                     }
                     
                     is TimerStatus.Paused -> {

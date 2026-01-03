@@ -7,6 +7,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration
@@ -23,10 +24,10 @@ class FocusTimerWidgetStateManager @Inject constructor(
 ) {
 
     companion object {
-        private val KEY_STATUS = stringPreferencesKey("status")
-        private val KEY_REMAINING_TIME = stringPreferencesKey("remaining_time")
-        private val KEY_OVERTIME = stringPreferencesKey("overtime")
-        private val KEY_PRESET_COLOR_INDEX = stringPreferencesKey("preset_color_index")
+        val KEY_STATUS = stringPreferencesKey("status")
+        val KEY_REMAINING_TIME = stringPreferencesKey("remaining_time")
+        val KEY_OVERTIME = stringPreferencesKey("overtime")
+        val KEY_PRESET_COLOR_INDEX = stringPreferencesKey("preset_color_index")
     }
 
     /**
@@ -36,19 +37,23 @@ class FocusTimerWidgetStateManager @Inject constructor(
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = "idle"
             prefs[KEY_REMAINING_TIME] = "00:00"
-            prefs[KEY_OVERTIME] = "+00:00"
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
+            prefs.remove(KEY_OVERTIME)
         }
     }
 
     /**
      * 위젯 상태를 Running으로 설정
      */
-    suspend fun setRunning(remainingTime: Duration, presetColorIndex: Int = 0) {
+    suspend fun setRunning(remainingTime: Duration, overtime: Duration = Duration.ZERO, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = "running"
             prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
+
+            if (overtime > Duration.ZERO) {
+                prefs[KEY_OVERTIME] = formatDuration(overtime, includeSign = true)
+            }
         }
     }
 
@@ -104,8 +109,8 @@ class FocusTimerWidgetStateManager @Inject constructor(
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
 
-        val formatted = String.format("%02d:%02d", minutes, seconds)
-        return if (includeSign && duration > Duration.ZERO) {
+        val formatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+        return if (includeSign && duration >= Duration.ZERO) {
             "+$formatted"
         } else {
             formatted
