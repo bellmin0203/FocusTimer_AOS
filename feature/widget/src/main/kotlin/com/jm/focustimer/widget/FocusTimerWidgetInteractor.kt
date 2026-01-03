@@ -2,6 +2,7 @@ package com.jm.focustimer.widget
 
 import android.content.Context
 import android.content.Intent
+import com.jm.focustimer.common.TimerServiceAction
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,10 +37,10 @@ class FocusTimerWidgetInteractor @Inject constructor(
         val serviceIntent = Intent().apply {
             setClassName(
                 context.packageName,
-                "com.jm.focustimer.timer.service.TimerService"
+                TimerServiceAction.SERVICE_CLASS_NAME
             )
-            action = "com.jm.focustimer.action.START"
-            putExtra("extra_duration", duration.inWholeMilliseconds)
+            action = TimerServiceAction.ACTION_START
+            putExtra(TimerServiceAction.EXTRA_DURATION, duration.inWholeMilliseconds)
         }
         
         try {
@@ -57,9 +58,9 @@ class FocusTimerWidgetInteractor @Inject constructor(
         val serviceIntent = Intent().apply {
             setClassName(
                 context.packageName,
-                "com.jm.focustimer.timer.service.TimerService"
+                TimerServiceAction.SERVICE_CLASS_NAME
             )
-            action = "com.jm.focustimer.action.PAUSE"
+            action = TimerServiceAction.ACTION_PAUSE
         }
         
         try {
@@ -76,9 +77,9 @@ class FocusTimerWidgetInteractor @Inject constructor(
         val serviceIntent = Intent().apply {
             setClassName(
                 context.packageName,
-                "com.jm.focustimer.timer.service.TimerService"
+                TimerServiceAction.SERVICE_CLASS_NAME
             )
-            action = "com.jm.focustimer.action.RESUME"
+            action = TimerServiceAction.ACTION_RESUME
         }
         
         try {
@@ -95,9 +96,9 @@ class FocusTimerWidgetInteractor @Inject constructor(
         val serviceIntent = Intent().apply {
             setClassName(
                 context.packageName,
-                "com.jm.focustimer.timer.service.TimerService"
+                TimerServiceAction.SERVICE_CLASS_NAME
             )
-            action = "com.jm.focustimer.action.STOP"
+            action = TimerServiceAction.ACTION_STOP
         }
 
         try {

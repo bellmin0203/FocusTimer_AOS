@@ -69,6 +69,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jm.focustimer.common.TimerServiceAction
 import com.jm.focustimer.designsystem.component.CircularTimerProgress
 import com.jm.focustimer.designsystem.component.FocusIconButton
 import com.jm.focustimer.designsystem.component.ThemePreviews
@@ -91,7 +92,6 @@ import com.jm.focustimer.timer.model.TimerSideEffect
 import com.jm.focustimer.timer.model.TimerUiState
 import com.jm.focustimer.timer.model.toUiText
 import com.jm.focustimer.timer.service.TimerService
-import com.jm.focustimer.timer.service.TimerServiceAction
 import com.jm.focustimer.ui.component.rememberPickerState
 import com.jm.focustimer.ui.util.PreviewProvider
 import com.jm.focustimer.util.KeepScreenOnManager

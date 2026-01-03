@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.common)
     // Widget 모듈 (위젯 업데이트를 위해)
     implementation(projects.feature.widget)
 }
