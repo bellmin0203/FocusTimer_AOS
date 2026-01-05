@@ -1,6 +1,8 @@
 package com.jm.focustimer.widget
 
 import android.content.Context
+import android.os.SystemClock
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -13,6 +15,7 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.action.action
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.provideContent
@@ -26,6 +29,8 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.layout.wrapContentHeight
+import androidx.glance.layout.wrapContentWidth
 import androidx.glance.preview.ExperimentalGlancePreviewApi
 import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -37,6 +42,12 @@ import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_PRESE
 import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_REMAINING_TIME
 import com.jm.focustimer.widget.FocusTimerWidgetStateManager.Companion.KEY_STATUS
 import com.jm.focustimer.widget.theme.FocusTimerGlanceTheme
+import com.jm.logutil.LogUtil
+import java.util.Locale
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Focus Timer Glance Widget
@@ -48,6 +59,8 @@ class FocusTimerWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        LogUtil.d("provideGlance Called at: ${System.currentTimeMillis()}")
+
         provideContent {
             FocusTimerGlanceTheme {
                 WidgetContent(context)
@@ -69,8 +82,9 @@ private fun WidgetContent(context: Context) {
 
     val status = preferences[KEY_STATUS] ?: FocusTimerWidgetState.IDLE
     val remainingTime =
-        preferences[KEY_REMAINING_TIME] ?: FocusTimerWidgetState.DEFAULT_REMAINING_TIME
-    val overtime = preferences[KEY_OVERTIME]
+        (preferences[KEY_REMAINING_TIME]
+            ?: FocusTimerWidgetState.DEFAULT_REMAINING_TIME).milliseconds
+    val overtime = preferences[KEY_OVERTIME]?.milliseconds
     val presetColorIndex =
         preferences[KEY_PRESET_COLOR_INDEX]?.toIntOrNull() ?: 0
 
@@ -81,7 +95,10 @@ private fun WidgetContent(context: Context) {
         }
 
         FocusTimerWidgetState.PAUSED -> FocusTimerWidgetState.Paused(remainingTime)
-        FocusTimerWidgetState.COMPLETED -> FocusTimerWidgetState.Completed(overtime ?: "+00:00")
+        FocusTimerWidgetState.COMPLETED -> FocusTimerWidgetState.Completed(
+            overtime ?: Duration.ZERO
+        )
+
         else -> FocusTimerWidgetState.Idle
     }
 
@@ -145,6 +162,22 @@ private fun FocusTimerWidgetContent(
 }
 
 /**
+ * Duration을 "MM:SS" 형식의 문자열로 변환
+ */
+private fun formatDuration(duration: Duration, includeSign: Boolean = false): String {
+    val totalSeconds = duration.inWholeSeconds.coerceAtLeast(0)
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+
+    val formatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+    return if (includeSign && duration >= Duration.ZERO) {
+        "+$formatted"
+    } else {
+        formatted
+    }
+}
+
+/**
  * Idle 상태 컨텐츠
  */
 @Composable
@@ -165,13 +198,18 @@ private fun IdleContent(presetColor: Color, onStartClick: () -> Unit) {
 
         Spacer(modifier = GlanceModifier.height(8.dp))
 
-        Text(
-            text = context.getString(R.string.widget_default_time),
-            style = TextStyle(
-                fontSize = 32.sp,
-                color = GlanceTheme.colors.onSurface
-            )
+        TimerChronometer(
+            durationMillis = 0,
+            isTimerRunning = false,
+            isOvertime = false
         )
+//        Text(
+//            text = context.getString(R.string.widget_default_time),
+//            style = TextStyle(
+//                fontSize = 32.sp,
+//                color = GlanceTheme.colors.onSurface
+//            )
+//        )
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
@@ -193,7 +231,7 @@ private fun IdleContent(presetColor: Color, onStartClick: () -> Unit) {
 @Composable
 private fun RunningContent(
     presetColor: Color,
-    remainingTime: String,
+    remainingTime: Duration,
     onPauseClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -212,13 +250,18 @@ private fun RunningContent(
 
         Spacer(modifier = GlanceModifier.height(8.dp))
 
-        Text(
-            text = remainingTime,
-            style = TextStyle(
-                fontSize = 32.sp,
-                color = GlanceTheme.colors.onSurface
-            )
+        TimerChronometer(
+            durationMillis = remainingTime.inWholeMilliseconds,
+            isTimerRunning = true,
+            isOvertime = false
         )
+//        Text(
+//            text = remainingTime,
+//            style = TextStyle(
+//                fontSize = 32.sp,
+//                color = GlanceTheme.colors.onSurface
+//            )
+//        )
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
@@ -240,7 +283,7 @@ private fun RunningContent(
 @Composable
 private fun PausedContent(
     presetColor: Color,
-    remainingTime: String,
+    remainingTime: Duration,
     onResumeClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -259,13 +302,18 @@ private fun PausedContent(
 
         Spacer(modifier = GlanceModifier.height(8.dp))
 
-        Text(
-            text = remainingTime,
-            style = TextStyle(
-                fontSize = 32.sp,
-                color = GlanceTheme.colors.onSurface
-            )
+        TimerChronometer(
+            durationMillis = remainingTime.inWholeMilliseconds,
+            isTimerRunning = false,
+            isOvertime = false
         )
+//        Text(
+//            text = remainingTime,
+//            style = TextStyle(
+//                fontSize = 32.sp,
+//                color = GlanceTheme.colors.onSurface
+//            )
+//        )
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
@@ -287,7 +335,7 @@ private fun PausedContent(
 @Composable
 private fun CompletedContent(
     presetColor: Color,
-    overtime: String,
+    overtime: Duration,
     onStopClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -306,13 +354,18 @@ private fun CompletedContent(
 
         Spacer(modifier = GlanceModifier.height(8.dp))
 
-        Text(
-            text = overtime,
-            style = TextStyle(
-                fontSize = 24.sp,
-                color = GlanceTheme.colors.onTertiaryContainer
-            )
+        TimerChronometer(
+            durationMillis = overtime.inWholeMilliseconds,
+            isTimerRunning = true,
+            isOvertime = overtime > Duration.ZERO
         )
+//        Text(
+//            text = overtime,
+//            style = TextStyle(
+//                fontSize = 24.sp,
+//                color = GlanceTheme.colors.onTertiaryContainer
+//            )
+//        )
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
@@ -334,6 +387,49 @@ private class ColorProvider(val color: Color) : androidx.glance.unit.ColorProvid
     }
 }
 
+@Composable
+fun TimerChronometer(
+    durationMillis: Long, // 타이머 남은 시간 (밀리초)
+    isTimerRunning: Boolean,
+    isOvertime: Boolean,
+    modifier: GlanceModifier = GlanceModifier
+) {
+    AndroidRemoteViews(
+        remoteViews = RemoteViews(
+            LocalContext.current.packageName,
+            R.layout.focus_timer_widget_chronometer
+        ).apply {
+            // 현재 시스템의 부팅 후 경과 시간(elapsedRealtime)을 기준으로 종료 시간을 계산합니다.
+            // 주의: durationMillis가 '남은 시간'이라면 아래와 같이 계산합니다.
+            // 이미 계산된 '종료 목표 시각'이 있다면 그 값을 elapsedRealtime 기준으로 변환해야 합니다.
+            if (isTimerRunning) {
+                val targetTime = SystemClock.elapsedRealtime() + durationMillis
+
+                setChronometerCountDown(R.id.chronometer_view, true)
+                setChronometer(
+                    R.id.chronometer_view,
+                    targetTime,
+                    null, // XML에 정의된 format 사용
+                    true // 타이머가 실행 중일 때만 시계가 흐르도록 설정
+                )
+            } else {
+                setChronometer(
+                    R.id.chronometer_view,
+                    SystemClock.elapsedRealtime(),
+                    null,
+                    false
+                )
+
+                setTextViewText(
+                    R.id.chronometer_view,
+                    formatDuration(duration = durationMillis.milliseconds, includeSign = isOvertime)
+                )
+            }
+        },
+        modifier = modifier.wrapContentWidth().wrapContentHeight()
+    )
+}
+
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview
 @Composable
@@ -352,7 +448,7 @@ private fun PreviewRunningContent() {
     FocusTimerGlanceTheme {
         RunningContent(
             presetColor = TimerColorPresets.lightPresets[1].progressColor,
-            remainingTime = "25:00",
+            remainingTime = 25.minutes,
             onPauseClick = {}
         )
     }
@@ -365,7 +461,7 @@ private fun PreviewPausedContent() {
     FocusTimerGlanceTheme {
         PausedContent(
             presetColor = TimerColorPresets.lightPresets[2].progressColor,
-            remainingTime = "20:00",
+            remainingTime = 20.minutes,
             onResumeClick = {}
         )
     }
@@ -378,7 +474,7 @@ private fun PreviewCompletedContent() {
     FocusTimerGlanceTheme {
         CompletedContent(
             presetColor = TimerColorPresets.lightPresets[3].progressColor,
-            overtime = "+01:30",
+            overtime = 1.minutes + 30.seconds,
             onStopClick = {}
         )
     }

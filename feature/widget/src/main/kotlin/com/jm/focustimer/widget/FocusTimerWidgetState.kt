@@ -1,5 +1,7 @@
 package com.jm.focustimer.widget
 
+import kotlin.time.Duration
+
 /**
  * Focus Timer Widget 상태
  *
@@ -12,7 +14,7 @@ sealed interface FocusTimerWidgetState {
         const val PAUSED = "paused"
         const val COMPLETED = "completed"
         const val IDLE = "idle"
-        const val DEFAULT_REMAINING_TIME = "00:00"
+        const val DEFAULT_REMAINING_TIME = 0L
     }
 
     /**
@@ -26,7 +28,7 @@ sealed interface FocusTimerWidgetState {
      * @param remainingTime 남은 시간 (포맷된 문자열, 예: "15:30")
      */
     data class Running(
-        val remainingTime: String
+        val remainingTime: Duration
     ) : FocusTimerWidgetState
 
     /**
@@ -35,7 +37,7 @@ sealed interface FocusTimerWidgetState {
      * @param remainingTime 남은 시간 (포맷된 문자열, 예: "15:30")
      */
     data class Paused(
-        val remainingTime: String
+        val remainingTime: Duration
     ) : FocusTimerWidgetState
 
     /**
@@ -44,6 +46,6 @@ sealed interface FocusTimerWidgetState {
      * @param overtime 초과 시간 (포맷된 문자열, 예: "+02:30")
      */
     data class Completed(
-        val overtime: String
+        val overtime: Duration
     ) : FocusTimerWidgetState
 }

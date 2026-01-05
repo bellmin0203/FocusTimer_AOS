@@ -157,11 +157,11 @@ class TimerService : Service() {
                         )
 
                         // 위젯 업데이트: 타이머 틱
-                        widgetUpdater.onTimerTick(
-                            remainingTime = state.remainingTime,
-                            overtime = state.overtime,
-                            presetColorIndex = state.presetColorIndex
-                        )
+//                        widgetUpdater.onTimerTick(
+//                            remainingTime = state.remainingTime,
+//                            overtime = state.overtime,
+//                            presetColorIndex = state.presetColorIndex
+//                        )
                     }
 
                     is TimerStatus.Paused -> {

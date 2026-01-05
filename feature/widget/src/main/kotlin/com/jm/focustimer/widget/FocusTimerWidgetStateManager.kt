@@ -2,12 +2,12 @@ package com.jm.focustimer.widget
 
 import android.content.Context
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration
@@ -25,8 +25,8 @@ class FocusTimerWidgetStateManager @Inject constructor(
 
     companion object {
         val KEY_STATUS = stringPreferencesKey("status")
-        val KEY_REMAINING_TIME = stringPreferencesKey("remaining_time")
-        val KEY_OVERTIME = stringPreferencesKey("overtime")
+        val KEY_REMAINING_TIME = longPreferencesKey("remaining_time")
+        val KEY_OVERTIME = longPreferencesKey("overtime")
         val KEY_PRESET_COLOR_INDEX = stringPreferencesKey("preset_color_index")
     }
 
@@ -52,11 +52,11 @@ class FocusTimerWidgetStateManager @Inject constructor(
     ) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.RUNNING
-            prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
+            prefs[KEY_REMAINING_TIME] = remainingTime.inWholeMilliseconds
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
 
             if (overtime > Duration.ZERO) {
-                prefs[KEY_OVERTIME] = formatDuration(overtime, includeSign = true)
+                prefs[KEY_OVERTIME] = overtime.inWholeMilliseconds
             }
         }
     }
@@ -67,7 +67,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
     suspend fun setPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.PAUSED
-            prefs[KEY_REMAINING_TIME] = formatDuration(remainingTime)
+            prefs[KEY_REMAINING_TIME] = remainingTime.inWholeMilliseconds
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
     }
@@ -78,7 +78,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
     suspend fun setCompleted(overtime: Duration, presetColorIndex: Int = 0) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.COMPLETED
-            prefs[KEY_OVERTIME] = formatDuration(overtime, includeSign = true)
+            prefs[KEY_OVERTIME] = overtime.inWholeMilliseconds
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }
     }
@@ -102,22 +102,6 @@ class FocusTimerWidgetStateManager @Inject constructor(
                 updateBlock(mutablePrefs)
                 mutablePrefs
             }
-        }
-    }
-
-    /**
-     * Duration을 "MM:SS" 형식의 문자열로 변환
-     */
-    private fun formatDuration(duration: Duration, includeSign: Boolean = false): String {
-        val totalSeconds = duration.inWholeSeconds.coerceAtLeast(0)
-        val minutes = totalSeconds / 60
-        val seconds = totalSeconds % 60
-
-        val formatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
-        return if (includeSign && duration >= Duration.ZERO) {
-            "+$formatted"
-        } else {
-            formatted
         }
     }
 }
