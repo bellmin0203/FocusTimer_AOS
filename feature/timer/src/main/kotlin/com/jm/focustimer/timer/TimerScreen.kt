@@ -296,11 +296,8 @@ private fun TimerScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // 선택된 프리셋의 색상 가져오기
-                        val selectedPreset =
-                            uiState.presets.find { it.id == uiState.selectedPresetId }
-                        val presetColors = selectedPreset?.let { preset ->
-                            TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
-                        } ?: TimerColorPresets.lightPresets[0]
+                        val presetColors =
+                            TimerColorPresets.lightPresets[uiState.selectedPreset?.colorIndex ?: 0]
 
                         // 원형 타이머 (좌측 배치, weight로 공간 차지)
                         CircularTimerProgress(
@@ -375,7 +372,7 @@ private fun TimerScreen(
                                     onClick = { showPresets = true },
                                     label = {
                                         Text(
-                                            text = selectedPreset?.name
+                                            text = uiState.selectedPreset?.name
                                                 ?: stringResource(R.string.preset_section_header),
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.SemiBold
@@ -418,13 +415,9 @@ private fun TimerScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-
                         // 선택된 프리셋의 색상 가져오기
-                        val selectedPreset =
-                            uiState.presets.find { it.id == uiState.selectedPresetId }
-                        val presetColors = selectedPreset?.let { preset ->
-                            TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
-                        } ?: TimerColorPresets.lightPresets[0]
+                        val presetColors =
+                            TimerColorPresets.lightPresets[uiState.selectedPreset?.colorIndex ?: 0]
 
                         // 원형 타이머
                         CircularTimerProgress(
@@ -489,7 +482,7 @@ private fun TimerScreen(
                         if (uiState.isIdle && !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)) {
                             PresetListRow(
                                 presets = uiState.presets,
-                                selectedPresetId = uiState.selectedPresetId,
+                                selectedPresetId = uiState.selectedPreset?.id,
                                 isEnabled = uiState.isIdle,
                                 onPresetClick = { presetId ->
                                     onIntent(TimerIntent.SelectPreset(presetId))
@@ -838,7 +831,9 @@ private fun TimerControlButtons(
                 }
             },
             icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
-            contentDescription = if (uiState.isRunning) stringResource(R.string.content_description_pause) else stringResource(R.string.content_description_play),
+            contentDescription = if (uiState.isRunning) stringResource(R.string.content_description_pause) else stringResource(
+                R.string.content_description_play
+            ),
             containerColor = presetColors.progressColor,
             contentColor = Color.White
         )
@@ -969,7 +964,7 @@ fun TimerScreenIdlePreview() {
         initialTime = 25.minutes,
         remainingTime = 25.minutes,
         progress = 0.5f,
-        selectedPresetId = presets.first().id, // 첫번째 프리셋 선택
+        selectedPreset = presets.first(), // 첫번째 프리셋 선택
         presets = presets,
     )
 
@@ -993,7 +988,7 @@ fun TimerScreenCompletePreview() {
         isCompleted = true,
         overtime = 5.minutes,
         progress = 0f,
-        selectedPresetId = presets.first().id, // 첫번째 프리셋 선택
+        selectedPreset = presets.first(), // 첫번째 프리셋 선택
         presets = presets,
     )
 

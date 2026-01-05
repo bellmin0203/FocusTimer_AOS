@@ -32,7 +32,7 @@ data class TimerUiState(
     val progress: Float = 0f,
     val error: String? = null,
     val presets: List<Preset> = emptyList(),
-    val selectedPresetId: Int? = null,
+    val selectedPreset: Preset? = null,
     val isScreenOnEnabled: Boolean = false, // 화면 켜짐 유지 기능 활성화 여부
     val currentSessionId: Long? = null, // 현재 진행 중인 세션 ID
     val sessionStartTime: Instant? = null, // 세션 시작 시간

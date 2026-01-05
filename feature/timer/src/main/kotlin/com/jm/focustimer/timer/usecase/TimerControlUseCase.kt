@@ -1,6 +1,7 @@
 package com.jm.focustimer.timer.usecase
 
 import androidx.compose.runtime.Immutable
+import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.timer.model.TimerEvent
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -35,7 +36,7 @@ data class TimerState(
     val reminderThresholds: List<Duration> = emptyList(),
     val overtime: Duration = Duration.ZERO,
     val isShowReminder: Boolean = false,
-    val presetColorIndex: Int = 0,
+    val selectedPreset: Preset? = null,
 ) {
     val isRunning: Boolean get() = status is TimerStatus.Running
     val isPaused: Boolean get() = status is TimerStatus.Paused

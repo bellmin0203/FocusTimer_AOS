@@ -152,6 +152,7 @@ class TimerViewModel @Inject constructor(
                 val overtime = timerState.overtime
                 val isRunning = timerState.isRunning
                 val isPaused = timerState.isPaused
+                val selectedPreset = timerState.selectedPreset
 
                 when (timerState.status) {
                     is TimerStatus.Idle -> {
@@ -202,6 +203,7 @@ class TimerViewModel @Inject constructor(
                                 overtime = overtime,
                                 isPaused = true,
                                 isRunning = false,
+                                selectedPreset = selectedPreset,
                             )
                         }
                     }
@@ -215,6 +217,7 @@ class TimerViewModel @Inject constructor(
                                 isRunning = isRunning,
                                 isPaused = isPaused,
                                 isCompleted = true,
+                                selectedPreset = selectedPreset,
                             )
                         }
                         if (!timerState.isOvertime) {
@@ -235,7 +238,7 @@ class TimerViewModel @Inject constructor(
                                 viewModelScope.launch {
                                     val updateResult = manageTimerSessionUseCase.completeSession(
                                         sessionId = sessionId,
-                                        presetId = currentState.selectedPresetId,
+                                        presetId = currentState.selectedPreset?.id,
                                         startTime = currentState.sessionStartTime,
                                         initialDuration = currentState.initialTime,
                                         overtime = Duration.ZERO
@@ -247,7 +250,14 @@ class TimerViewModel @Inject constructor(
                                         },
                                         onFailure = { error ->
                                             LogUtil.e("세션 자동 완료 업데이트 실패", error)
-                                            emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, true)))
+                                            emitSideEffect(
+                                                ShowError(
+                                                    mapSessionExceptionToTimerError(
+                                                        error,
+                                                        true
+                                                    )
+                                                )
+                                            )
                                         }
                                     )
                                 }
@@ -338,7 +348,7 @@ class TimerViewModel @Inject constructor(
         // 타이머 시작 전에 세션을 DB에 저장
         viewModelScope.launch {
             val sessionResult = manageTimerSessionUseCase.startSession(
-                presetId = currentState.selectedPresetId ?: 0,
+                presetId = currentState.selectedPreset?.id ?: 0,
                 duration = currentState.initialTime
             )
 
@@ -421,7 +431,7 @@ class TimerViewModel @Inject constructor(
             viewModelScope.launch {
                 val updateResult = manageTimerSessionUseCase.stopSession(
                     sessionId = sessionId,
-                    presetId = currentState.selectedPresetId,
+                    presetId = currentState.selectedPreset?.id,
                     startTime = currentState.sessionStartTime,
                     initialDuration = currentState.initialTime
                 )
@@ -469,7 +479,7 @@ class TimerViewModel @Inject constructor(
                 viewModelScope.launch {
                     val updateResult = manageTimerSessionUseCase.completeSession(
                         sessionId = sessionId,
-                        presetId = currentState.selectedPresetId,
+                        presetId = currentState.selectedPreset?.id,
                         startTime = currentState.sessionStartTime,
                         initialDuration = currentState.initialTime,
                         overtime = Duration.ZERO
@@ -538,7 +548,7 @@ class TimerViewModel @Inject constructor(
             overtime = Duration.ZERO,
             progress = newProgress,
             error = null,
-            selectedPresetId = null, // 수동 조정 시 프리셋 선택 해제
+            selectedPreset = null, // 수동 조정 시 프리셋 선택 해제
         )
         _uiState.update { newState }
     }
@@ -548,8 +558,6 @@ class TimerViewModel @Inject constructor(
      */
     private fun handleSelectPreset(presetId: Int) {
         LogUtil.d("presetId=$presetId, isActive=${_uiState.value.isTimerActiveOrPaused}")
-
-
 
         viewModelScope.launch {
             val result = managePresetUseCase.selectPreset(
@@ -562,9 +570,8 @@ class TimerViewModel @Inject constructor(
                 onSuccess = { preset ->
                     LogUtil.d("프리셋 선택됨, name=${preset.name}, duration=${preset.duration}")
                     handleSetTime(preset.duration)
-                    _uiState.update { it.copy(selectedPresetId = presetId) }
-                    // TimerManager에 preset color index 설정
-                    timerManager.setPresetColorIndex(preset.colorIndex)
+                    _uiState.update { it.copy(selectedPreset = preset) }
+                    timerManager.selectPreset(preset)
                     emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_selected,
@@ -618,11 +625,13 @@ class TimerViewModel @Inject constructor(
                             PresetError.MaxCount,
                             listOf(error.maxCount.toString())
                         )
+
                         is PresetException.InvalidName -> TimerError.Preset(PresetError.InvalidName)
                         is PresetException.NameTooLong -> TimerError.Preset(
                             PresetError.NameTooLong,
                             listOf(error.maxLength.toString())
                         )
+
                         else -> TimerError.Preset(PresetError.FailSave)
                     }
                     emitSideEffect(ShowError(timerError))
@@ -652,9 +661,9 @@ class TimerViewModel @Inject constructor(
                             )
                         )
                         // 삭제된 프리셋이 선택되어 있었다면 선택 해제
-                        if (_uiState.value.selectedPresetId == presetId) {
+                        if (_uiState.value.selectedPreset?.id == presetId) {
                             LogUtil.d("선택된 프리셋 해제")
-                            _uiState.update { it.copy(selectedPresetId = null) }
+                            _uiState.update { it.copy(selectedPreset = null) }
                         }
                     },
                     onFailure = { error ->
@@ -702,10 +711,10 @@ class TimerViewModel @Inject constructor(
                         )
 
                         // 수정된 프리셋이 현재 선택되어 있다면 타이머도 동기화
-                        if (_uiState.value.selectedPresetId == presetId && !_uiState.value.isTimerActiveOrPaused) {
+                        if (_uiState.value.selectedPreset?.id == presetId && !_uiState.value.isTimerActiveOrPaused) {
                             LogUtil.d("선택된 프리셋이므로 타이머 동기화")
                             handleSetTime(duration)
-                            _uiState.update { it.copy(selectedPresetId = presetId) }
+                            _uiState.update { it.copy(selectedPreset = preset) }
                         }
                     },
                     onFailure = { error ->

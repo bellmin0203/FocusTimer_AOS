@@ -2,6 +2,7 @@ package com.jm.focustimer.widget
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
+import com.jm.focustimer.domain.model.preset.Preset
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,11 +33,11 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 시작됨
      */
-    fun onTimerStarted(remainingTime: Duration, presetColorIndex: Int = 0) {
+    fun onTimerStarted(remainingTime: Duration, preset: Preset? = null) {
         scope.launch {
             stateManager.setRunning(
                 remainingTime = remainingTime,
-                presetColorIndex = presetColorIndex
+                presetColorIndex = preset?.colorIndex
             )
             updateWidget()
         }
@@ -45,11 +46,11 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 일시정지됨
      */
-    fun onTimerPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
+    fun onTimerPaused(remainingTime: Duration, preset: Preset? = null) {
         scope.launch {
             stateManager.setPaused(
                 remainingTime = remainingTime,
-                presetColorIndex = presetColorIndex
+                presetColorIndex = preset?.colorIndex
             )
             updateWidget()
         }
@@ -58,11 +59,11 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 재개됨
      */
-    fun onTimerResumed(remainingTime: Duration, presetColorIndex: Int = 0) {
+    fun onTimerResumed(remainingTime: Duration, preset: Preset? = null) {
         scope.launch {
             stateManager.setRunning(
                 remainingTime = remainingTime,
-                presetColorIndex = presetColorIndex
+                presetColorIndex = preset?.colorIndex
             )
             updateWidget()
         }
@@ -71,9 +72,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 완료됨
      */
-    fun onTimerCompleted(overtime: Duration = Duration.ZERO, presetColorIndex: Int = 0) {
+    fun onTimerCompleted(overtime: Duration = Duration.ZERO, preset: Preset? = null) {
         scope.launch {
-            stateManager.setCompleted(overtime = overtime, presetColorIndex = presetColorIndex)
+            stateManager.setCompleted(overtime = overtime, presetColorIndex = preset?.colorIndex)
             updateWidget()
         }
     }
@@ -81,9 +82,9 @@ class FocusTimerWidgetUpdater @Inject constructor(
     /**
      * 타이머가 중지됨 (리셋)
      */
-    fun onTimerStopped(presetColorIndex: Int = 0) {
+    fun onTimerStopped(preset: Preset? = null) {
         scope.launch {
-            stateManager.setIdle(presetColorIndex = presetColorIndex)
+            stateManager.setIdle(presetColorIndex = preset?.colorIndex)
             updateWidget()
         }
     }

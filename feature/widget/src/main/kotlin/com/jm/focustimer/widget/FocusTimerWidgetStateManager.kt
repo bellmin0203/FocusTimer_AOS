@@ -33,7 +33,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
     /**
      * 위젯 상태를 Idle로 설정
      */
-    suspend fun setIdle(presetColorIndex: Int = 0) {
+    suspend fun setIdle(presetColorIndex: Int? = null) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.IDLE
             prefs[KEY_REMAINING_TIME] = FocusTimerWidgetState.DEFAULT_REMAINING_TIME
@@ -48,7 +48,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
     suspend fun setRunning(
         remainingTime: Duration,
         overtime: Duration = Duration.ZERO,
-        presetColorIndex: Int = 0
+        presetColorIndex: Int? = null
     ) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.RUNNING
@@ -64,7 +64,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
     /**
      * 위젯 상태를 Paused로 설정
      */
-    suspend fun setPaused(remainingTime: Duration, presetColorIndex: Int = 0) {
+    suspend fun setPaused(remainingTime: Duration, presetColorIndex: Int? = null) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.PAUSED
             prefs[KEY_REMAINING_TIME] = remainingTime.inWholeMilliseconds
@@ -75,7 +75,7 @@ class FocusTimerWidgetStateManager @Inject constructor(
     /**
      * 위젯 상태를 Completed로 설정
      */
-    suspend fun setCompleted(overtime: Duration, presetColorIndex: Int = 0) {
+    suspend fun setCompleted(overtime: Duration, presetColorIndex: Int? = null) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.COMPLETED
             prefs[KEY_OVERTIME] = overtime.inWholeMilliseconds

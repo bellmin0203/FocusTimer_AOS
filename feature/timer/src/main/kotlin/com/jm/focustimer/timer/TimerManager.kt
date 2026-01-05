@@ -1,6 +1,7 @@
 package com.jm.focustimer.timer
 
 import com.jm.focustimer.common.di.DefaultDispatcher
+import com.jm.focustimer.domain.model.preset.Preset
 import com.jm.focustimer.timer.model.SetTimeError
 import com.jm.focustimer.timer.model.TimerError
 import com.jm.focustimer.timer.model.TimerEvent
@@ -47,7 +48,7 @@ interface TimerManager {
     fun resume()
     fun stop(initialDuration: Duration)
     fun cancelAll()
-    fun setPresetColorIndex(colorIndex: Int)
+    fun selectPreset(preset: Preset)
 }
 
 @Singleton
@@ -212,6 +213,10 @@ class TimerManagerImpl @Inject constructor(
         job.cancelChildren()
     }
 
+    override fun selectPreset(preset: Preset) {
+        _timerState.update { it.copy(selectedPreset = preset) }
+    }
+
     private fun TimerState.toRunning(
         initialDuration: Duration,
         remainingTime: Duration,
@@ -246,10 +251,6 @@ class TimerManagerImpl @Inject constructor(
         remainingTime = initialDuration,
         overtime = Duration.ZERO,
         reminderThresholds = emptyList(),
-        isShowReminder = false
+        isShowReminder = false,
     )
-
-    override fun setPresetColorIndex(colorIndex: Int) {
-        _timerState.update { it.copy(presetColorIndex = colorIndex) }
-    }
 }
