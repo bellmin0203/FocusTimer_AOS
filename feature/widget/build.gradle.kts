@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.data)
     implementation(projects.core.common)
+    implementation(projects.core.util)
     implementation(projects.core.designsystem)
 
     // Glance (Widget)
