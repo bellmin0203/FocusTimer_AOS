@@ -190,7 +190,8 @@ class TimerViewModel @Inject constructor(
                                 isRunning = true,
                                 isPaused = false,
                                 overtime = overtime,
-                                progress = progress
+                                progress = progress,
+                                selectedPreset = selectedPreset,
                             )
                         }
                     }
@@ -793,7 +794,7 @@ class TimerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         LogUtil.d("ViewModel 정리 중")
-        timerManager.cancelAll()
+//        timerManager.cancelAll()
         notificationSoundPlayer.stop() // 알림 소리 정지
         _sideEffect.close() // Channel 정리
     }
