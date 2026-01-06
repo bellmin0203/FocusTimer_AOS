@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.focustimer.core.database"
+    namespace = "com.jm.teumtimer.core.database"
 }
 
 dependencies {

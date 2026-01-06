@@ -1,9 +1,9 @@
 import com.android.build.api.dsl.ApplicationExtension
-import com.jm.focustimer.convention.ExtensionType
-import com.jm.focustimer.convention.configureBuildTypes
-import com.jm.focustimer.convention.configureKotestAndroid
-import com.jm.focustimer.convention.configureKotlinAndroid
-import com.jm.focustimer.convention.libs
+import com.jm.teumtimer.convention.ExtensionType
+import com.jm.teumtimer.convention.configureBuildTypes
+import com.jm.teumtimer.convention.configureKotestAndroid
+import com.jm.teumtimer.convention.configureKotlinAndroid
+import com.jm.teumtimer.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

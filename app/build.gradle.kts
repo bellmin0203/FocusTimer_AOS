@@ -5,10 +5,10 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.focustimer"
+    namespace = "com.jm.teumtimer"
 
     defaultConfig {
-        testInstrumentationRunner = "com.jm.focustimer.HiltTestRunner"
+        testInstrumentationRunner = "com.jm.teumtimer.HiltTestRunner"
     }
 }
 

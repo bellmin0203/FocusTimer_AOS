@@ -4,5 +4,5 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.focustimer.uitesthilt"
+    namespace = "com.jm.teumtimer.uitesthilt"
 }

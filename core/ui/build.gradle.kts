@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.focustimer.ui"
+    namespace = "com.jm.teumtimer.ui"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

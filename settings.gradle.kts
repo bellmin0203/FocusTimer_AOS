@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "FocusTimer"
+rootProject.name = "TeumTimer"
 include(":app")
 
 // core

@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.focustimer.stats"
+    namespace = "com.jm.teumtimer.stats"
 }
 
 dependencies {

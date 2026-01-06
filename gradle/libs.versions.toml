@@ -1,6 +1,6 @@
 [versions]
 # Project versions
-projectApplicationId = "com.jm.focustimer"
+projectApplicationId = "com.jm.teumtimer"
 projectVersionName = "1.0"
 projectVersionCode = "1"
 projectMinSdkVersion = "26"

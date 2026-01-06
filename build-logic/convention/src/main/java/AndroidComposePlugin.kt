@@ -1,4 +1,4 @@
-import com.jm.focustimer.convention.configureAndroidCompose
+import com.jm.teumtimer.convention.configureAndroidCompose
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
