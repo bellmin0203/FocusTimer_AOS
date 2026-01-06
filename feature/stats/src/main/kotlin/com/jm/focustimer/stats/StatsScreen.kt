@@ -136,17 +136,32 @@ private fun StatsScreen(
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.DAILY,
                     onClick = { onPeriodSelected(StatsPeriod.DAILY) },
-                    text = { Text(stringResource(R.string.stats_tab_daily)) }
+                    text = {
+                        Text(
+                            text = stringResource(R.string.stats_tab_daily),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 )
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.WEEKLY,
                     onClick = { onPeriodSelected(StatsPeriod.WEEKLY) },
-                    text = { Text(stringResource(R.string.stats_tab_weekly)) }
+                    text = {
+                        Text(
+                            text = stringResource(R.string.stats_tab_weekly),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 )
                 Tab(
                     selected = uiState.selectedPeriod == StatsPeriod.MONTHLY,
                     onClick = { onPeriodSelected(StatsPeriod.MONTHLY) },
-                    text = { Text(stringResource(R.string.stats_tab_monthly)) }
+                    text = {
+                        Text(
+                            text = stringResource(R.string.stats_tab_monthly),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 )
             }
 
