@@ -11,16 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-// 다크 테마 ColorScheme
+// 다크 테마 ColorScheme - Midnight Gap (심야의 틈)
 val DarkColorScheme = darkColorScheme(
-    // Primary - 브랜드 메인 컬러 (다크 모드에서는 밝은 Green 유지)
-    primary = PrimaryGreen,
-    onPrimary = DarkBackground,
+    // Primary - 어둠 속에서 빛나는 밝은 옐로우
+    primary = PrimaryYellow,
+    onPrimary = DarkBackground, // 옐로우 위의 텍스트는 어두운 배경색
     primaryContainer = DarkSurfaceVariant,
-    onPrimaryContainer = PrimaryGreen,
+    onPrimaryContainer = PrimaryYellow,
 
     // Secondary - 보조 컬러
-    secondary = DarkOnSurfaceVariant, // 업데이트: Deprecated된 DarkSecondaryText 대신 사용
+    secondary = DarkOnSurfaceVariant,
     onSecondary = DarkBackground,
     secondaryContainer = DarkSurface,
     onSecondaryContainer = DarkOnSurfaceVariant,
@@ -37,7 +37,7 @@ val DarkColorScheme = darkColorScheme(
     surface = DarkSurface,
     onSurface = DarkOnSurface,
     surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = DarkOnSurfaceVariant, // 업데이트: 텍스트 가독성 최적화
+    onSurfaceVariant = DarkOnSurfaceVariant,
 
     // Outline & Border
     outline = DarkBorder,
@@ -48,16 +48,16 @@ val DarkColorScheme = darkColorScheme(
     onError = DarkOnError,
 )
 
-// 라이트 테마 ColorScheme
+// 라이트 테마 ColorScheme - Morning Ray (새벽의 빛)
 val LightColorScheme = lightColorScheme(
-    // Primary - 브랜드 메인 컬러 (라이트 모드 가독성 최적화)
-    primary = PrimaryGreenLight,
+    // Primary - 새벽의 따뜻한 햇살 (오렌지)
+    primary = PrimaryOrange,
     onPrimary = Color.White,
-    primaryContainer = PrimaryGreenContainer,
-    onPrimaryContainer = PrimaryGreenLight, // 컨테이너 위 텍스트는 짙은 색 사용
+    primaryContainer = PrimaryOrangeContainer,
+    onPrimaryContainer = PrimaryOrange, // 컨테이너 위 텍스트는 짙은 색 사용
 
     // Secondary - 보조 컬러
-    secondary = LightOnSurfaceVariant, // 업데이트: Deprecated된 LightSecondaryText 대신 사용
+    secondary = LightOnSurfaceVariant,
     onSecondary = Color.White,
     secondaryContainer = LightSurface,
     onSecondaryContainer = LightOnSurfaceVariant,
@@ -71,10 +71,10 @@ val LightColorScheme = lightColorScheme(
     // Background & Surface
     background = LightBackground,
     onBackground = LightOnBackground,
-    surface = LightBackground, // Surface는 보통 Background와 같거나 약간 다름
+    surface = LightSurface, // 화이트 카드
     onSurface = LightOnSurface,
     surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = LightOnSurfaceVariant, // 업데이트: 텍스트 가독성 최적화
+    onSurfaceVariant = LightOnSurfaceVariant,
 
     // Outline & Border
     outline = LightBorder,
