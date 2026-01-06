@@ -62,6 +62,7 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.round
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -73,7 +74,13 @@ fun DailyStatsContent(
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)")
+    val locale = Locale.getDefault()
+    val pattern = if (locale.language == "ko") {
+        "yyyy년 M월 d일 (E)"
+    } else {
+        "EEE, MMM d, yyyy"
+    }
+    val dateFormatter = DateTimeFormatter.ofPattern(pattern, locale)
 
     // 날짜 네비게이션 헤더
     Row(

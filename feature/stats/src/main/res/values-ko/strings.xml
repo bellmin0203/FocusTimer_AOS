@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stats_title">통계</string>
+    <string name="content_description_back">뒤로가기</string>
+    <string name="content_description_achievements">성취 기록 보기</string>
+    <string name="content_description_today">오늘</string>
+
+    <!-- Tabs -->
+    <string name="stats_tab_daily">일간</string>
+    <string name="stats_tab_weekly">주간</string>
+    <string name="stats_tab_monthly">월간</string>
+
+    <!-- Loading/Empty -->
+    <string name="stats_loading">통계를 불러오는 중...</string>
+    <string name="stats_no_achievements">아직 기록된 성취가 없습니다.</string>
+    <string name="stats_error_message">데이터를 불러오는 중 오류가 발생했습니다.</string>
+
+    <!-- Achievement -->
+    <string name="achievement_title">성취 지표</string>
+    <string name="achievement_focus_rate">집중률</string>
+    <string name="achievement_consecutive_days">연속 일수</string>
+    <string name="achievement_longest_time">최장 시간</string>
+    <string name="achievement_average_session">평균 세션</string>
+    <string name="achievement_detail_title">상세 통계</string>
+    <string name="achievement_total_sessions">전체 세션</string>
+    <string name="achievement_total_time">총 집중 시간</string>
+    <string name="achievement_completed_sessions">완료된 세션</string>
+    <string name="achievement_incomplete_sessions">미완료 세션</string>
+
+    <!-- Daily -->
+    <string name="content_description_prev_day">이전 날짜</string>
+    <string name="content_description_next_day">다음 날짜</string>
+    <string name="daily_summary_title">하루 요약</string>
+    <string name="daily_most_productive_hour">가장 집중한 시간</string>
+    <string name="daily_chart_title">24시간 집중 시간</string>
+    <string name="daily_no_data">집중 기록이 없습니다.</string>
+
+    <!-- Weekly -->
+    <string name="content_description_prev_week">이전 주</string>
+    <string name="content_description_next_week">다음 주</string>
+    <string name="weekly_summary_title">주간 요약</string>
+    <string name="weekly_average_daily">하루 평균 집중 시간</string>
+    <string name="weekly_most_productive_day">가장 집중한 요일</string>
+    <string name="weekly_growth_rate">지난주 대비</string>
+    <string name="weekly_chart_title">일별 집중 시간</string>
+    <string name="weekly_no_data">이번 주 집중 기록이 없습니다.</string>
+
+    <!-- Monthly -->
+    <string name="content_description_prev_month">이전 달</string>
+    <string name="content_description_next_month">다음 달</string>
+    <string name="monthly_summary_title">월간 요약</string>
+    <string name="monthly_average_weekly">주 평균 집중 시간</string>
+    <string name="monthly_most_productive_week">가장 집중한 주</string>
+    <string name="monthly_growth_rate">지난달 대비</string>
+    <string name="monthly_chart_title">주별 집중 시간</string>
+    <string name="monthly_no_data">이번 달 집중 기록이 없습니다.</string>
+
+    <!-- Formats -->
+    <string name="format_percent">%d%%</string>
+    <string name="format_days">%d일</string>
+    <string name="format_count">%d개</string>
+    <string name="format_hours_minutes">%1$d시간 %2$d분</string>
+    <string name="format_hours">%d시간</string>
+    <string name="format_minutes">%d분</string>
+    <string name="format_zero_minutes">0분</string>
+    <string name="format_time">%d:00</string>
+    <string name="format_week">%d주</string>
+    <string name="format_week_order">%d주차</string>
+
+    <!-- Days of Week -->
+    <string name="day_monday">월요일</string>
+    <string name="day_tuesday">화요일</string>
+    <string name="day_wednesday">수요일</string>
+    <string name="day_thursday">목요일</string>
+    <string name="day_friday">금요일</string>
+    <string name="day_saturday">토요일</string>
+    <string name="day_sunday">일요일</string>
+
+    <string name="day_short_monday">월</string>
+    <string name="day_short_tuesday">화</string>
+    <string name="day_short_wednesday">수</string>
+    <string name="day_short_thursday">목</string>
+    <string name="day_short_friday">금</string>
+    <string name="day_short_saturday">토</string>
+    <string name="day_short_sunday">일</string>
+</resources>

@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_description">Focus Timer 타이머 위젯</string>
-    <string name="widget_start">시작</string>
-    <string name="widget_pause">일시정지</string>
-    <string name="widget_resume">재개</string>
-    <string name="widget_complete">완료</string>
-    <string name="widget_loading">로딩 중...</string>
-    <string name="widget_idle">타이머 준비</string>
-    <string name="widget_open_app">앱 열기</string>
+    <string name="widget_description">Teum Timer Widget</string>
+    <string name="widget_start">Start</string>
+    <string name="widget_pause">Pause</string>
+    <string name="widget_resume">Resume</string>
+    <string name="widget_complete">Complete</string>
+    <string name="widget_loading">Loading...</string>
+    <string name="widget_idle">Timer Ready</string>
+    <string name="widget_open_app">Open App</string>
 
     <!-- UI Labels -->
-    <string name="widget_title">Focus Timer</string>
+    <string name="widget_title">Teum Timer</string>
     <string name="widget_default_time">00:00</string>
     
     <!-- Status Messages -->
-    <string name="widget_status_running">진행 중</string>
-    <string name="widget_status_paused">일시정지</string>
-    <string name="widget_status_completed">완료!</string>
+    <string name="widget_status_running">Running</string>
+    <string name="widget_status_paused">Paused</string>
+    <string name="widget_status_completed">Completed!</string>
 
     <!-- Content Descriptions & Symbols -->
-    <string name="widget_cd_play">재생</string>
+    <string name="widget_cd_play">Play</string>
     <string name="widget_symbol_play">▶</string>
     <string name="widget_symbol_pause">⏸</string>
 </resources>

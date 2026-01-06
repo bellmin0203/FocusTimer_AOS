@@ -57,6 +57,7 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.round
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -68,7 +69,13 @@ fun WeeklyStatsContent(
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+    val locale = Locale.getDefault()
+    val pattern = if (locale.language == "ko") {
+        "yyyy.MM.dd"
+    } else {
+        "MMM d"
+    }
+    val dateFormatter = DateTimeFormatter.ofPattern(pattern, locale)
 
     // 날짜 네비게이션 헤더
     Row(
