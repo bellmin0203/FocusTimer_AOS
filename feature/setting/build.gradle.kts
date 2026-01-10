@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.jm.teumtimer.setting"
 }
+
+dependencies {
+    testImplementation(projects.core.testing)
+}
