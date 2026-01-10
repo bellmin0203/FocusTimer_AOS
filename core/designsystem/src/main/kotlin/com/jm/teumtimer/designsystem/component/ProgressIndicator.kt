@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jm.teumtimer.designsystem.theme.FocusTimerTheme
 import kotlin.math.atan2
@@ -515,20 +516,20 @@ private fun createTextPaint(textSize: Float, color: Color): Paint {
     }
 }
 
-@ThemePreviews
+@Preview(name = "Teum Theme (Default)", showBackground = true)
 @Composable
-fun CircularTimerProgressMintPreview() {
+fun CircularTimerProgressTeumPreview() {
     FocusTimerTheme {
         CircularTimerProgress(
             progress = 0.65f,
             modifier = Modifier.size(200.dp),
-            colorScheme = TimerColorPresets.MintLight,
+            colorScheme = TimerColorPresets.TeumLight,
             showKnob = true,
         )
     }
 }
 
-@ThemePreviews
+@Preview(name = "Coral Theme", showBackground = true)
 @Composable
 fun CircularTimerProgressCoralPreview() {
     FocusTimerTheme {
@@ -541,7 +542,7 @@ fun CircularTimerProgressCoralPreview() {
     }
 }
 
-@ThemePreviews
+@Preview(name = "Lavender Theme", showBackground = true)
 @Composable
 fun CircularTimerProgressLavenderPreview() {
     FocusTimerTheme {
@@ -554,7 +555,7 @@ fun CircularTimerProgressLavenderPreview() {
     }
 }
 
-@ThemePreviews
+@Preview(name = "Sky Theme", showBackground = true)
 @Composable
 fun CircularTimerProgressSkyPreview() {
     FocusTimerTheme {
@@ -567,20 +568,20 @@ fun CircularTimerProgressSkyPreview() {
     }
 }
 
-@ThemePreviews
+@Preview(name = "Slate Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressPeachPreview() {
+fun CircularTimerProgressSlatePreview() {
     FocusTimerTheme {
         CircularTimerProgress(
             progress = 0.55f,
             modifier = Modifier.size(200.dp),
-            colorScheme = TimerColorPresets.PeachLight,
+            colorScheme = TimerColorPresets.SlateLight,
             showKnob = true,
         )
     }
 }
 
-@ThemePreviews
+@Preview(name = "Sage Theme", showBackground = true)
 @Composable
 fun CircularTimerProgressSagePreview() {
     FocusTimerTheme {
