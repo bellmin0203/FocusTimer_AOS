@@ -154,6 +154,8 @@ class TimerViewModel @Inject constructor(
                 val isPaused = timerState.isPaused
                 val selectedPreset = timerState.selectedPreset
 
+                LogUtil.d("timerState=$timerState")
+
                 when (timerState.status) {
                     is TimerStatus.Idle -> {
                         notificationSoundPlayer.stop() // 알림 소리 정지
@@ -569,9 +571,23 @@ class TimerViewModel @Inject constructor(
             result.fold(
                 onSuccess = { preset ->
                     LogUtil.d("프리셋 선택됨, name=${preset.name}, duration=${preset.duration}")
+                    val initialTime = preset.duration
+                    val remainingTime = preset.duration
+                    val progress = calculateProgress(remainingTime)
+
                     handleSetTime(preset.duration)
-                    _uiState.update { it.copy(selectedPreset = preset) }
+
+                    _uiState.update {
+                        it.copy(
+                            initialTime = initialTime,
+                            remainingTime = remainingTime,
+                            progress = progress,
+                            selectedPreset = preset
+                        )
+                    }
+
                     timerManager.selectPreset(preset)
+
                     emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_selected,
