@@ -308,7 +308,7 @@ private fun formatDuration(duration: kotlin.time.Duration): String {
 private fun formatGrowthRate(growthRate: Double): String {
     val percentage = (growthRate * 100).toInt()
     return when {
-        percentage > 0 -> "↗ +${percentage}%" // TODO: Add to strings.xml if precise formatting is needed
+        percentage > 0 -> "↗ +${percentage}%"
         percentage < 0 -> "↘ ${percentage}%"
         else -> "→ 0%"
     }
