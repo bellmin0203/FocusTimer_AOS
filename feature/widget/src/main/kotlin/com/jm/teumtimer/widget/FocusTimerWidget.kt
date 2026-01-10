@@ -5,6 +5,7 @@ import android.os.SystemClock
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -32,11 +33,11 @@ import androidx.glance.layout.size
 import androidx.glance.layout.wrapContentHeight
 import androidx.glance.layout.wrapContentWidth
 import androidx.glance.preview.ExperimentalGlancePreviewApi
-import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.jm.logutil.LogUtil
+import com.jm.teumtimer.designsystem.component.ThemePreviews
 import com.jm.teumtimer.designsystem.component.TimerColorPresets
 import com.jm.teumtimer.widget.FocusTimerWidgetStateManager.Companion.KEY_OVERTIME
 import com.jm.teumtimer.widget.FocusTimerWidgetStateManager.Companion.KEY_PRESET_COLOR_INDEX
@@ -392,13 +393,18 @@ fun TimerChronometer(
     durationMillis: Long, // 타이머 남은 시간 (밀리초)
     isTimerRunning: Boolean,
     isOvertime: Boolean,
+    textColor: Color = GlanceTheme.colors.onBackground.getColor(LocalContext.current),
     modifier: GlanceModifier = GlanceModifier
 ) {
+    val textColorInt = textColor.toArgb()
+
     AndroidRemoteViews(
         remoteViews = RemoteViews(
             LocalContext.current.packageName,
             R.layout.focus_timer_widget_chronometer
         ).apply {
+            setTextColor(R.id.chronometer_view, textColorInt)
+
             // 현재 시스템의 부팅 후 경과 시간(elapsedRealtime)을 기준으로 종료 시간을 계산합니다.
             // 주의: durationMillis가 '남은 시간'이라면 아래와 같이 계산합니다.
             // 이미 계산된 '종료 목표 시각'이 있다면 그 값을 elapsedRealtime 기준으로 변환해야 합니다.
@@ -431,7 +437,7 @@ fun TimerChronometer(
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@Preview
+@ThemePreviews
 @Composable
 private fun PreviewIdleContent() {
     FocusTimerGlanceTheme {
@@ -442,7 +448,7 @@ private fun PreviewIdleContent() {
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@Preview
+@ThemePreviews
 @Composable
 private fun PreviewRunningContent() {
     FocusTimerGlanceTheme {
@@ -455,7 +461,7 @@ private fun PreviewRunningContent() {
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@Preview
+@ThemePreviews
 @Composable
 private fun PreviewPausedContent() {
     FocusTimerGlanceTheme {
@@ -468,7 +474,7 @@ private fun PreviewPausedContent() {
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@Preview
+@ThemePreviews
 @Composable
 private fun PreviewCompletedContent() {
     FocusTimerGlanceTheme {
