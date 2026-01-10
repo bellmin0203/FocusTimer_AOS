@@ -297,7 +297,7 @@ private fun TimerScreen(
                     ) {
                         // 선택된 프리셋의 색상 가져오기
                         val presetColors =
-                            TimerColorPresets.lightPresets[uiState.selectedPreset?.colorIndex ?: 0]
+                            TimerColorPresets.presetColors[uiState.selectedPreset?.colorIndex ?: 0]
 
                         // 원형 타이머 (좌측 배치, weight로 공간 차지)
                         CircularTimerProgress(
@@ -417,7 +417,7 @@ private fun TimerScreen(
                     ) {
                         // 선택된 프리셋의 색상 가져오기
                         val presetColors =
-                            TimerColorPresets.lightPresets[uiState.selectedPreset?.colorIndex ?: 0]
+                            TimerColorPresets.presetColors[uiState.selectedPreset?.colorIndex ?: 0]
 
                         // 원형 타이머
                         CircularTimerProgress(
@@ -901,8 +901,8 @@ private fun PresetListRow(
         // 2. 프리셋 목록 표시
         items(items = presets, key = { it.id }) { preset ->
             // 선택된 프리셋의 색상 테마 가져오기 (시각적 피드백)
-            val presetColor = TimerColorPresets.lightPresets.getOrNull(preset.colorIndex)
-                ?: TimerColorPresets.lightPresets[0]
+            val presetColor = TimerColorPresets.presetColors.getOrNull(preset.colorIndex)
+                ?: TimerColorPresets.presetColors[0]
 
             val isSelected = preset.id == selectedPresetId
 

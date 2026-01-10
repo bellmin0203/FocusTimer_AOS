@@ -103,8 +103,8 @@ private fun WidgetContent(context: Context) {
     }
 
     // 선택된 프리셋의 색상 가져오기
-    val presetColor = TimerColorPresets.lightPresets.getOrNull(presetColorIndex)
-        ?: TimerColorPresets.lightPresets[0]
+    val presetColor = TimerColorPresets.presetColors.getOrNull(presetColorIndex)
+        ?: TimerColorPresets.presetColors[0]
 
     FocusTimerWidgetContent(
         state = widgetState,
@@ -437,7 +437,7 @@ fun TimerChronometer(
 private fun PreviewIdleContent() {
     FocusTimerGlanceTheme {
         IdleContent(
-            presetColor = TimerColorPresets.lightPresets[1].progressColor,
+            presetColor = TimerColorPresets.presetColors[1].progressColor,
             onStartClick = {})
     }
 }
@@ -448,7 +448,7 @@ private fun PreviewIdleContent() {
 private fun PreviewRunningContent() {
     FocusTimerGlanceTheme {
         RunningContent(
-            presetColor = TimerColorPresets.lightPresets[1].progressColor,
+            presetColor = TimerColorPresets.presetColors[1].progressColor,
             remainingTime = 25.minutes,
             onPauseClick = {}
         )
@@ -461,7 +461,7 @@ private fun PreviewRunningContent() {
 private fun PreviewPausedContent() {
     FocusTimerGlanceTheme {
         PausedContent(
-            presetColor = TimerColorPresets.lightPresets[2].progressColor,
+            presetColor = TimerColorPresets.presetColors[2].progressColor,
             remainingTime = 20.minutes,
             onResumeClick = {}
         )
@@ -474,7 +474,7 @@ private fun PreviewPausedContent() {
 private fun PreviewCompletedContent() {
     FocusTimerGlanceTheme {
         CompletedContent(
-            presetColor = TimerColorPresets.lightPresets[3].progressColor,
+            presetColor = TimerColorPresets.presetColors[3].progressColor,
             overtime = 1.minutes + 30.seconds,
             onStopClick = {}
         )

@@ -234,13 +234,15 @@ private fun ColorSelector(
     onColorSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val presetColors = TimerColorPresets.presetColors
+
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(TimerColorPresets.lightPresets.size) { index ->
+        items(presetColors.size) { index ->
             ColorOption(
-                color = TimerColorPresets.lightPresets[index].progressColor,
+                color = TimerColorPresets.presetColors[index].progressColor,
                 isSelected = index == selectedIndex,
                 onClick = { onColorSelected(index) }
             )

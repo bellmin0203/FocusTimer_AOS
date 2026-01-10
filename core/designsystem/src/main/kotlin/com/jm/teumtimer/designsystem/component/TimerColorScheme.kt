@@ -1,5 +1,7 @@
 package com.jm.teumtimer.designsystem.component
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -168,4 +170,8 @@ object TimerColorPresets {
         PeachDark,
         SageDark
     )
+
+    @get:Composable
+    val presetColors: List<TimerColorScheme>
+        get() = if (isSystemInDarkTheme()) darkPresets else lightPresets
 }
