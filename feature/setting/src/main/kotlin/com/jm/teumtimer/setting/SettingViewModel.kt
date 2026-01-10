@@ -16,13 +16,16 @@ import com.jm.teumtimer.domain.model.preset.Preset
 import com.jm.teumtimer.domain.repository.SettingsRepository
 import com.jm.teumtimer.domain.usecase.preset.GetAllPresetsUseCase
 import com.jm.teumtimer.setting.model.SettingCategory
+import com.jm.teumtimer.setting.model.SettingSideEffect
 import com.jm.teumtimer.setting.model.SettingType
 import com.jm.teumtimer.ui.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -41,6 +44,9 @@ class SettingViewModel @Inject constructor(
     )
     private val _settingItems = MutableStateFlow<List<SettingType>>(emptyList())
     val settingItems: StateFlow<List<SettingType>> = _settingItems.asStateFlow()
+
+    private val _sideEffect = Channel<SettingSideEffect>(Channel.BUFFERED)
+    val sideEffect = _sideEffect.receiveAsFlow()
 
     init {
         // 설정 항목 생성
@@ -207,7 +213,11 @@ class SettingViewModel @Inject constructor(
                 updateAction()
             } catch (e: Exception) {
                 LogUtil.e("설정 업데이트 실패", e)
-                // TODO: jongmin, 사용자에게 토스트 메시지 표시
+                _sideEffect.send(
+                    SettingSideEffect.ShowSnackbar(
+                        UiText.StringResource(R.string.msg_update_setting_failed)
+                    )
+                )
             }
         }
     }

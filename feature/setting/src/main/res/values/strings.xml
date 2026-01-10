@@ -39,4 +39,5 @@
 
     <!-- Formats -->
     <string name="format_minutes">%d min</string>
+    <string name="msg_update_setting_failed">Failed to update setting.</string>
 </resources>

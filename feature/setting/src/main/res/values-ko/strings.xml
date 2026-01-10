@@ -39,4 +39,5 @@
 
     <!-- Formats -->
     <string name="format_minutes">%d분</string>
+    <string name="msg_update_setting_failed">설정 업데이트에 실패했습니다.</string>
 </resources>

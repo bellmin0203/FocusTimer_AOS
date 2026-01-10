@@ -16,9 +16,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,12 +36,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.jm.teumtimer.designsystem.component.ThemePreviews
 import com.jm.teumtimer.designsystem.theme.FocusTimerTheme
 import com.jm.teumtimer.setting.model.SettingCategory
+import com.jm.teumtimer.setting.model.SettingSideEffect
 import com.jm.teumtimer.setting.model.SettingType
 import com.jm.teumtimer.ui.component.SettingsClickableItem
 import com.jm.teumtimer.ui.component.SettingsDivider
 import com.jm.teumtimer.ui.component.SettingsSectionHeader
 import com.jm.teumtimer.ui.component.SettingsSwitchItem
 import com.jm.teumtimer.ui.util.UiText
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * 설정 화면
@@ -52,9 +57,22 @@ fun SettingScreen(
     onBackClick: () -> Unit = {}
 ) {
     val settingItems by viewModel.settingItems.collectAsState(initial = emptyList())
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(viewModel.sideEffect) {
+        viewModel.sideEffect.collectLatest { sideEffect ->
+            when (sideEffect) {
+                is SettingSideEffect.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(sideEffect.message.asString(context))
+                }
+            }
+        }
+    }
 
     SettingScreen(
         settingItems = settingItems,
+        snackbarHostState = snackbarHostState,
         onBackClick = onBackClick
     )
 }
@@ -63,6 +81,7 @@ fun SettingScreen(
 @Composable
 private fun SettingScreen(
     settingItems: List<SettingType>,
+    snackbarHostState: SnackbarHostState,
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -78,6 +97,7 @@ private fun SettingScreen(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.setting_title)) },
@@ -264,6 +284,9 @@ fun PreviewSettingScreen() {
     )
 
     FocusTimerTheme {
-        SettingScreen(dummyItems)
+        SettingScreen(
+            settingItems = dummyItems,
+            snackbarHostState = remember { SnackbarHostState() }
+        )
     }
 }
