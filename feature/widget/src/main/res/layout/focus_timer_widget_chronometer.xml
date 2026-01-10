@@ -3,8 +3,8 @@
     android:id="@+id/chronometer_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:textColor="@android:color/black"
     android:textSize="32sp"
     android:textStyle="bold"
+    android:textColor="@color/widget_chronometer_text"
     android:format="%M:%S"
     android:gravity="center" />

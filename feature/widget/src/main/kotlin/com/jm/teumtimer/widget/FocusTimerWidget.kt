@@ -5,7 +5,6 @@ import android.os.SystemClock
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -393,17 +392,13 @@ fun TimerChronometer(
     durationMillis: Long, // 타이머 남은 시간 (밀리초)
     isTimerRunning: Boolean,
     isOvertime: Boolean,
-    textColor: Color = GlanceTheme.colors.onBackground.getColor(LocalContext.current),
     modifier: GlanceModifier = GlanceModifier
 ) {
-    val textColorInt = textColor.toArgb()
-
     AndroidRemoteViews(
         remoteViews = RemoteViews(
             LocalContext.current.packageName,
             R.layout.focus_timer_widget_chronometer
         ).apply {
-            setTextColor(R.id.chronometer_view, textColorInt)
 
             // 현재 시스템의 부팅 후 경과 시간(elapsedRealtime)을 기준으로 종료 시간을 계산합니다.
             // 주의: durationMillis가 '남은 시간'이라면 아래와 같이 계산합니다.
