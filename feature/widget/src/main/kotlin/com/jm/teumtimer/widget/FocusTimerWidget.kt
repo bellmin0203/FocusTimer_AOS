@@ -33,11 +33,11 @@ import androidx.glance.layout.size
 import androidx.glance.layout.wrapContentHeight
 import androidx.glance.layout.wrapContentWidth
 import androidx.glance.preview.ExperimentalGlancePreviewApi
+import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.jm.logutil.LogUtil
-import com.jm.teumtimer.designsystem.component.ThemePreviews
 import com.jm.teumtimer.designsystem.component.TimerColorPresets
 import com.jm.teumtimer.widget.FocusTimerWidgetStateManager.Companion.KEY_OVERTIME
 import com.jm.teumtimer.widget.FocusTimerWidgetStateManager.Companion.KEY_PRESET_COLOR_INDEX
@@ -437,7 +437,7 @@ fun TimerChronometer(
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@ThemePreviews
+@Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewIdleContent() {
     FocusTimerGlanceTheme {
@@ -448,7 +448,7 @@ private fun PreviewIdleContent() {
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@ThemePreviews
+@Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewRunningContent() {
     FocusTimerGlanceTheme {
@@ -461,7 +461,7 @@ private fun PreviewRunningContent() {
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@ThemePreviews
+@Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewPausedContent() {
     FocusTimerGlanceTheme {
@@ -474,7 +474,7 @@ private fun PreviewPausedContent() {
 }
 
 @OptIn(ExperimentalGlancePreviewApi::class)
-@ThemePreviews
+@Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewCompletedContent() {
     FocusTimerGlanceTheme {
