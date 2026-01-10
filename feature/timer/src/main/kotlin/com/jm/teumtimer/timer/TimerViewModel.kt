@@ -549,7 +549,6 @@ class TimerViewModel @Inject constructor(
             overtime = Duration.ZERO,
             progress = newProgress,
             error = null,
-            selectedPreset = null, // 수동 조정 시 프리셋 선택 해제
         )
         _uiState.update { newState }
     }
