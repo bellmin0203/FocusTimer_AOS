@@ -5,6 +5,6 @@
     android:layout_height="wrap_content"
     android:textSize="32sp"
     android:textStyle="bold"
-    android:textColor="@color/widget_chronometer_text"
+    android:textColor="@color/widget_text"
     android:format="%M:%S"
     android:gravity="center" />

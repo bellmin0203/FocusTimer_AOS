@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="widget_chronometer_text">#FF1A1C1E</color>
+    <!-- Light Theme Colors -->
+    <color name="widget_background">#FFF5F5F5</color>
+    <color name="widget_primary">#FFFF6F3C</color>
+    <color name="widget_on_primary">#FFFFFFFF</color>
+    <color name="widget_text">#FF1A1C1E</color>
 </resources>
