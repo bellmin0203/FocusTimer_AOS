@@ -26,13 +26,13 @@ object TimerColorPresets {
     // Light Theme Presets
 
     /**
-     * 틈 타이머 시그니처 테마 (오렌지)
+     * 틈 타이머 시그니처 테마 (딥 틸)
      */
     val TeumLight = TimerColorScheme(
-        progressColor = Color(0xFFFF6F3C), // PrimaryOrange
+        progressColor = Color(0xFF00695C), // PrimaryDeepTeal
         knobColor = Color(0xFFFFFFFF),
-        tickColor = Color(0xFFFFCCBC), // PrimaryOrangeContainer
-        labelColor = Color(0xFFFF6F3C) // PrimaryOrange
+        tickColor = Color(0xFFB2DFDB), // PrimaryDeepTealContainer
+        labelColor = Color(0xFF00695C) // PrimaryDeepTeal
     )
 
     /**
@@ -88,13 +88,13 @@ object TimerColorPresets {
     // Dark Theme Presets
 
     /**
-     * 틈 타이머 시그니처 테마 (옐로우)
+     * 틈 타이머 시그니처 테마 (민트)
      */
     val TeumDark = TimerColorScheme(
-        progressColor = Color(0xFFFFF176), // PrimaryYellow
-        knobColor = Color(0xFF1A1C1E), // DarkBackground
-        tickColor = Color(0xFF3F4147), // DarkBorder
-        labelColor = Color(0xFFFFF176) // PrimaryYellow
+        progressColor = Color(0xFF64FFDA), // PrimaryMint
+        knobColor = Color(0xFF0F172A), // DarkBackground
+        tickColor = Color(0xFF334155), // DarkBorder
+        labelColor = Color(0xFF64FFDA) // PrimaryMint
     )
 
     /**

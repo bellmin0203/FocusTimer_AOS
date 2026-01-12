@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-// 다크 테마 ColorScheme - Midnight Gap (심야의 틈)
+// 다크 테마 ColorScheme - Deep Focus (깊은 몰입)
 val DarkColorScheme = darkColorScheme(
-    // Primary - 어둠 속에서 빛나는 밝은 옐로우
-    primary = PrimaryYellow,
-    onPrimary = DarkBackground, // 옐로우 위의 텍스트는 어두운 배경색
-    primaryContainer = DarkSurfaceVariant,
-    onPrimaryContainer = PrimaryYellow,
+    // Primary - 깊은 몰입을 위한 민트
+    primary = PrimaryMint,
+    onPrimary = DarkBackground,
+    primaryContainer = PrimaryMintContainer,
+    onPrimaryContainer = PrimaryMint,
 
     // Secondary - 보조 컬러
     secondary = DarkOnSurfaceVariant,
@@ -48,13 +48,13 @@ val DarkColorScheme = darkColorScheme(
     onError = DarkOnError,
 )
 
-// 라이트 테마 ColorScheme - Morning Ray (새벽의 빛)
+// 라이트 테마 ColorScheme - Clear Day (선명한 하루)
 val LightColorScheme = lightColorScheme(
-    // Primary - 새벽의 따뜻한 햇살 (오렌지)
-    primary = PrimaryOrange,
+    // Primary - 신뢰감을 주는 딥 틸
+    primary = PrimaryDeepTeal,
     onPrimary = Color.White,
-    primaryContainer = PrimaryOrangeContainer,
-    onPrimaryContainer = PrimaryOrange, // 컨테이너 위 텍스트는 짙은 색 사용
+    primaryContainer = PrimaryDeepTealContainer,
+    onPrimaryContainer = PrimaryDeepTeal, // 컨테이너 위 텍스트는 짙은 색 사용
 
     // Secondary - 보조 컬러
     secondary = LightOnSurfaceVariant,
