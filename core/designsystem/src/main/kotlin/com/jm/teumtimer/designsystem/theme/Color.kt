@@ -38,13 +38,6 @@ val DarkSecondaryText = Color(0xFF94A3B8) // Deprecated: Use DarkOnSurfaceVarian
 val DarkBorder = Color(0xFF334155) // Slate 700 - 경계선
 val DarkSurfaceInactive = Color(0xFF1E293B) // 비활성 상태
 
-// Session List (Dark)
-val DarkSessionBackground = Color(0xFF020617) // Slate 950 - 더 어두운 배경
-val DarkSessionCard = Color(0xFF1E293B) // Slate 800 - 카드 배경
-val DarkSessionBorder = Color(0xFF334155) // Slate 700 - 카드 경계선
-val DarkSessionTextSecondary = Color(0xFF94A3B8)
-val DarkSessionTextTertiary = Color(0xFF64748B)
-
 // =================================================================================================
 // Light Theme Palette - Clear Day (선명한 하루)
 // =================================================================================================
@@ -63,12 +56,6 @@ val LightBorder = Color(0xFFE2E8F0) // Slate 200 - 경계선
 val LightBorderVariant = Color(0xFFF1F5F9)
 val LightSwitchInactive = Color(0xFFE2E8F0)
 
-// Session List (Light)
-val LightSessionBackground = Color(0xFFF8FAFC)
-val LightSessionCard = Color(0xFFFFFFFF)
-val LightSessionBorder = Color(0xFFE2E8F0)
-val LightSessionTextSecondary = Color(0xFF64748B)
-val LightSessionTextTertiary = Color(0xFF94A3B8)
 
 // =================================================================================================
 // Semantic & Component Colors (기능 및 컴포넌트)
@@ -83,24 +70,3 @@ val BreakIconLight = Color(0xFF5E35B1)           // Deep Purple 600
 val BreakIconLightBackground = Color(0xFFEDE7F6) // Deep Purple 50
 val BreakIconDark = Color(0xFFB39DDB)            // Deep Purple 200
 val BreakIconDarkBackground = Color(0x1AB39DDB)  // Purple 10% 투명도
-
-// Chart & Statistics
-val ChartBarLight = Color(0xFFE2E8F0) // Slate 200
-val ChartBarDark = Color(0xFF334155) // Slate 700
-
-val StatsCardLightBackground = Color(0xFFFFFFFF)
-val StatsCardLightBorder = Color(0xFFE2E8F0)
-
-val StatsCardDarkBackground = Color(0xFF1E293B) // Slate 800
-val StatsCardDarkBorder = Color(0xFF334155) // Slate 700
-
-// =================================================================================================
-// Legacy Support (레거시 호환성)
-// =================================================================================================
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)

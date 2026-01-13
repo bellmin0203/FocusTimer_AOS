@@ -193,8 +193,9 @@ private fun WeeklyChart(stats: MonthlyStats) {
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    val markerBackgroundColor = MaterialTheme.colorScheme.surfaceContainer
-    val markerTextColor = MaterialTheme.colorScheme.onSurface
+    val barColor = MaterialTheme.colorScheme.primary
+    val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
+    val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
 
     // 차트 데이터 준비
     LaunchedEffect(stats) {
@@ -242,7 +243,7 @@ private fun WeeklyChart(stats: MonthlyStats) {
             rememberColumnCartesianLayer(
                 columnProvider = ColumnCartesianLayer.ColumnProvider.series(
                     rememberLineComponent(
-                        fill = fill(MaterialTheme.colorScheme.primary),
+                        fill = fill(barColor),
                         thickness = 20.dp,
                         shape = rounded(allPercent = 40)
                     )

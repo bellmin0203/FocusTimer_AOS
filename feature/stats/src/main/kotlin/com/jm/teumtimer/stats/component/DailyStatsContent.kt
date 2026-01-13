@@ -191,8 +191,8 @@ private fun HourlyChart(stats: DailyStats) {
 
     // UX 개선 1: 테마 색상 적용
     val barColor = MaterialTheme.colorScheme.primary
-    val markerBackgroundColor = MaterialTheme.colorScheme.surfaceContainer
-    val markerTextColor = MaterialTheme.colorScheme.onSurface
+    val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
+    val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
 
     LaunchedEffect(stats) {
         modelProducer.runTransaction {
