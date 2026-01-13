@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_description">틈 타이머 위젯</string>
+    <string name="widget_description">하루 몰입 위젯</string>
     <string name="widget_start">시작</string>
     <string name="widget_pause">일시정지</string>
     <string name="widget_resume">재개</string>
@@ -10,7 +10,7 @@
     <string name="widget_open_app">앱 열기</string>
 
     <!-- UI Labels -->
-    <string name="widget_title">틈 타이머</string>
+    <string name="widget_title">하루 몰입</string>
     <string name="widget_default_time">00:00</string>
     
     <!-- Status Messages -->

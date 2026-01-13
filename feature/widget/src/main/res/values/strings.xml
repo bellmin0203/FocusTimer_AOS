@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_description">Teum Timer Widget</string>
+    <string name="widget_description">Haru Focus Widget</string>
     <string name="widget_start">Start</string>
     <string name="widget_pause">Pause</string>
     <string name="widget_resume">Resume</string>
@@ -10,7 +10,7 @@
     <string name="widget_open_app">Open App</string>
 
     <!-- UI Labels -->
-    <string name="widget_title">Teum Timer</string>
+    <string name="widget_title">Haru Focus</string>
     <string name="widget_default_time">00:00</string>
     
     <!-- Status Messages -->

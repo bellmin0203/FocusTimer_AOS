@@ -5,7 +5,7 @@
     <string name="preset_management_text">자주 쓰는 타이머</string>
     <string name="statistics_text">통계</string>
     <string name="setting_text">설정</string>
-    <string name="navigation_drawer_title">틈 타이머</string>
+    <string name="navigation_drawer_title">하루 몰입</string>
     <string name="preset_section_header">나의 시간</string>
     <string name="dropdown_menu_modify_text">수정</string>
     <string name="dropdown_menu_delete_text">삭제</string>
