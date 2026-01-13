@@ -8,7 +8,7 @@
     <application>
         <!-- 타이머 Foreground Service -->
         <service
-            android:name="com.jm.teumtimer.timer.service.TimerService"
+            android:name="com.jm.harufocus.timer.service.TimerService"
             android:enabled="true"
             android:exported="false"
             android:stopWithTask="false"

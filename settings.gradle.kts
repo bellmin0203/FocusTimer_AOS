@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "TeumTimer"
+rootProject.name = "HaruFocus"
 include(":app")
 
 // core

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.teumtimer"
+    namespace = "com.jm.harufocus"
 
     defaultConfig {
         testInstrumentationRunner = "com.jm.teumtimer.HiltTestRunner"

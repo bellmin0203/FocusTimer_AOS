@@ -1,6 +1,6 @@
-import com.jm.teumtimer.convention.configureCoroutineKotlin
-import com.jm.teumtimer.convention.configureKotest
-import com.jm.teumtimer.convention.configureKotlinJvm
+import com.jm.harufocus.convention.configureCoroutineKotlin
+import com.jm.harufocus.convention.configureKotest
+import com.jm.harufocus.convention.configureKotlinJvm
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

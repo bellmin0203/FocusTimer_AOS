@@ -4,5 +4,5 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.teumtimer.uitesthilt"
+    namespace = "com.jm.harufocus.uitesthilt"
 }

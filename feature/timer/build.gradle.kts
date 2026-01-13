@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jm.teumtimer.timer"
+    namespace = "com.jm.harufocus.timer"
 }
 
 dependencies {

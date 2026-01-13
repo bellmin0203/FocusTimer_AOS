@@ -1,8 +1,8 @@
-import com.jm.teumtimer.convention.ExtensionType
-import com.jm.teumtimer.convention.configureBuildTypes
-import com.jm.teumtimer.convention.configureCoroutineAndroid
-import com.jm.teumtimer.convention.configureKotest
-import com.jm.teumtimer.convention.configureKotlinAndroid
+import com.jm.harufocus.convention.ExtensionType
+import com.jm.harufocus.convention.configureBuildTypes
+import com.jm.harufocus.convention.configureCoroutineAndroid
+import com.jm.harufocus.convention.configureKotest
+import com.jm.harufocus.convention.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
