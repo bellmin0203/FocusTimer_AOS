@@ -4,6 +4,9 @@ import android.app.Application
 import com.jm.harufocus.timer.service.TimerNotificationHelper
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class FocusTimerApplication : Application() {
@@ -11,8 +14,10 @@ class FocusTimerApplication : Application() {
         super.onCreate()
 
         LogUtil.init(context = this, tag = "FocusTimerApp")
-        
-        // 타이머 알림 채널 생성
-        TimerNotificationHelper(this).createNotificationChannel()
+
+        // 타이머 알림 채널 생성 (메인 스레드 차단 방지)
+        CoroutineScope(Dispatchers.Default).launch {
+            TimerNotificationHelper(this@FocusTimerApplication).createNotificationChannel()
+        }
     }
 }
