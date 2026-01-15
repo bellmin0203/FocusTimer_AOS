@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.my.android.application)
     alias(libs.plugins.my.android.compose)
@@ -10,6 +12,29 @@ android {
 
     defaultConfig {
         testInstrumentationRunner = "com.jm.harufocus.HiltTestRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(
+                System.getenv("RELEASE_STORE_FILE") ?: gradleLocalProperties(
+                    rootDir,
+                    providers
+                ).getProperty("RELEASE_STORE_FILE")
+            )
+            storePassword = System.getenv("RELEASE_STORE_PASSWORD") ?: gradleLocalProperties(
+                rootDir,
+                providers
+            ).getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: gradleLocalProperties(
+                rootDir,
+                providers
+            ).getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: gradleLocalProperties(
+                rootDir,
+                providers
+            ).getProperty("RELEASE_KEY_PASSWORD")
+        }
     }
 
     buildTypes {
