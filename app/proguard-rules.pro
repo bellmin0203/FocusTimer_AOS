@@ -12,10 +12,31 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve the line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Hide the original source file name.
+-renamesourcefileattribute SourceFile
+
+# ===============================
+# Hilt / Dagger
+# ===============================
+-keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
+
+# ===============================
+# Kotlin Serialization (if used)
+# ===============================
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+
+# ===============================
+# Vico Chart Library
+# ===============================
+#-keep class com.patrykandpatrick.vico.** { *; }
+#-dontwarn com.patrykandpatrick.vico.**
+
+# ===============================
+# Application specific
+# ===============================
+#-keep class com.jm.harufocus.** { *; }
+#-keep class com.jm.logutil.** { *; }
