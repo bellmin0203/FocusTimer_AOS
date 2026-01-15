@@ -43,20 +43,20 @@ class StatsViewModel @Inject constructor(
     init {
         LogUtil.d("StatsViewModel initialized")
 
-        generateDummyData()
+        // generateDummyData() // 릴리즈 빌드에서는 더미 데이터 생성하지 않음
         loadAchievementMetrics()
         loadStats()
     }
 
-    // 디버그 전용 함수들
+    // 디버그 전용 함수 - 테스트에서 사용
+    @Suppress("unused")
     fun generateDummyData() {
         if (BuildConfig.DEBUG) {
             viewModelScope.launch {
                 try {
-                    val count = dummyDataHelper.generateRandomMonthData()
-                    // 성공 처리
-                } catch (e: Exception) {
-                    // 에러 처리
+                    dummyDataHelper.generateRandomMonthData()
+                } catch (_: Exception) {
+                    // 에러 무시 (디버그용)
                 }
             }
         }
