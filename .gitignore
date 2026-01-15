@@ -60,3 +60,4 @@ node_modules/
 /.taskmaster/
 
 /.gemini/
+/app/src/release/generated/baselineProfiles/startup-prof.txt
