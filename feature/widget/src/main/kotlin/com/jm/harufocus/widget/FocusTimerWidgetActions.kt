@@ -16,13 +16,13 @@ import kotlinx.coroutines.launch
 
 // Widget Action Constants
 object WidgetActions {
-    const val ACTION_START_TIMER = "com.jm.focustimer.widget.ACTION_START_TIMER"
-    const val ACTION_PAUSE_TIMER = "com.jm.focustimer.widget.ACTION_PAUSE_TIMER"
-    const val ACTION_RESUME_TIMER = "com.jm.focustimer.widget.ACTION_RESUME_TIMER"
-    const val ACTION_STOP_TIMER = "com.jm.focustimer.widget.ACTION_STOP_TIMER"
-    const val ACTION_OPEN_APP = "com.jm.focustimer.widget.ACTION_OPEN_APP"
-    const val ACTION_INCREASE_TIME = "com.jm.focustimer.widget.ACTION_INCREASE_TIME"
-    const val ACTION_DECREASE_TIME = "com.jm.focustimer.widget.ACTION_DECREASE_TIME"
+    const val ACTION_START_TIMER = "com.jm.harufocus.widget.ACTION_START_TIMER"
+    const val ACTION_PAUSE_TIMER = "com.jm.harufocus.widget.ACTION_PAUSE_TIMER"
+    const val ACTION_RESUME_TIMER = "com.jm.harufocus.widget.ACTION_RESUME_TIMER"
+    const val ACTION_STOP_TIMER = "com.jm.harufocus.widget.ACTION_STOP_TIMER"
+    const val ACTION_OPEN_APP = "com.jm.harufocus.widget.ACTION_OPEN_APP"
+    const val ACTION_INCREASE_TIME = "com.jm.harufocus.widget.ACTION_INCREASE_TIME"
+    const val ACTION_DECREASE_TIME = "com.jm.harufocus.widget.ACTION_DECREASE_TIME"
 }
 
 /**
