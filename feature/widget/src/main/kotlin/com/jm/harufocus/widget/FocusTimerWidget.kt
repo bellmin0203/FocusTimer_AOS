@@ -31,8 +31,6 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.wrapContentHeight
 import androidx.glance.layout.wrapContentWidth
-import androidx.glance.preview.ExperimentalGlancePreviewApi
-import androidx.glance.preview.Preview
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -46,8 +44,6 @@ import com.jm.logutil.LogUtil
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Focus Timer Glance Widget
@@ -429,54 +425,4 @@ fun TimerChronometer(
         },
         modifier = modifier.wrapContentWidth().wrapContentHeight()
     )
-}
-
-@OptIn(ExperimentalGlancePreviewApi::class)
-@Preview(widthDp = 180, heightDp = 180)
-@Composable
-private fun PreviewIdleContent() {
-    FocusTimerGlanceTheme {
-        IdleContent(
-            presetColor = TimerColorPresets.presetColors[1].progressColor,
-            onStartClick = {})
-    }
-}
-
-@OptIn(ExperimentalGlancePreviewApi::class)
-@Preview(widthDp = 180, heightDp = 180)
-@Composable
-private fun PreviewRunningContent() {
-    FocusTimerGlanceTheme {
-        RunningContent(
-            presetColor = TimerColorPresets.presetColors[1].progressColor,
-            remainingTime = 25.minutes,
-            onPauseClick = {}
-        )
-    }
-}
-
-@OptIn(ExperimentalGlancePreviewApi::class)
-@Preview(widthDp = 180, heightDp = 180)
-@Composable
-private fun PreviewPausedContent() {
-    FocusTimerGlanceTheme {
-        PausedContent(
-            presetColor = TimerColorPresets.presetColors[2].progressColor,
-            remainingTime = 20.minutes,
-            onResumeClick = {}
-        )
-    }
-}
-
-@OptIn(ExperimentalGlancePreviewApi::class)
-@Preview(widthDp = 180, heightDp = 180)
-@Composable
-private fun PreviewCompletedContent() {
-    FocusTimerGlanceTheme {
-        CompletedContent(
-            presetColor = TimerColorPresets.presetColors[3].progressColor,
-            overtime = 1.minutes + 30.seconds,
-            onStopClick = {}
-        )
-    }
 }
