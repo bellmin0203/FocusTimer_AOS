@@ -116,7 +116,6 @@ private fun FocusTimerApp() {
 
     FocusTimerNavHost(
         navController = navController,
-        snackbarHostState = snackbarHostState,
-        scope = scope
+        snackbarHostState = snackbarHostState
     )
 }
