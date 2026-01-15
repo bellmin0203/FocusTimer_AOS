@@ -398,7 +398,7 @@ private fun CompletedContent(
         TimerChronometer(
             durationMillis = overtime.inWholeMilliseconds,
             isTimerRunning = true,
-            isOvertime = overtime > Duration.ZERO
+            isOvertime = true
         )
 //        Text(
 //            text = overtime,
@@ -445,15 +445,31 @@ fun TimerChronometer(
             // 주의: durationMillis가 '남은 시간'이라면 아래와 같이 계산합니다.
             // 이미 계산된 '종료 목표 시각'이 있다면 그 값을 elapsedRealtime 기준으로 변환해야 합니다.
             if (isTimerRunning) {
-                val targetTime = SystemClock.elapsedRealtime() + durationMillis
-
-                setChronometerCountDown(R.id.chronometer_view, true)
-                setChronometer(
-                    R.id.chronometer_view,
-                    targetTime,
-                    null, // XML에 정의된 format 사용
-                    true // 타이머가 실행 중일 때만 시계가 흐르도록 설정
-                )
+                if (isOvertime) {
+                    // Overtime: Count UP
+                    // Chronometer (countUp) shows: SystemClock.elapsedRealtime() - base
+                    // We want it to equal: durationMillis + (time elapsed since update)
+                    // At this exact moment, it should display durationMillis.
+                    // durationMillis = Now - base => base = Now - durationMillis
+                    val baseTime = SystemClock.elapsedRealtime() - durationMillis
+                    setChronometerCountDown(R.id.chronometer_view, false)
+                    setChronometer(
+                        R.id.chronometer_view,
+                        baseTime,
+                        "+%s",
+                        true
+                    )
+                } else {
+                    // Running: Count DOWN
+                    val targetTime = SystemClock.elapsedRealtime() + durationMillis
+                    setChronometerCountDown(R.id.chronometer_view, true)
+                    setChronometer(
+                        R.id.chronometer_view,
+                        targetTime,
+                        null, // XML에 정의된 format 사용
+                        true // 타이머가 실행 중일 때만 시계가 흐르도록 설정
+                    )
+                }
             } else {
                 setChronometer(
                     R.id.chronometer_view,
