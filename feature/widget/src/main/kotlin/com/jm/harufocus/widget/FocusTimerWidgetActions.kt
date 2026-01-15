@@ -21,6 +21,28 @@ object WidgetActions {
     const val ACTION_RESUME_TIMER = "com.jm.focustimer.widget.ACTION_RESUME_TIMER"
     const val ACTION_STOP_TIMER = "com.jm.focustimer.widget.ACTION_STOP_TIMER"
     const val ACTION_OPEN_APP = "com.jm.focustimer.widget.ACTION_OPEN_APP"
+    const val ACTION_INCREASE_TIME = "com.jm.focustimer.widget.ACTION_INCREASE_TIME"
+    const val ACTION_DECREASE_TIME = "com.jm.focustimer.widget.ACTION_DECREASE_TIME"
+}
+
+/**
+ * 타이머 시간 증가 액션
+ */
+fun actionIncreaseTime(context: Context) {
+    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+        action = WidgetActions.ACTION_INCREASE_TIME
+    }
+    context.sendBroadcast(intent)
+}
+
+/**
+ * 타이머 시간 감소 액션
+ */
+fun actionDecreaseTime(context: Context) {
+    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+        action = WidgetActions.ACTION_DECREASE_TIME
+    }
+    context.sendBroadcast(intent)
 }
 
 /**

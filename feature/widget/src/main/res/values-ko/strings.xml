@@ -20,6 +20,6 @@
 
     <!-- Content Descriptions & Symbols -->
     <string name="widget_cd_play">재생</string>
-    <string name="widget_symbol_play">▶</string>
-    <string name="widget_symbol_pause">⏸</string>
+    <string name="widget_increase_time">시간 늘리기</string>
+    <string name="widget_decrease_time">시간 줄이기</string>
 </resources>

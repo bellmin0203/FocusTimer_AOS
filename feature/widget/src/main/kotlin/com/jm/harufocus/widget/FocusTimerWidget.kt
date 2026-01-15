@@ -1,6 +1,7 @@
 package com.jm.harufocus.widget
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.SystemClock
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
@@ -44,6 +46,7 @@ import com.jm.logutil.LogUtil
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * 하루 몰입 Glance Widget
@@ -99,17 +102,23 @@ private fun WidgetContent(context: Context) {
     }
 
     // 선택된 프리셋의 색상 가져오기
-    val presetColor = TimerColorPresets.presetColors.getOrNull(presetColorIndex)
-        ?: TimerColorPresets.presetColors[0]
+    val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    val presets = if (isDark) TimerColorPresets.darkPresets else TimerColorPresets.lightPresets
+    
+    val presetColor = presets.getOrNull(presetColorIndex)
+        ?: presets[0]
 
     FocusTimerWidgetContent(
         state = widgetState,
         presetColor = presetColor.progressColor,
+        currentRemainingTime = remainingTime,
         onStartClick = { actionStartTimer(context) },
         onPauseClick = { actionPauseTimer(context) },
         onResumeClick = { actionResumeTimer(context) },
         onStopClick = { actionStopTimer(context) },
-        onOpenAppClick = { actionOpenApp(context) }
+        onOpenAppClick = { actionOpenApp(context) },
+        onIncreaseClick = { actionIncreaseTime(context) },
+        onDecreaseClick = { actionDecreaseTime(context) }
     )
 }
 
@@ -120,11 +129,14 @@ private fun WidgetContent(context: Context) {
 private fun FocusTimerWidgetContent(
     state: FocusTimerWidgetState,
     presetColor: Color,
+    currentRemainingTime: Duration,
     onStartClick: () -> Unit,
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
     onStopClick: () -> Unit,
-    onOpenAppClick: () -> Unit
+    onOpenAppClick: () -> Unit,
+    onIncreaseClick: () -> Unit,
+    onDecreaseClick: () -> Unit
 ) {
     Box(
         modifier = GlanceModifier
@@ -135,7 +147,13 @@ private fun FocusTimerWidgetContent(
         contentAlignment = Alignment.Center
     ) {
         when (state) {
-            is FocusTimerWidgetState.Idle -> IdleContent(presetColor, onStartClick)
+            is FocusTimerWidgetState.Idle -> IdleContent(
+                presetColor = presetColor,
+                remainingTime = if (currentRemainingTime > Duration.ZERO) currentRemainingTime else 25.minutes,
+                onStartClick = onStartClick,
+                onIncreaseClick = onIncreaseClick,
+                onDecreaseClick = onDecreaseClick
+            )
             is FocusTimerWidgetState.Running -> RunningContent(
                 presetColor = presetColor,
                 remainingTime = state.remainingTime,
@@ -177,7 +195,13 @@ private fun formatDuration(duration: Duration, includeSign: Boolean = false): St
  * Idle 상태 컨텐츠
  */
 @Composable
-private fun IdleContent(presetColor: Color, onStartClick: () -> Unit) {
+private fun IdleContent(
+    presetColor: Color,
+    remainingTime: Duration,
+    onStartClick: () -> Unit,
+    onIncreaseClick: () -> Unit,
+    onDecreaseClick: () -> Unit
+) {
     val context = LocalContext.current
     Column(
         modifier = GlanceModifier.fillMaxSize(),
@@ -195,29 +219,50 @@ private fun IdleContent(presetColor: Color, onStartClick: () -> Unit) {
         Spacer(modifier = GlanceModifier.height(8.dp))
 
         TimerChronometer(
-            durationMillis = 0,
+            durationMillis = remainingTime.inWholeMilliseconds,
             isTimerRunning = false,
             isOvertime = false
         )
-//        Text(
-//            text = context.getString(R.string.widget_default_time),
-//            style = TextStyle(
-//                fontSize = 32.sp,
-//                color = GlanceTheme.colors.onSurface
-//            )
-//        )
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
-        // 시작 버튼
-        CircleIconButton(
-            imageProvider = ImageProvider(R.drawable.ic_widget_play),
-            contentDescription = context.getString(R.string.widget_start),
-            onClick = action(block = onStartClick),
-            modifier = GlanceModifier.size(48.dp),
-            contentColor = GlanceTheme.colors.onSecondary,
-            backgroundColor = ColorProvider(presetColor)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // 감소 버튼
+            CircleIconButton(
+                imageProvider = ImageProvider(R.drawable.ic_widget_minus),
+                contentDescription = context.getString(R.string.widget_decrease_time),
+                onClick = action(block = onDecreaseClick),
+                modifier = GlanceModifier.size(32.dp),
+                contentColor = GlanceTheme.colors.onSurface,
+                backgroundColor = GlanceTheme.colors.background
+            )
+
+            Spacer(modifier = GlanceModifier.height(8.dp))
+
+            // 시작 버튼
+            CircleIconButton(
+                imageProvider = ImageProvider(R.drawable.ic_widget_play),
+                contentDescription = context.getString(R.string.widget_start),
+                onClick = action(block = onStartClick),
+                modifier = GlanceModifier.size(48.dp),
+                contentColor = GlanceTheme.colors.onSecondary,
+                backgroundColor = ColorProvider(presetColor)
+            )
+
+            Spacer(modifier = GlanceModifier.height(8.dp))
+
+            // 증가 버튼
+            CircleIconButton(
+                imageProvider = ImageProvider(R.drawable.ic_widget_plus),
+                contentDescription = context.getString(R.string.widget_increase_time),
+                onClick = action(block = onIncreaseClick),
+                modifier = GlanceModifier.size(32.dp),
+                contentColor = GlanceTheme.colors.onSurface,
+                backgroundColor = GlanceTheme.colors.background
+            )
+        }
     }
 }
 

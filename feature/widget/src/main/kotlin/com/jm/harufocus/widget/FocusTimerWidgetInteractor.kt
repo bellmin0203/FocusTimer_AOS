@@ -3,7 +3,11 @@ package com.jm.harufocus.widget
 import android.content.Context
 import android.content.Intent
 import com.jm.harufocus.common.TimerServiceAction
+import com.jm.harufocus.domain.repository.PresetRepository
+import com.jm.harufocus.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration
@@ -16,18 +20,54 @@ import kotlin.time.Duration.Companion.minutes
  */
 @Singleton
 class FocusTimerWidgetInteractor @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val settingsRepository: SettingsRepository,
+    private val presetRepository: PresetRepository,
+    private val widgetStateManager: FocusTimerWidgetStateManager
 ) {
     
     /**
      * 타이머 시작
      * 
-     * 기본 25분 타이머를 시작합니다.
-     * TODO: 프리셋이나 설정에서 기본 시간을 가져오도록 개선
+     * 1. 위젯에 설정된 시간이 있다면 그 시간으로 시작
+     * 2. 없다면 기본 프리셋이나 설정된 시간으로 시작
      */
-    fun startTimer() {
-        val defaultDuration = 25.minutes
-        startTimerWithDuration(defaultDuration)
+    suspend fun startTimer() {
+        // 위젯에 현재 설정된 시간 확인 (사용자가 조절했을 수 있음)
+        val currentWidgetTime = widgetStateManager.getRemainingTime()
+        
+        val duration = if (currentWidgetTime > Duration.ZERO) {
+            currentWidgetTime
+        } else {
+            val defaultPresetId = settingsRepository.defaultPresetId.firstOrNull()
+            
+            val fetchedDuration = if (defaultPresetId != null) {
+                presetRepository.getPresetById(defaultPresetId)?.duration
+            } else {
+                null
+            } ?: settingsRepository.defaultSessionDuration.first()
+            
+            // 가져온 기본값을 위젯 상태에도 반영하여 UI 동기화
+            widgetStateManager.updateRemainingTime(fetchedDuration)
+            fetchedDuration
+        }
+
+        startTimerWithDuration(duration)
+    }
+
+    /**
+     * 타이머 시간 증가 (1분)
+     */
+    suspend fun increaseTime() {
+        widgetStateManager.updateRemainingTime(1.minutes)
+        // 위젯 업데이트 요청은 Receiver에서 처리
+    }
+
+    /**
+     * 타이머 시간 감소 (1분)
+     */
+    suspend fun decreaseTime() {
+        widgetStateManager.updateRemainingTime((-1).minutes)
     }
     
     /**
