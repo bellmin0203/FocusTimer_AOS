@@ -2,13 +2,26 @@ plugins {
     alias(libs.plugins.my.android.application)
     alias(libs.plugins.my.android.compose)
     alias(libs.plugins.my.hilt)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
     namespace = "com.jm.harufocus"
 
     defaultConfig {
-        testInstrumentationRunner = "com.jm.teumtimer.HiltTestRunner"
+        testInstrumentationRunner = "com.jm.harufocus.HiltTestRunner"
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
+        create("benchmark") {
+            matchingFallbacks.add("release")
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+        }
     }
 }
 
@@ -38,4 +51,7 @@ dependencies {
 
     debugImplementation(projects.core.uiTestHilt)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    baselineProfile(project(":baselineprofile"))
+    implementation(libs.androidx.profileinstaller)
 }

@@ -51,3 +51,6 @@ include(
     ":feature:setting",
     ":feature:widget",
 )
+
+// performance
+include(":baselineprofile")
