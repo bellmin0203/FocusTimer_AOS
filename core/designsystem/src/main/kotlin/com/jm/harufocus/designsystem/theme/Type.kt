@@ -62,7 +62,7 @@ val Typography = Typography(
     titleLarge = TextStyle(
         fontFamily = SplineSans,
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp, // "Focus Timer", "Sessions" 헤더
+        fontSize = 20.sp, // "하루 몰입", "Sessions" 헤더
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),

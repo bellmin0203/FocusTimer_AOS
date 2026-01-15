@@ -7,7 +7,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /**
- * Focus Timer Widget Action Receiver
+ * 하루 몰입 Widget Action Receiver
  * 
  * 위젯 버튼 클릭 이벤트를 처리하는 BroadcastReceiver
  */

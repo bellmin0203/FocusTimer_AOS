@@ -46,7 +46,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Focus Timer Glance Widget
+ * 하루 몰입 Glance Widget
  *
  * Jetpack Glance를 사용한 타이머 위젯
  */

@@ -26,7 +26,7 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * Focus Timer 앱에서 사용되는 Material Icons
+ * 하루 몰입 앱에서 사용되는 Material Icons
  * Material Symbols Outlined과 매핑
  */
 object FocusTimerIcons {

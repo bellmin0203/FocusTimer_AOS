@@ -10,7 +10,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 /**
- * Focus Timer Widget Interactor
+ * 하루 몰입 Widget Interactor
  * 
  * 위젯과 타이머 서비스 간의 통신을 담당하는 클래스
  */

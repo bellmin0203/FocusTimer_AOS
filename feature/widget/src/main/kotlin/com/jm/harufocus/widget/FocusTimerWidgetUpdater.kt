@@ -13,7 +13,7 @@ import javax.inject.Singleton
 import kotlin.time.Duration
 
 /**
- * Focus Timer Widget Updater
+ * 하루 몰입 Widget Updater
  *
  * 타이머 서비스에서 위젯 상태를 업데이트하기 위한 헬퍼 클래스
  */

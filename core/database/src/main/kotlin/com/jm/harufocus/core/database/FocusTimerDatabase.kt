@@ -14,7 +14,7 @@ import com.jm.harufocus.core.database.model.StatisticsEntity
 import com.jm.harufocus.core.database.model.TimerSessionEntity
 
 /**
- * Focus Timer 앱의 메인 Room 데이터베이스
+ * 하루 몰입 앱의 메인 Room 데이터베이스
  *
  * 타이머 세션 데이터를 관리하는 SQLite 데이터베이스입니다.
  * Hilt를 통해 의존성 주입으로 관리됩니다.

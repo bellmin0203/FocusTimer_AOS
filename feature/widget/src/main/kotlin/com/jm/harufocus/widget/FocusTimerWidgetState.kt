@@ -3,7 +3,7 @@ package com.jm.harufocus.widget
 import kotlin.time.Duration
 
 /**
- * Focus Timer Widget 상태
+ * 하루 몰입 Widget 상태
  *
  * 위젯에 표시될 타이머 상태를 정의합니다.
  */

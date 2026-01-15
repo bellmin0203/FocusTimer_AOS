@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import com.jm.harufocus.designsystem.theme.FocusTimerTheme
 
 /**
- * Focus Timer 스위치
+ * 하루 몰입 스위치
  * 설정 화면의 토글 스위치
  */
 @Composable

@@ -12,7 +12,7 @@ import com.jm.harufocus.designsystem.theme.FocusTimerTheme
 import com.jm.harufocus.ui.R
 
 /**
- * Focus Timer Alert Dialog
+ * 하루 몰입 Alert Dialog
  */
 @Composable
 fun FocusAlertDialog(

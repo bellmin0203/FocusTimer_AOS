@@ -4,7 +4,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
-// Focus Timer 앱에서 사용되는 Shape 정의
+// 하루 몰입 앱에서 사용되는 Shape 정의
 val Shapes = Shapes(
     // 작은 요소 (스위치, 작은 칩)
     extraSmall = RoundedCornerShape(8.dp),

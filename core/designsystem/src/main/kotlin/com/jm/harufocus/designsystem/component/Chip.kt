@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.theme.FocusTimerTheme
 
 /**
- * Focus Timer Chip
+ * 하루 몰입 Chip
  * Focus, Short Break, Long Break 선택에 사용
  */
 @Composable

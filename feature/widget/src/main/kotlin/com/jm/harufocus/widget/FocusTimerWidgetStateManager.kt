@@ -13,7 +13,7 @@ import javax.inject.Singleton
 import kotlin.time.Duration
 
 /**
- * Focus Timer Widget State Manager
+ * 하루 몰입 Widget State Manager
  *
  * 위젯 상태를 Glance Preferences에 저장하고 관리합니다.
  * 타이머 서비스와 위젯 간의 상태 동기화를 담당합니다.

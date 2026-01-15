@@ -8,7 +8,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import com.jm.logutil.LogUtil
 
 /**
- * Focus Timer Widget Receiver
+ * 하루 몰입 Widget Receiver
  * 
  * Glance 위젯의 BroadcastReceiver
  */

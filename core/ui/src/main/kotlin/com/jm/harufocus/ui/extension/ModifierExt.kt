@@ -9,7 +9,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 /**
- * Focus Timer 카드 스타일
+ * 하루 몰입 카드 스타일
  */
 @Composable
 fun Modifier.focusTimerCard(): Modifier = this
