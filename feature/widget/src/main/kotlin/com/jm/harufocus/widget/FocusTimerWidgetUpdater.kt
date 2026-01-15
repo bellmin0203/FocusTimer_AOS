@@ -84,7 +84,7 @@ class FocusTimerWidgetUpdater @Inject constructor(
      */
     fun onTimerStopped(preset: Preset? = null) {
         scope.launch {
-            stateManager.setIdle(presetColorIndex = preset?.colorIndex)
+            stateManager.setIdle(preset = preset)
             updateWidget()
         }
     }

@@ -8,6 +8,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import com.jm.harufocus.domain.model.preset.Preset
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -62,17 +63,11 @@ class FocusTimerWidgetStateManager @Inject constructor(
     /**
      * 위젯 상태를 Idle로 설정
      */
-    suspend fun setIdle(presetColorIndex: Int? = null) {
+    suspend fun setIdle(preset: Preset? = null) {
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = FocusTimerWidgetState.IDLE
-            // Idle 상태로 돌아갈 때 시간을 초기화하지 않고 마지막 시간을 유지하거나 기본값으로 설정할 수 있음
-            // 여기서는 0으로 초기화되던 것을 유지하되, Interactor에서 초기화 로직을 담당하도록 할 수 있음
-            // 기존 로직: prefs[KEY_REMAINING_TIME] = FocusTimerWidgetState.DEFAULT_REMAINING_TIME (0)
-            // 변경: 타이머가 종료/정지되어 Idle로 갈 때 0으로 만들면 화면에 00:00이 뜸.
-            // 사용성을 위해 Idle 상태에서도 기본 시간(예: 25분)이나 마지막 설정 시간을 보여주는 게 좋음.
-            // 일단 기존 동작(0으로 초기화)을 유지하되, 필요 시 수정.
-            prefs[KEY_REMAINING_TIME] = FocusTimerWidgetState.DEFAULT_REMAINING_TIME
-            prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
+            prefs[KEY_REMAINING_TIME] = preset?.duration?.inWholeMilliseconds ?: FocusTimerWidgetState.DEFAULT_REMAINING_TIME
+            prefs[KEY_PRESET_COLOR_INDEX] = preset?.colorIndex.toString()
             prefs.remove(KEY_OVERTIME)
         }
     }
