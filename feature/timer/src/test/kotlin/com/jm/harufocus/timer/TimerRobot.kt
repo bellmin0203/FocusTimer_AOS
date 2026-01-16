@@ -25,11 +25,10 @@ class TimerRobot(private val scope: TestScope) {
 
     // ViewModel 생성 (UseCase들은 Mock으로 단순화 - 필요시 실제 객체 사용 가능)
     val viewModel = TimerViewModel(
-        getAllPresetsUseCase = mockk(relaxed = true),
-        addPresetUseCase = mockk(),
-        updatePresetUseCase = mockk(),
-        deletePresetUseCase = mockk(),
-        timerManager = timerManager
+        timerManager = timerManager,
+        managePresetUseCase = mockk(relaxed = true),
+        settingsRepository = mockk(),
+        notificationSoundPlayer = mockk(),
     )
 
     // --- Actions (Given / When) ---

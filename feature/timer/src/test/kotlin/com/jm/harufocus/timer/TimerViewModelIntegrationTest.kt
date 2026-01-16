@@ -751,10 +751,9 @@ class TimerViewModelIntegrationTest {
             }
 
             val viewModel = TimerViewModel(
-                getAllPresetsUseCase = mockk(relaxed = true),
-                addPresetUseCase = mockk(),
-                updatePresetUseCase = mockk(),
-                deletePresetUseCase = mockk(),
+                managePresetUseCase = mockk(relaxed = true),
+                settingsRepository = mockk(),
+                notificationSoundPlayer = mockk(),
                 timerManager = mockTimerManager
             )
 
