@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 // TimerManager 인터페이스
@@ -74,6 +75,10 @@ class TimerManagerImpl @Inject constructor(
     override val timerError: SharedFlow<TimerError> = _timerError.asSharedFlow()
 
     private var timerJob: Job? = null
+
+    // 마지막 Tick 시점의 타임스탬프와 남은 시간 (pause 시 정확한 시간 계산용)
+    private var lastTickTimestamp: Long = 0L
+    private var lastTickRemainingTime: Duration = Duration.ZERO
 
     override fun setTime(duration: Duration) {
         val validationResult = timerControlUseCase.validateTimerTime(duration)
@@ -125,12 +130,18 @@ class TimerManagerImpl @Inject constructor(
         reminderThresholds: List<Duration>
     ) {
         when (event) {
-            is TimerEvent.Tick -> _timerState.update { state ->
-                state.toRunning(
-                    initialDuration = initialDuration,
-                    remainingTime = event.remainingTime,
-                    reminderThresholds = reminderThresholds
-                )
+            is TimerEvent.Tick -> {
+                // pause 시 정확한 시간 계산을 위해 Tick 시점 기록
+                lastTickTimestamp = System.currentTimeMillis()
+                lastTickRemainingTime = event.remainingTime
+
+                _timerState.update { state ->
+                    state.toRunning(
+                        initialDuration = initialDuration,
+                        remainingTime = event.remainingTime,
+                        reminderThresholds = reminderThresholds
+                    )
+                }
             }
 
             is TimerEvent.Completed -> handleTimerComplete(initialDuration)
@@ -184,7 +195,18 @@ class TimerManagerImpl @Inject constructor(
     override fun pause() {
         if (_timerState.value.status is TimerStatus.Running) {
             timerJob?.cancel()
-            _timerState.update { it.toPaused() }
+
+            // 마지막 Tick 이후 경과한 시간을 계산하여 정확한 남은 시간 산출
+            val elapsedSinceLastTick = (System.currentTimeMillis() - lastTickTimestamp).milliseconds
+            val accurateRemainingTime = (lastTickRemainingTime - elapsedSinceLastTick)
+                .coerceAtLeast(Duration.ZERO)
+
+            _timerState.update {
+                it.copy(
+                    status = TimerStatus.Paused,
+                    remainingTime = accurateRemainingTime
+                )
+            }
         }
     }
 
