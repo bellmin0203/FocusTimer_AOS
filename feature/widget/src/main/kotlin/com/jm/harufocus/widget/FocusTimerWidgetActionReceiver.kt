@@ -39,6 +39,9 @@ class FocusTimerWidgetActionReceiver : BroadcastReceiver() {
                     WidgetActions.ACTION_STOP_TIMER -> {
                         widgetInteractor.stopTimer()
                     }
+                    WidgetActions.ACTION_COMPLETE_TIMER -> {
+                        widgetInteractor.completeTimer()
+                    }
                     WidgetActions.ACTION_INCREASE_TIME -> {
                         widgetInteractor.increaseTime()
                     }

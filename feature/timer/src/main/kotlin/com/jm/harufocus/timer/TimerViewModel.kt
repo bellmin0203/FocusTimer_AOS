@@ -6,11 +6,8 @@ import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.domain.repository.SettingsRepository
 import com.jm.harufocus.domain.usecase.preset.ManagePresetUseCase
 import com.jm.harufocus.domain.usecase.preset.PresetException
-import com.jm.harufocus.domain.usecase.session.ManageTimerSessionUseCase
-import com.jm.harufocus.domain.usecase.session.SessionException
 import com.jm.harufocus.timer.model.HapticPattern
 import com.jm.harufocus.timer.model.PresetError
-import com.jm.harufocus.timer.model.SessionError
 import com.jm.harufocus.timer.model.SetTimeError
 import com.jm.harufocus.timer.model.TimerError
 import com.jm.harufocus.timer.model.TimerIntent
@@ -34,7 +31,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -48,7 +44,6 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     private val managePresetUseCase: ManagePresetUseCase,
-    private val manageTimerSessionUseCase: ManageTimerSessionUseCase,
     private val timerManager: TimerManager,
     private val settingsRepository: SettingsRepository,
     private val notificationSoundPlayer: NotificationSoundPlayer,
@@ -235,36 +230,7 @@ class TimerViewModel @Inject constructor(
                             // 알림 소리 및 진동 재생
                             playNotificationSound()
 
-                            // 타이머가 자동 완료되었으므로 세션을 완료 상태로 업데이트
-                            val currentState = _uiState.value
-                            currentState.currentSessionId?.let { sessionId ->
-                                viewModelScope.launch {
-                                    val updateResult = manageTimerSessionUseCase.completeSession(
-                                        sessionId = sessionId,
-                                        presetId = currentState.selectedPreset?.id,
-                                        startTime = currentState.sessionStartTime,
-                                        initialDuration = currentState.initialTime,
-                                        overtime = Duration.ZERO
-                                    )
-
-                                    updateResult.fold(
-                                        onSuccess = {
-                                            LogUtil.d("세션 자동 완료 업데이트 성공, sessionId=$sessionId")
-                                        },
-                                        onFailure = { error ->
-                                            LogUtil.e("세션 자동 완료 업데이트 실패", error)
-                                            emitSideEffect(
-                                                ShowError(
-                                                    mapSessionExceptionToTimerError(
-                                                        error,
-                                                        true
-                                                    )
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                            }
+                            // 세션 완료 처리는 TimerService에서 처리됩니다
                         }
                     }
                 }
@@ -297,7 +263,7 @@ class TimerViewModel @Inject constructor(
     private fun handleUserIntent(intent: TimerIntent) {
         when (intent) {
             is TimerIntent.SetTime -> handleSetTime(intent.totalTime)
-            is TimerIntent.Start -> startTimerWithSession(intent.reminderThresholds)
+            is TimerIntent.Start -> startTimer(intent.reminderThresholds)
             is TimerIntent.Pause -> handlePause()
             is TimerIntent.Resume -> handleResume()
             is TimerIntent.Stop -> handleStop()
@@ -324,8 +290,10 @@ class TimerViewModel @Inject constructor(
 
     /**
      * 타이머 시작
+     *
+     * 세션 관리는 TimerService에서 처리됩니다.
      */
-    private fun startTimerWithSession(reminderThresholds: List<Duration>) {
+    private fun startTimer(reminderThresholds: List<Duration>) {
         val currentState = _uiState.value
         LogUtil.d("isRunning=${currentState.isRunning}, remainingTime=${currentState.remainingTime}")
 
@@ -348,44 +316,12 @@ class TimerViewModel @Inject constructor(
 
         LogUtil.d("타이머 시작")
 
-        // 타이머 시작 전에 세션을 DB에 저장
-        viewModelScope.launch {
-            val sessionResult = manageTimerSessionUseCase.startSession(
-                presetId = currentState.selectedPreset?.id ?: 0,
-                duration = currentState.initialTime
-            )
-
-            sessionResult.fold(
-                onSuccess = { sessionId ->
-                    LogUtil.d("세션 저장 성공, sessionId=$sessionId")
-                    _uiState.update {
-                        it.copy(
-                            currentSessionId = sessionId,
-                            sessionStartTime = Instant.now()
-                        )
-                    }
-
-                    // 세션 저장 성공 후 타이머 시작
-                    timerManager.start(
-                        initialDuration = _uiState.value.initialTime,
-                        duration = _uiState.value.remainingTime,
-                        reminderThresholds = reminderThresholds,
-                    )
-                },
-                onFailure = { error ->
-                    LogUtil.e("세션 저장 실패", error)
-                    // 세션 저장 실패 시 알림 표시
-                    emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, false)))
-
-                    // 세션 저장 실패 시에도 타이머는 시작 (사용자 경험 우선)
-                    timerManager.start(
-                        initialDuration = _uiState.value.initialTime,
-                        duration = _uiState.value.remainingTime,
-                        reminderThresholds = reminderThresholds,
-                    )
-                }
-            )
-        }
+        // 타이머 시작 (세션 관리는 TimerService에서 처리)
+        timerManager.start(
+            initialDuration = currentState.initialTime,
+            duration = currentState.remainingTime,
+            reminderThresholds = reminderThresholds,
+        )
     }
 
     /**
@@ -424,48 +360,19 @@ class TimerViewModel @Inject constructor(
 
     /**
      * 타이머 정지 및 초기화
+     *
+     * 세션 미완료 처리는 TimerService에서 처리됩니다.
      */
     private fun handleStop() {
         LogUtil.d("타이머 정지 및 초기화")
-
-        // 진행 중인 세션이 있으면 미완료 상태로 업데이트
-        val currentState = _uiState.value
-        currentState.currentSessionId?.let { sessionId ->
-            viewModelScope.launch {
-                val updateResult = manageTimerSessionUseCase.stopSession(
-                    sessionId = sessionId,
-                    presetId = currentState.selectedPreset?.id,
-                    startTime = currentState.sessionStartTime,
-                    initialDuration = currentState.initialTime
-                )
-
-                updateResult.fold(
-                    onSuccess = {
-                        LogUtil.d("세션 업데이트 성공 (미완료), sessionId=$sessionId")
-                    },
-                    onFailure = { error ->
-                        LogUtil.e("세션 업데이트 실패", error)
-                        // 에러 발생 시 UI에 알림
-                        emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, true)))
-                    }
-                )
-            }
-        }
-
         timerManager.stop(initialDuration = _uiState.value.initialTime)
-        _uiState.update {
-            it.copy(
-                currentSessionId = null,
-                sessionStartTime = null
-            )
-        }
     }
 
     /**
      * 타이머 완료 확인 처리
      *
      * 사용자가 완료 버튼을 클릭했을 때 호출됩니다.
-     * 초과 시간이 있는 경우 세션에 초과 시간을 업데이트합니다.
+     * TimerService에서 세션 업데이트 및 타이머 리셋을 처리합니다.
      */
     private fun handleComplete() {
         LogUtil.d("타이머 완료 확인")
@@ -475,43 +382,8 @@ class TimerViewModel @Inject constructor(
             return
         }
 
-        // 초과 시간이 있는 경우에만 세션 업데이트 (초과 시간 추가)
-        val currentState = _uiState.value
-        if (currentState.overtime > Duration.ZERO) {
-            currentState.currentSessionId?.let { sessionId ->
-                viewModelScope.launch {
-                    val updateResult = manageTimerSessionUseCase.completeSession(
-                        sessionId = sessionId,
-                        presetId = currentState.selectedPreset?.id,
-                        startTime = currentState.sessionStartTime,
-                        initialDuration = currentState.initialTime,
-                        overtime = Duration.ZERO
-                    )
-
-                    updateResult.fold(
-                        onSuccess = {
-                            LogUtil.d("세션 초과 시간 업데이트 성공, sessionId=$sessionId, overtime=${currentState.overtime}")
-                        },
-                        onFailure = { error ->
-                            LogUtil.e("세션 초과 시간 업데이트 실패", error)
-                            emitSideEffect(ShowError(mapSessionExceptionToTimerError(error, true)))
-                        }
-                    )
-                }
-            }
-        } else {
-            // 초과 시간 없이 완료 버튼을 누른 경우 (이미 자동 완료 시 업데이트됨)
-            LogUtil.d("초과 시간 없음, 세션 업데이트 건너뜀")
-        }
-
-        // 타이머를 초기 상태로 리셋
-        timerManager.stop(initialDuration = _uiState.value.initialTime)
-        _uiState.update {
-            it.copy(
-                currentSessionId = null,
-                sessionStartTime = null
-            )
-        }
+        // TimerManager를 통해 complete 이벤트 발생 -> TimerService에서 처리
+        timerManager.complete()
 
         emitSideEffect(
             TimerSideEffect.ShowSnackbar(
@@ -786,22 +658,6 @@ class TimerViewModel @Inject constructor(
         } else 0f
     }
 
-    /**
-     * SessionException을 TimerError로 변환
-     */
-    private fun mapSessionExceptionToTimerError(
-        error: Throwable,
-        isUpdate: Boolean
-    ): TimerError.Session {
-        val code = when (error) {
-            is SessionException.SessionNotFound -> SessionError.NotFound
-            is SessionException.InvalidDuration -> SessionError.InvalidDuration
-            is SessionException.InvalidTimeRange -> SessionError.InvalidTimeRange
-            is SessionException.MissingStartTime -> SessionError.MissingStartTime
-            else -> if (isUpdate) SessionError.FailUpdate else SessionError.FailSave
-        }
-        return TimerError.Session(code)
-    }
 
     /**
      * ViewModel이 제거될 때 타이머 정리

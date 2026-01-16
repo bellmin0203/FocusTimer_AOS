@@ -13,7 +13,8 @@ object TimerServiceAction {
     const val ACTION_PAUSE = "com.jm.harufocus.action.PAUSE"
     const val ACTION_RESUME = "com.jm.harufocus.action.RESUME"
     const val ACTION_STOP = "com.jm.harufocus.action.STOP"
-    
+    const val ACTION_COMPLETE = "com.jm.harufocus.action.COMPLETE"
+
     // Intent Extra Keys
     const val EXTRA_DURATION = "extra_duration"
     const val EXTRA_SESSION_ID = "extra_session_id"

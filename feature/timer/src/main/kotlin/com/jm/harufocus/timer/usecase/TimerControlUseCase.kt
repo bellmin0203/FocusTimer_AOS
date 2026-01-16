@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.timer.model.TimerEvent
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration
 
@@ -37,6 +38,8 @@ data class TimerState(
     val overtime: Duration = Duration.ZERO,
     val isShowReminder: Boolean = false,
     val selectedPreset: Preset? = null,
+    val currentSessionId: Long? = null,
+    val sessionStartTime: Instant? = null,
 ) {
     val isRunning: Boolean get() = status is TimerStatus.Running
     val isPaused: Boolean get() = status is TimerStatus.Paused

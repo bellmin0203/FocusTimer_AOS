@@ -147,7 +147,26 @@ class FocusTimerWidgetInteractor @Inject constructor(
             e.printStackTrace()
         }
     }
-    
+
+    /**
+     * 타이머 완료 (초과 시간 있는 경우 세션 업데이트 후 리셋)
+     */
+    fun completeTimer() {
+        val serviceIntent = Intent().apply {
+            setClassName(
+                context.packageName,
+                TimerServiceAction.SERVICE_CLASS_NAME
+            )
+            action = TimerServiceAction.ACTION_COMPLETE
+        }
+
+        try {
+            context.startService(serviceIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     /**
      * 앱 열기
      * 

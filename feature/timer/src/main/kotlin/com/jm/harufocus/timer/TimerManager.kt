@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration
@@ -38,6 +39,8 @@ import kotlin.time.Duration.Companion.seconds
 interface TimerManager {
     val timerState: StateFlow<TimerState>
     val timerError: SharedFlow<TimerError>
+    val completeEvent: SharedFlow<Unit> // 완료 확인 이벤트 (UI에서 완료 버튼 클릭 시)
+
     fun setTime(duration: Duration)
     fun start(
         initialDuration: Duration,
@@ -48,8 +51,13 @@ interface TimerManager {
     fun pause()
     fun resume()
     fun stop(initialDuration: Duration)
+    fun complete() // 타이머 완료 확인 (세션 업데이트 후 리셋)
     fun cancelAll()
     fun selectPreset(preset: Preset)
+
+    // 세션 관련 메서드
+    fun setSession(sessionId: Long, startTime: Instant)
+    fun clearSession()
 }
 
 @Singleton
@@ -73,6 +81,12 @@ class TimerManagerImpl @Inject constructor(
         extraBufferCapacity = 10 // 여러 에러를 버퍼링할 수 있도록 설정
     )
     override val timerError: SharedFlow<TimerError> = _timerError.asSharedFlow()
+
+    private val _completeEvent = MutableSharedFlow<Unit>(
+        replay = 0,
+        extraBufferCapacity = 1
+    )
+    override val completeEvent: SharedFlow<Unit> = _completeEvent.asSharedFlow()
 
     private var timerJob: Job? = null
 
@@ -231,12 +245,38 @@ class TimerManagerImpl @Inject constructor(
         }
     }
 
+    override fun complete() {
+        if (_timerState.value.status is TimerStatus.Completed) {
+            scope.launch {
+                _completeEvent.emit(Unit)
+            }
+        }
+    }
+
     override fun cancelAll() {
         job.cancelChildren()
     }
 
     override fun selectPreset(preset: Preset) {
         _timerState.update { it.copy(selectedPreset = preset) }
+    }
+
+    override fun setSession(sessionId: Long, startTime: Instant) {
+        _timerState.update {
+            it.copy(
+                currentSessionId = sessionId,
+                sessionStartTime = startTime
+            )
+        }
+    }
+
+    override fun clearSession() {
+        _timerState.update {
+            it.copy(
+                currentSessionId = null,
+                sessionStartTime = null
+            )
+        }
     }
 
     private fun TimerState.toRunning(
@@ -274,5 +314,7 @@ class TimerManagerImpl @Inject constructor(
         overtime = Duration.ZERO,
         reminderThresholds = emptyList(),
         isShowReminder = false,
+        currentSessionId = null,
+        sessionStartTime = null,
     )
 }

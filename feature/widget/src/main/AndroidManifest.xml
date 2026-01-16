@@ -22,6 +22,10 @@
                 <action android:name="${applicationId}.widget.ACTION_START_TIMER" />
                 <action android:name="${applicationId}.widget.ACTION_PAUSE_TIMER" />
                 <action android:name="${applicationId}.widget.ACTION_RESUME_TIMER" />
+                <action android:name="${applicationId}.widget.ACTION_STOP_TIMER" />
+                <action android:name="${applicationId}.widget.ACTION_COMPLETE_TIMER" />
+                <action android:name="${applicationId}.widget.ACTION_INCREASE_TIME" />
+                <action android:name="${applicationId}.widget.ACTION_DECREASE_TIME" />
                 <action android:name="${applicationId}.widget.ACTION_OPEN_APP" />
             </intent-filter>
         </receiver>

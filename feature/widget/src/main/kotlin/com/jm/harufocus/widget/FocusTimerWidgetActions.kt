@@ -20,6 +20,7 @@ object WidgetActions {
     const val ACTION_PAUSE_TIMER = "com.jm.harufocus.widget.ACTION_PAUSE_TIMER"
     const val ACTION_RESUME_TIMER = "com.jm.harufocus.widget.ACTION_RESUME_TIMER"
     const val ACTION_STOP_TIMER = "com.jm.harufocus.widget.ACTION_STOP_TIMER"
+    const val ACTION_COMPLETE_TIMER = "com.jm.harufocus.widget.ACTION_COMPLETE_TIMER"
     const val ACTION_OPEN_APP = "com.jm.harufocus.widget.ACTION_OPEN_APP"
     const val ACTION_INCREASE_TIME = "com.jm.harufocus.widget.ACTION_INCREASE_TIME"
     const val ACTION_DECREASE_TIME = "com.jm.harufocus.widget.ACTION_DECREASE_TIME"
@@ -81,6 +82,16 @@ fun actionResumeTimer(context: Context) {
 fun actionStopTimer(context: Context) {
     val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_STOP_TIMER
+    }
+    context.sendBroadcast(intent)
+}
+
+/**
+ * 타이머 완료 액션 (초과 시간 있는 경우 세션 업데이트 후 리셋)
+ */
+fun actionCompleteTimer(context: Context) {
+    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+        action = WidgetActions.ACTION_COMPLETE_TIMER
     }
     context.sendBroadcast(intent)
 }

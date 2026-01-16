@@ -116,6 +116,7 @@ private fun WidgetContent(context: Context) {
         onPauseClick = { actionPauseTimer(context) },
         onResumeClick = { actionResumeTimer(context) },
         onStopClick = { actionStopTimer(context) },
+        onCompleteClick = { actionCompleteTimer(context) },
         onOpenAppClick = { actionOpenApp(context) },
         onIncreaseClick = { actionIncreaseTime(context) },
         onDecreaseClick = { actionDecreaseTime(context) }
@@ -134,6 +135,7 @@ private fun FocusTimerWidgetContent(
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
     onStopClick: () -> Unit,
+    onCompleteClick: () -> Unit,
     onOpenAppClick: () -> Unit,
     onIncreaseClick: () -> Unit,
     onDecreaseClick: () -> Unit
@@ -169,7 +171,7 @@ private fun FocusTimerWidgetContent(
             is FocusTimerWidgetState.Completed -> CompletedContent(
                 presetColor = presetColor,
                 overtime = state.overtime,
-                onStopClick = onStopClick
+                onCompleteClick = onCompleteClick
             )
         }
     }
@@ -377,7 +379,7 @@ private fun PausedContent(
 private fun CompletedContent(
     presetColor: Color,
     overtime: Duration,
-    onStopClick: () -> Unit
+    onCompleteClick: () -> Unit
 ) {
     val context = LocalContext.current
     Column(
@@ -410,11 +412,11 @@ private fun CompletedContent(
 
         Spacer(modifier = GlanceModifier.height(16.dp))
 
-        // 다시 시작 버튼
+        // 완료 확인 버튼
         CircleIconButton(
             imageProvider = ImageProvider(R.drawable.ic_widget_check),
             contentDescription = context.getString(R.string.widget_complete),
-            onClick = action(block = onStopClick),
+            onClick = action(block = onCompleteClick),
             modifier = GlanceModifier.size(48.dp),
             backgroundColor = ColorProvider(presetColor),
             contentColor = GlanceTheme.colors.onSecondary

@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.jm.harufocus.common.TimerServiceAction
+import com.jm.harufocus.domain.usecase.session.ManageTimerSessionUseCase
 import com.jm.harufocus.timer.TimerManager
 import com.jm.harufocus.timer.usecase.TimerStatus
 import com.jm.harufocus.widget.FocusTimerWidgetUpdater
@@ -17,6 +18,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -26,6 +29,7 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * 백그라운드에서도 타이머가 계속 동작하도록 하는 서비스입니다.
  * 알림을 통해 현재 타이머 상태를 표시하고, 사용자가 알림에서 직접 제어할 수 있습니다.
+ * 타이머 세션의 생명주기도 관리합니다.
  */
 @AndroidEntryPoint
 class TimerService : Service() {
@@ -36,10 +40,16 @@ class TimerService : Service() {
     @Inject
     lateinit var widgetUpdater: FocusTimerWidgetUpdater
 
+    @Inject
+    lateinit var manageTimerSessionUseCase: ManageTimerSessionUseCase
+
     private lateinit var notificationHelper: TimerNotificationHelper
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private var timerStateJob: Job? = null
+
+    // 타이머 완료 처리 중복 방지 플래그
+    private var isCompletionHandled: Boolean = false
 
     override fun onCreate() {
         super.onCreate()
@@ -51,6 +61,9 @@ class TimerService : Service() {
 
         // 타이머 상태 관찰 시작
         observeTimerState()
+
+        // 완료 이벤트 관찰 (ViewModel에서 완료 버튼 클릭 시)
+        observeCompleteEvent()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -66,6 +79,7 @@ class TimerService : Service() {
             TimerServiceAction.ACTION_PAUSE -> handlePause()
             TimerServiceAction.ACTION_RESUME -> handleResume()
             TimerServiceAction.ACTION_STOP -> handleStop()
+            TimerServiceAction.ACTION_COMPLETE -> handleComplete()
         }
 
         return START_STICKY // 시스템에 의해 종료되면 재시작
@@ -75,9 +89,41 @@ class TimerService : Service() {
 
     /**
      * 타이머 시작
+     *
+     * 세션을 DB에 저장한 후 타이머를 시작합니다.
      */
     private fun handleStart(duration: Duration) {
         LogUtil.d("TimerService handleStart: duration=$duration")
+
+        // 완료 처리 플래그 초기화
+        isCompletionHandled = false
+
+        val selectedPreset = timerManager.timerState.value.selectedPreset
+
+        // 세션을 DB에 저장
+        serviceScope.launch {
+            val sessionResult = manageTimerSessionUseCase.startSession(
+                presetId = selectedPreset?.id ?: 0,
+                duration = duration
+            )
+
+            sessionResult.fold(
+                onSuccess = { sessionId ->
+                    LogUtil.d("세션 저장 성공, sessionId=$sessionId")
+                    timerManager.setSession(sessionId, Instant.now())
+                },
+                onFailure = { error ->
+                    LogUtil.e("세션 저장 실패", error)
+                    // 세션 저장 실패해도 타이머는 계속 동작
+                }
+            )
+        }
+
+        // 타이머 시작
+        timerManager.start(
+            initialDuration = duration,
+            duration = duration,
+        )
 
         // Foreground Service 시작
         val notification = notificationHelper.createRunningNotification(
@@ -87,7 +133,6 @@ class TimerService : Service() {
         startForeground(TimerNotificationHelper.NOTIFICATION_ID, notification)
 
         // 위젯 업데이트: 타이머 시작
-        val selectedPreset = timerManager.timerState.value.selectedPreset
         widgetUpdater.onTimerStarted(duration, selectedPreset)
     }
 
@@ -117,11 +162,91 @@ class TimerService : Service() {
 
     /**
      * 타이머 정지 및 서비스 종료
+     *
+     * 진행 중인 세션이 있으면 미완료 상태로 업데이트합니다.
      */
     private fun handleStop() {
         LogUtil.d("TimerService handleStop")
-        val selectedPreset = timerManager.timerState.value.selectedPreset
-        timerManager.stop(timerManager.timerState.value.initialDuration)
+        val state = timerManager.timerState.value
+        val selectedPreset = state.selectedPreset
+
+        // 진행 중인 세션이 있으면 미완료 상태로 업데이트
+        state.currentSessionId?.let { sessionId ->
+            serviceScope.launch {
+                val updateResult = manageTimerSessionUseCase.stopSession(
+                    sessionId = sessionId,
+                    presetId = selectedPreset?.id,
+                    startTime = state.sessionStartTime,
+                    initialDuration = state.initialDuration
+                )
+
+                updateResult.fold(
+                    onSuccess = {
+                        LogUtil.d("세션 업데이트 성공 (미완료), sessionId=$sessionId")
+                    },
+                    onFailure = { error ->
+                        LogUtil.e("세션 업데이트 실패", error)
+                    }
+                )
+            }
+        }
+
+        timerManager.stop(state.initialDuration)
+
+        // 위젯 업데이트: 타이머 중지
+        widgetUpdater.onTimerStopped(selectedPreset)
+
+        // Foreground 상태 해제 및 서비스 종료
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    /**
+     * 타이머 완료 확인 처리
+     *
+     * 사용자가 완료 버튼을 클릭했을 때 호출됩니다.
+     * 초과 시간이 있는 경우 세션에 초과 시간을 업데이트합니다.
+     */
+    private fun handleComplete() {
+        LogUtil.d("TimerService handleComplete")
+        val state = timerManager.timerState.value
+
+        // 완료 상태가 아니면 무시
+        if (state.status !is TimerStatus.Completed) {
+            LogUtil.w("완료 상태가 아님")
+            return
+        }
+
+        val selectedPreset = state.selectedPreset
+
+        // 초과 시간이 있는 경우에만 세션 업데이트
+        if (state.overtime > Duration.ZERO) {
+            state.currentSessionId?.let { sessionId ->
+                serviceScope.launch {
+                    val updateResult = manageTimerSessionUseCase.completeSession(
+                        sessionId = sessionId,
+                        presetId = selectedPreset?.id,
+                        startTime = state.sessionStartTime,
+                        initialDuration = state.initialDuration,
+                        overtime = state.overtime
+                    )
+
+                    updateResult.fold(
+                        onSuccess = {
+                            LogUtil.d("세션 초과 시간 업데이트 성공, sessionId=$sessionId, overtime=${state.overtime}")
+                        },
+                        onFailure = { error ->
+                            LogUtil.e("세션 초과 시간 업데이트 실패", error)
+                        }
+                    )
+                }
+            }
+        } else {
+            LogUtil.d("초과 시간 없음, 세션 업데이트 건너뜀")
+        }
+
+        // 타이머를 초기 상태로 리셋
+        timerManager.stop(state.initialDuration)
 
         // 위젯 업데이트: 타이머 중지
         widgetUpdater.onTimerStopped(selectedPreset)
@@ -202,6 +327,31 @@ class TimerService : Service() {
                             overtime = state.overtime,
                             preset = state.selectedPreset
                         )
+
+                        // 세션 완료 처리 (초과 시간 없이 최초 완료 시점에만)
+                        if (!isCompletionHandled && !state.isOvertime) {
+                            isCompletionHandled = true
+                            state.currentSessionId?.let { sessionId ->
+                                serviceScope.launch {
+                                    val updateResult = manageTimerSessionUseCase.completeSession(
+                                        sessionId = sessionId,
+                                        presetId = state.selectedPreset?.id,
+                                        startTime = state.sessionStartTime,
+                                        initialDuration = state.initialDuration,
+                                        overtime = Duration.ZERO
+                                    )
+
+                                    updateResult.fold(
+                                        onSuccess = {
+                                            LogUtil.d("세션 자동 완료 업데이트 성공, sessionId=$sessionId")
+                                        },
+                                        onFailure = { error ->
+                                            LogUtil.e("세션 자동 완료 업데이트 실패", error)
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     is TimerStatus.Idle -> {
@@ -212,6 +362,21 @@ class TimerService : Service() {
                         widgetUpdater.onTimerStopped(preset = state.selectedPreset)
                     }
                 }
+            }
+            .launchIn(serviceScope)
+    }
+
+    /**
+     * 완료 이벤트 관찰
+     *
+     * ViewModel에서 완료 버튼을 클릭하면 timerManager.complete()가 호출되고,
+     * 이 이벤트를 받아서 handleComplete를 실행합니다.
+     */
+    private fun observeCompleteEvent() {
+        timerManager.completeEvent
+            .onEach {
+                LogUtil.d("TimerService completeEvent 수신")
+                handleComplete()
             }
             .launchIn(serviceScope)
     }
