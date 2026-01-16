@@ -1,5 +1,6 @@
 package com.jm.harufocus.designsystem.component
 
+import android.content.res.Configuration
 import android.graphics.Paint
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -516,14 +518,14 @@ private fun createTextPaint(textSize: Float, color: Color): Paint {
     }
 }
 
-@Preview(name = "Teum Theme (Default)", showBackground = true)
+@Preview(name = "Haru Theme (Default)", showBackground = true)
 @Composable
-fun CircularTimerProgressTeumPreview() {
+fun CircularTimerProgressHaruPreview() {
     FocusTimerTheme {
         CircularTimerProgress(
             progress = 0.65f,
             modifier = Modifier.size(200.dp),
-            colorScheme = TimerColorPresets.TeumLight,
+            colorScheme = TimerColorPresets.HaruLight,
             showKnob = true,
         )
     }
@@ -542,14 +544,14 @@ fun CircularTimerProgressCoralPreview() {
     }
 }
 
-@Preview(name = "Lavender Theme", showBackground = true)
+@Preview(name = "Purple Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressLavenderPreview() {
+fun CircularTimerProgressPurplePreview() {
     FocusTimerTheme {
         CircularTimerProgress(
             progress = 0.80f,
             modifier = Modifier.size(200.dp),
-            colorScheme = TimerColorPresets.LavenderLight,
+            colorScheme = TimerColorPresets.PurpleLight,
             showKnob = true,
         )
     }
@@ -581,15 +583,105 @@ fun CircularTimerProgressSlatePreview() {
     }
 }
 
-@Preview(name = "Sage Theme", showBackground = true)
+@Preview(name = "Green Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressSagePreview() {
+fun CircularTimerProgressGreenPreview() {
     FocusTimerTheme {
         CircularTimerProgress(
             progress = 0.70f,
             modifier = Modifier.size(200.dp),
-            colorScheme = TimerColorPresets.SageLight,
+            colorScheme = TimerColorPresets.GreenLight,
             showKnob = true,
         )
+    }
+}
+
+@Preview(name = "Haru Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CircularTimerProgressHaruDarkPreview() {
+    FocusTimerTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CircularTimerProgress(
+                progress = 0.65f,
+                modifier = Modifier.size(200.dp),
+                colorScheme = TimerColorPresets.HaruDark,
+                showKnob = true,
+            )
+        }
+    }
+}
+
+@Preview(name = "Coral Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CircularTimerProgressCoralDarkPreview() {
+    FocusTimerTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CircularTimerProgress(
+                progress = 0.45f,
+                modifier = Modifier.size(200.dp),
+                colorScheme = TimerColorPresets.CoralDark,
+                showKnob = true,
+            )
+        }
+    }
+}
+
+@Preview(name = "Purple Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CircularTimerProgressPurpleDarkPreview() {
+    FocusTimerTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CircularTimerProgress(
+                progress = 0.80f,
+                modifier = Modifier.size(200.dp),
+                colorScheme = TimerColorPresets.PurpleDark,
+                showKnob = true,
+            )
+        }
+    }
+}
+
+@Preview(name = "Sky Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CircularTimerProgressSkyDarkPreview() {
+    FocusTimerTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CircularTimerProgress(
+                progress = 0.30f,
+                modifier = Modifier.size(200.dp),
+                colorScheme = TimerColorPresets.SkyDark,
+                showKnob = true,
+            )
+        }
+    }
+}
+
+@Preview(name = "Slate Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CircularTimerProgressSlateDarkPreview() {
+    FocusTimerTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CircularTimerProgress(
+                progress = 0.55f,
+                modifier = Modifier.size(200.dp),
+                colorScheme = TimerColorPresets.SlateDark,
+                showKnob = true,
+            )
+        }
+    }
+}
+
+@Preview(name = "Green Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CircularTimerProgressGreenDarkPreview() {
+    FocusTimerTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CircularTimerProgress(
+                progress = 0.70f,
+                modifier = Modifier.size(200.dp),
+                colorScheme = TimerColorPresets.GreenDark,
+                showKnob = true,
+            )
+        }
     }
 }

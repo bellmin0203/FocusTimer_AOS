@@ -3,6 +3,12 @@ package com.jm.harufocus.designsystem.component
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.jm.harufocus.designsystem.theme.BrandNavy
+import com.jm.harufocus.designsystem.theme.BrandPurple
+import com.jm.harufocus.designsystem.theme.BrandYellow
+import com.jm.harufocus.designsystem.theme.DarkBackground
+import com.jm.harufocus.designsystem.theme.DarkSurface
+import com.jm.harufocus.designsystem.theme.LightPrimaryContainer
 
 /**
  * 타이머 컴포넌트의 컬러 스킴
@@ -26,13 +32,14 @@ object TimerColorPresets {
     // Light Theme Presets
 
     /**
-     * 하루 몰입 시그니처 테마 (딥 틸)
+     * 하루(Haru) 시그니처 테마 (Navy & Purple)
+     * 브랜드 아이덴티티를 살려 깊은 Navy를 메인으로 사용
      */
-    val TeumLight = TimerColorScheme(
-        progressColor = Color(0xFF00695C), // PrimaryDeepTeal
-        knobColor = Color(0xFFFFFFFF),
-        tickColor = Color(0xFFB2DFDB), // PrimaryDeepTealContainer
-        labelColor = Color(0xFF00695C) // PrimaryDeepTeal
+    val HaruLight = TimerColorScheme(
+        progressColor = BrandNavy,        // Primary (#252A4E)
+        knobColor = Color.White,
+        tickColor = LightPrimaryContainer, // 연한 Navy
+        labelColor = BrandNavy
     )
 
     /**
@@ -41,18 +48,18 @@ object TimerColorPresets {
     val CoralLight = TimerColorScheme(
         progressColor = Color(0xFFF43F5E), // rose-500
         knobColor = Color(0xFFFFFFFF),
-        tickColor = Color(0xFFE5E7EB), // gray-200
-        labelColor = Color(0xFF9CA3AF) // gray-400
+        tickColor = Color(0xFFFFE4E6), // rose-100
+        labelColor = Color(0xFFE11D48) // rose-600
     )
 
     /**
-     * 라벤더 퍼플 테마
+     * 퍼플 테마 (브랜드 컬러 Purple 활용)
      */
-    val LavenderLight = TimerColorScheme(
-        progressColor = Color(0xFF8B5CF6), // violet-500
+    val PurpleLight = TimerColorScheme(
+        progressColor = BrandPurple,      // Secondary (#5A4A72)
         knobColor = Color(0xFFFFFFFF),
-        tickColor = Color(0xFFE5E7EB), // gray-200
-        labelColor = Color(0xFF9CA3AF) // gray-400
+        tickColor = Color(0xFFF3E8FF), // purple-100
+        labelColor = BrandPurple
     )
 
     /**
@@ -61,40 +68,41 @@ object TimerColorPresets {
     val SkyLight = TimerColorScheme(
         progressColor = Color(0xFF0EA5E9), // sky-500
         knobColor = Color(0xFFFFFFFF),
-        tickColor = Color(0xFFE0E7FF), // indigo-100
-        labelColor = Color(0xFF94A3B8) // slate-400
+        tickColor = Color(0xFFE0F2FE), // sky-100
+        labelColor = Color(0xFF0284C7) // sky-600
     )
 
     /**
-     * 슬레이트 그레이 테마 (구 Peach)
+     * 슬레이트 그레이 테마
      */
     val SlateLight = TimerColorScheme(
         progressColor = Color(0xFF475569), // slate-600
         knobColor = Color(0xFFFFFFFF),
-        tickColor = Color(0xFFE2E8F0), // slate-200
-        labelColor = Color(0xFF64748B) // slate-500
+        tickColor = Color(0xFFF1F5F9), // slate-100
+        labelColor = Color(0xFF334155) // slate-700
     )
 
     /**
-     * 세이지 그린 테마
+     * 포레스트 그린 테마 (자연의 색)
      */
-    val SageLight = TimerColorScheme(
+    val GreenLight = TimerColorScheme(
         progressColor = Color(0xFF059669), // emerald-600
-        knobColor = Color(0xFFFFFBEB), // amber-50
+        knobColor = Color(0xFFFFFFFF),
         tickColor = Color(0xFFD1FAE5), // emerald-100
-        labelColor = Color(0xFF78716C) // stone-500
+        labelColor = Color(0xFF047857) // emerald-700
     )
 
     // Dark Theme Presets
 
     /**
-     * 하루 몰입 시그니처 테마 (민트)
+     * 하루(Haru) 시그니처 테마 (Yellow on Navy)
+     * 다크 모드에서는 네이비 배경 위 옐로우 포인트로 브랜드 강조
      */
-    val TeumDark = TimerColorScheme(
-        progressColor = Color(0xFF64FFDA), // PrimaryMint
-        knobColor = Color(0xFF0F172A), // DarkBackground
-        tickColor = Color(0xFF334155), // DarkBorder
-        labelColor = Color(0xFF64FFDA) // PrimaryMint
+    val HaruDark = TimerColorScheme(
+        progressColor = BrandYellow,      // Primary (#FAD79C)
+        knobColor = DarkBackground,       // Deep Navy
+        tickColor = DarkSurface,          // Navy (#252A4E)
+        labelColor = BrandYellow
     )
 
     /**
@@ -103,18 +111,18 @@ object TimerColorPresets {
     val CoralDark = TimerColorScheme(
         progressColor = Color(0xFFFB7185), // rose-400
         knobColor = Color(0xFF1A231F),
-        tickColor = Color(0xFF374151), // gray-700
-        labelColor = Color(0xFF9CA3AF) // gray-400
+        tickColor = Color(0xFF881337), // rose-900
+        labelColor = Color(0xFFFDA4AF) // rose-300
     )
 
     /**
-     * 바이올렛 퍼플 테마
+     * 퍼플 테마
      */
-    val LavenderDark = TimerColorScheme(
+    val PurpleDark = TimerColorScheme(
         progressColor = Color(0xFFA78BFA), // violet-400
         knobColor = Color(0xFF1A231F),
         tickColor = Color(0xFF4C1D95), // violet-900
-        labelColor = Color(0xFFC4B5FD) // violet-300
+        labelColor = Color(0xFFDDD6FE) // violet-200
     )
 
     /**
@@ -123,26 +131,26 @@ object TimerColorPresets {
     val SkyDark = TimerColorScheme(
         progressColor = Color(0xFF38BDF8), // sky-400
         knobColor = Color(0xFF0F172A), // slate-900
-        tickColor = Color(0xFF334155), // slate-700
-        labelColor = Color(0xFF94A3B8) // slate-400
+        tickColor = Color(0xFF0C4A6E), // sky-900
+        labelColor = Color(0xFFBAE6FD) // sky-200
     )
 
     /**
-     * 미드나잇 슬레이트 테마 (구 Peach)
+     * 미드나잇 슬레이트 테마
      */
     val SlateDark = TimerColorScheme(
-        progressColor = Color(0xFFCBD5E1), // slate-300
+        progressColor = Color(0xFF94A3B8), // slate-400
         knobColor = Color(0xFF1E293B), // slate-800
         tickColor = Color(0xFF334155), // slate-700
-        labelColor = Color(0xFF94A3B8) // slate-400
+        labelColor = Color(0xFFCBD5E1) // slate-300
     )
 
     /**
-     * 포레스트 그린 테마
+     * 에메랄드 그린 테마
      */
-    val SageDark = TimerColorScheme(
-        progressColor = Color(0xFF10B981), // emerald-500
-        knobColor = Color(0xFF1C2620),
+    val GreenDark = TimerColorScheme(
+        progressColor = Color(0xFF34D399), // emerald-400
+        knobColor = Color(0xFF064E3B), // emerald-900
         tickColor = Color(0xFF065F46), // emerald-800
         labelColor = Color(0xFF6EE7B7) // emerald-300
     )
@@ -151,24 +159,24 @@ object TimerColorPresets {
      * 모든 라이트 테마 프리셋 리스트
      */
     val lightPresets = listOf(
-        TeumLight,
+        HaruLight,
         CoralLight,
-        LavenderLight,
+        PurpleLight,
         SkyLight,
         SlateLight,
-        SageLight
+        GreenLight
     )
 
     /**
      * 모든 다크 테마 프리셋 리스트
      */
     val darkPresets = listOf(
-        TeumDark,
+        HaruDark,
         CoralDark,
-        LavenderDark,
+        PurpleDark,
         SkyDark,
         SlateDark,
-        SageDark
+        GreenDark
     )
 
     @get:Composable

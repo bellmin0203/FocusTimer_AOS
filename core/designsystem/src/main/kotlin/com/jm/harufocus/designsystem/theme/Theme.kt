@@ -8,30 +8,26 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 // 다크 테마 ColorScheme - Deep Focus (깊은 몰입)
+// Navy(#252A4E)를 Surface로, Yellow(#FAD79C)를 포인트로 사용
 val DarkColorScheme = darkColorScheme(
-    // Primary - 깊은 몰입을 위한 민트
-    primary = PrimaryMint,
-    onPrimary = DarkBackground,
-    primaryContainer = PrimaryMintContainer,
-    onPrimaryContainer = PrimaryMint,
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = DarkOnPrimaryContainer,
 
-    // Secondary - 보조 컬러
-    secondary = DarkOnSurfaceVariant,
-    onSecondary = DarkBackground,
-    secondaryContainer = DarkSurface,
-    onSecondaryContainer = DarkOnSurfaceVariant,
+    secondary = DarkSecondary,
+    onSecondary = DarkOnSecondary,
+    secondaryContainer = DarkSecondaryContainer,
+    onSecondaryContainer = DarkOnSecondaryContainer,
 
-    // Tertiary - 3차 컬러 (Break 아이콘용)
-    tertiary = BreakIconDark,
-    onTertiary = DarkBackground,
+    tertiary = BrandPurple, // 보라색은 3차 강조색으로 유지
+    onTertiary = DarkOnSecondary,
     tertiaryContainer = BreakIconDarkBackground,
     onTertiaryContainer = BreakIconDark,
 
-    // Background & Surface
     background = DarkBackground,
     onBackground = DarkOnBackground,
     surface = DarkSurface,
@@ -39,48 +35,41 @@ val DarkColorScheme = darkColorScheme(
     surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = DarkOnSurfaceVariant,
 
-    // Outline & Border
     outline = DarkBorder,
-    outlineVariant = DarkSurfaceInactive,
+    outlineVariant = DarkSurfaceVariant,
 
-    // Error (Material3 표준 적용)
     error = DarkError,
     onError = DarkOnError,
 )
 
 // 라이트 테마 ColorScheme - Clear Day (선명한 하루)
+// Navy(#252A4E)를 Primary로 사용하여 신뢰감 부여
 val LightColorScheme = lightColorScheme(
-    // Primary - 신뢰감을 주는 딥 틸
-    primary = PrimaryDeepTeal,
-    onPrimary = Color.White,
-    primaryContainer = PrimaryDeepTealContainer,
-    onPrimaryContainer = PrimaryDeepTeal, // 컨테이너 위 텍스트는 짙은 색 사용
+    primary = LightPrimary,
+    onPrimary = LightOnPrimary,
+    primaryContainer = LightPrimaryContainer,
+    onPrimaryContainer = LightOnPrimaryContainer,
 
-    // Secondary - 보조 컬러
-    secondary = LightOnSurfaceVariant,
-    onSecondary = Color.White,
-    secondaryContainer = LightSurface,
-    onSecondaryContainer = LightOnSurfaceVariant,
+    secondary = LightSecondary,
+    onSecondary = LightOnSecondary,
+    secondaryContainer = LightSecondaryContainer,
+    onSecondaryContainer = LightOnSecondaryContainer,
 
-    // Tertiary - 3차 컬러 (Break 아이콘용)
-    tertiary = BreakIconLight,
-    onTertiary = Color.White,
-    tertiaryContainer = BreakIconLightBackground,
-    onTertiaryContainer = BreakIconLight,
+    tertiary = LightTertiary,
+    onTertiary = LightOnTertiary,
+    tertiaryContainer = LightTertiaryContainer,
+    onTertiaryContainer = LightOnTertiaryContainer,
 
-    // Background & Surface
     background = LightBackground,
     onBackground = LightOnBackground,
-    surface = LightSurface, // 화이트 카드
+    surface = LightSurface,
     onSurface = LightOnSurface,
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = LightOnSurfaceVariant,
 
-    // Outline & Border
     outline = LightBorder,
-    outlineVariant = LightBorderVariant,
+    outlineVariant = LightSurfaceVariant,
 
-    // Error (Material3 표준 적용)
     error = LightError,
     onError = LightOnError,
 )
@@ -88,7 +77,7 @@ val LightColorScheme = lightColorScheme(
 @Composable
 fun FocusTimerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color는 디자인 시스템과 맞지 않으므로 기본값을 false로 설정
+    // 브랜드 아이덴티티 유지를 위해 Dynamic Color 기본값 false
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -97,7 +86,6 @@ fun FocusTimerTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
