@@ -30,7 +30,7 @@ object WidgetActions {
  * 타이머 시간 증가 액션
  */
 fun actionIncreaseTime(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_INCREASE_TIME
     }
     context.sendBroadcast(intent)
@@ -40,7 +40,7 @@ fun actionIncreaseTime(context: Context) {
  * 타이머 시간 감소 액션
  */
 fun actionDecreaseTime(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_DECREASE_TIME
     }
     context.sendBroadcast(intent)
@@ -50,7 +50,7 @@ fun actionDecreaseTime(context: Context) {
  * 타이머 시작 액션
  */
 fun actionStartTimer(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_START_TIMER
     }
     context.sendBroadcast(intent)
@@ -60,7 +60,7 @@ fun actionStartTimer(context: Context) {
  * 타이머 일시정지 액션
  */
 fun actionPauseTimer(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_PAUSE_TIMER
     }
     context.sendBroadcast(intent)
@@ -70,7 +70,7 @@ fun actionPauseTimer(context: Context) {
  * 타이머 재개 액션
  */
 fun actionResumeTimer(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_RESUME_TIMER
     }
     context.sendBroadcast(intent)
@@ -80,7 +80,7 @@ fun actionResumeTimer(context: Context) {
  * 타이머 정지 액션
  */
 fun actionStopTimer(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_STOP_TIMER
     }
     context.sendBroadcast(intent)
@@ -90,7 +90,7 @@ fun actionStopTimer(context: Context) {
  * 타이머 완료 액션 (초과 시간 있는 경우 세션 업데이트 후 리셋)
  */
 fun actionCompleteTimer(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_COMPLETE_TIMER
     }
     context.sendBroadcast(intent)
@@ -100,7 +100,7 @@ fun actionCompleteTimer(context: Context) {
  * 앱 열기 액션
  */
 fun actionOpenApp(context: Context) {
-    val intent = Intent(context, FocusTimerWidgetActionReceiver::class.java).apply {
+    val intent = Intent(context, HaruFocusWidgetActionReceiver::class.java).apply {
         action = WidgetActions.ACTION_OPEN_APP
     }
     context.sendBroadcast(intent)
@@ -111,6 +111,6 @@ fun actionOpenApp(context: Context) {
  */
 fun updateWidget(context: Context) {
     CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-        FocusTimerWidget().updateAll(context)
+        HaruFocusWidget().updateAll(context)
     }
 }

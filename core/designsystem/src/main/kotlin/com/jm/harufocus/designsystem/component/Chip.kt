@@ -10,14 +10,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * 하루 몰입 Chip
  * Focus, Short Break, Long Break 선택에 사용
  */
 @Composable
-fun FocusTimerChip(
+fun HaruFocusChip(
     selected: Boolean,
     onClick: () -> Unit,
     text: String,
@@ -50,9 +50,9 @@ fun FocusTimerChip(
 
 @ThemePreviews
 @Composable
-fun FocusTimerChipPreview() {
-    FocusTimerTheme {
-        FocusTimerChip(
+fun HaruFocusChipPreview() {
+    HaruFocusTheme {
+        HaruFocusChip(
             selected = true,
             onClick = { },
             text = "Focus"

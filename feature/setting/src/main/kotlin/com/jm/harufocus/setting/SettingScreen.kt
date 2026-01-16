@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.setting.model.SettingCategory
 import com.jm.harufocus.setting.model.SettingSideEffect
 import com.jm.harufocus.setting.model.SettingType
@@ -283,7 +283,7 @@ fun PreviewSettingScreen() {
         ),
     )
 
-    FocusTimerTheme {
+    HaruFocusTheme {
         SettingScreen(
             settingItems = dummyItems,
             snackbarHostState = remember { SnackbarHostState() }

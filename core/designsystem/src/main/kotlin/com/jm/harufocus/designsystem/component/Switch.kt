@@ -5,7 +5,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * 하루 몰입 스위치
@@ -35,8 +35,8 @@ fun FocusSwitch(
 
 @ThemePreviews
 @Composable
-fun FocusSwitchPreview() {
-    FocusTimerTheme {
+fun HaruFocusSwitchPreview() {
+    HaruFocusTheme {
         FocusSwitch(checked = true, onCheckedChange = {})
     }
 }

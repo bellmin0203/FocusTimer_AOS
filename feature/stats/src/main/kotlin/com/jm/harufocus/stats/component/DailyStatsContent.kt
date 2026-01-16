@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.statistics.DailyStats
 import com.jm.harufocus.domain.model.statistics.HourlyStats
 import com.jm.harufocus.stats.R
@@ -353,7 +353,7 @@ class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
 private fun DailyStatsContentPreview(
     @PreviewParameter(DailyStatsProvider::class) stats: DailyStats
 ) {
-    FocusTimerTheme {
+    HaruFocusTheme {
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)

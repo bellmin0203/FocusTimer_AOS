@@ -28,7 +28,7 @@ import com.jm.harufocus.core.database.model.TimerSessionEntity
     version = 2,
     exportSchema = false
 )
-abstract class FocusTimerDatabase : RoomDatabase() {
+abstract class HaruFocusDatabase : RoomDatabase() {
 
     /**
      * 타이머 세션 DAO에 접근합니다.
@@ -54,12 +54,12 @@ abstract class FocusTimerDatabase : RoomDatabase() {
          * 테스트용 인메모리 데이터베이스를 생성합니다.
          *
          * @param context 테스트 컨텍스트
-         * @return 테스트용 FocusTimerDatabase 인스턴스
+         * @return 테스트용 HaruFocusDatabase 인스턴스
          */
-        fun getInMemoryDatabase(context: Context): FocusTimerDatabase {
+        fun getInMemoryDatabase(context: Context): HaruFocusDatabase {
             return Room.inMemoryDatabaseBuilder(
                 context.applicationContext,
-                FocusTimerDatabase::class.java
+                HaruFocusDatabase::class.java
             )
                 .allowMainThreadQueries() // 테스트에서만 메인 스레드 쿼리 허용
                 .addMigrations(MIGRATION_1_2)

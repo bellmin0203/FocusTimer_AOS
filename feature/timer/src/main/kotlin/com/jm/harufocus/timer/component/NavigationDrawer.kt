@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
 import com.jm.harufocus.timer.R
 import kotlinx.coroutines.launch
 
@@ -63,17 +63,17 @@ fun NavigationDrawerContent(
     // 메뉴 아이템 목록
     val menuItems = listOf(
         DrawerMenuItem(
-            icon = FocusTimerIcons.ListAlt,
+            icon = HaruFocusIcons.ListAlt,
             label = stringResource(R.string.preset_management_text),
             onClick = onPresetsClick
         ),
         DrawerMenuItem(
-            icon = FocusTimerIcons.BarChart,
+            icon = HaruFocusIcons.BarChart,
             label = stringResource(R.string.statistics_text),
             onClick = onStatsClick
         ),
         DrawerMenuItem(
-            icon = FocusTimerIcons.Settings,
+            icon = HaruFocusIcons.Settings,
             label = stringResource(R.string.setting_text),
             onClick = onSettingsClick
         )

@@ -15,10 +15,10 @@ import javax.inject.Inject
  * 위젯 버튼 클릭 이벤트를 처리하는 BroadcastReceiver
  */
 @AndroidEntryPoint
-class FocusTimerWidgetActionReceiver : BroadcastReceiver() {
+class HaruFocusWidgetActionReceiver : BroadcastReceiver() {
     
     @Inject
-    lateinit var widgetInteractor: FocusTimerWidgetInteractor
+    lateinit var widgetInteractor: HaruFocusWidgetInteractor
     
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()

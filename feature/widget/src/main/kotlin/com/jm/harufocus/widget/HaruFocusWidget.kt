@@ -37,11 +37,11 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.jm.harufocus.designsystem.component.TimerColorPresets
-import com.jm.harufocus.widget.FocusTimerWidgetStateManager.Companion.KEY_OVERTIME
-import com.jm.harufocus.widget.FocusTimerWidgetStateManager.Companion.KEY_PRESET_COLOR_INDEX
-import com.jm.harufocus.widget.FocusTimerWidgetStateManager.Companion.KEY_REMAINING_TIME
-import com.jm.harufocus.widget.FocusTimerWidgetStateManager.Companion.KEY_STATUS
-import com.jm.harufocus.widget.theme.FocusTimerGlanceTheme
+import com.jm.harufocus.widget.HaruFocusWidgetStateManager.Companion.KEY_OVERTIME
+import com.jm.harufocus.widget.HaruFocusWidgetStateManager.Companion.KEY_PRESET_COLOR_INDEX
+import com.jm.harufocus.widget.HaruFocusWidgetStateManager.Companion.KEY_REMAINING_TIME
+import com.jm.harufocus.widget.HaruFocusWidgetStateManager.Companion.KEY_STATUS
+import com.jm.harufocus.widget.theme.HaruFocusGlanceTheme
 import com.jm.logutil.LogUtil
 import java.util.Locale
 import kotlin.time.Duration
@@ -53,7 +53,7 @@ import kotlin.time.Duration.Companion.minutes
  *
  * Jetpack Glance를 사용한 타이머 위젯
  */
-class FocusTimerWidget : GlanceAppWidget() {
+class HaruFocusWidget : GlanceAppWidget() {
 
     override val stateDefinition = PreferencesGlanceStateDefinition
 
@@ -61,7 +61,7 @@ class FocusTimerWidget : GlanceAppWidget() {
         LogUtil.d("provideGlance Called at: ${System.currentTimeMillis()}")
 
         provideContent {
-            FocusTimerGlanceTheme {
+            HaruFocusGlanceTheme {
                 WidgetContent(context)
             }
         }
@@ -79,26 +79,26 @@ private fun WidgetContent(context: Context) {
     // Glance 위젯은 currentState를 사용하여 DataStore에서 상태를 동기적으로 읽습니다
     val preferences = currentState<Preferences>()
 
-    val status = preferences[KEY_STATUS] ?: FocusTimerWidgetState.IDLE
+    val status = preferences[KEY_STATUS] ?: HaruFocusWidgetState.IDLE
     val remainingTime =
         (preferences[KEY_REMAINING_TIME]
-            ?: FocusTimerWidgetState.DEFAULT_REMAINING_TIME).milliseconds
+            ?: HaruFocusWidgetState.DEFAULT_REMAINING_TIME).milliseconds
     val overtime = preferences[KEY_OVERTIME]?.milliseconds
     val presetColorIndex =
         preferences[KEY_PRESET_COLOR_INDEX]?.toIntOrNull() ?: 0
 
     val widgetState = when (status) {
-        FocusTimerWidgetState.RUNNING -> {
-            if (overtime != null) FocusTimerWidgetState.Completed(overtime)
-            else FocusTimerWidgetState.Running(remainingTime)
+        HaruFocusWidgetState.RUNNING -> {
+            if (overtime != null) HaruFocusWidgetState.Completed(overtime)
+            else HaruFocusWidgetState.Running(remainingTime)
         }
 
-        FocusTimerWidgetState.PAUSED -> FocusTimerWidgetState.Paused(remainingTime)
-        FocusTimerWidgetState.COMPLETED -> FocusTimerWidgetState.Completed(
+        HaruFocusWidgetState.PAUSED -> HaruFocusWidgetState.Paused(remainingTime)
+        HaruFocusWidgetState.COMPLETED -> HaruFocusWidgetState.Completed(
             overtime ?: Duration.ZERO
         )
 
-        else -> FocusTimerWidgetState.Idle
+        else -> HaruFocusWidgetState.Idle
     }
 
     // 선택된 프리셋의 색상 가져오기
@@ -108,7 +108,7 @@ private fun WidgetContent(context: Context) {
     val presetColor = presets.getOrNull(presetColorIndex)
         ?: presets[0]
 
-    FocusTimerWidgetContent(
+    HaruFocusWidgetContent(
         state = widgetState,
         presetColor = presetColor.progressColor,
         currentRemainingTime = remainingTime,
@@ -127,8 +127,8 @@ private fun WidgetContent(context: Context) {
  * 위젯 UI 컨텐츠
  */
 @Composable
-private fun FocusTimerWidgetContent(
-    state: FocusTimerWidgetState,
+private fun HaruFocusWidgetContent(
+    state: HaruFocusWidgetState,
     presetColor: Color,
     currentRemainingTime: Duration,
     onStartClick: () -> Unit,
@@ -149,26 +149,26 @@ private fun FocusTimerWidgetContent(
         contentAlignment = Alignment.Center
     ) {
         when (state) {
-            is FocusTimerWidgetState.Idle -> IdleContent(
+            is HaruFocusWidgetState.Idle -> IdleContent(
                 presetColor = presetColor,
                 remainingTime = if (currentRemainingTime > Duration.ZERO) currentRemainingTime else 25.minutes,
                 onStartClick = onStartClick,
                 onIncreaseClick = onIncreaseClick,
                 onDecreaseClick = onDecreaseClick
             )
-            is FocusTimerWidgetState.Running -> RunningContent(
+            is HaruFocusWidgetState.Running -> RunningContent(
                 presetColor = presetColor,
                 remainingTime = state.remainingTime,
                 onPauseClick = onPauseClick
             )
 
-            is FocusTimerWidgetState.Paused -> PausedContent(
+            is HaruFocusWidgetState.Paused -> PausedContent(
                 presetColor = presetColor,
                 remainingTime = state.remainingTime,
                 onResumeClick = onResumeClick
             )
 
-            is FocusTimerWidgetState.Completed -> CompletedContent(
+            is HaruFocusWidgetState.Completed -> CompletedContent(
                 presetColor = presetColor,
                 overtime = state.overtime,
                 onCompleteClick = onCompleteClick

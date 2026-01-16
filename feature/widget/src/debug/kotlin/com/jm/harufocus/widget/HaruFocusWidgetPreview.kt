@@ -22,7 +22,7 @@ import androidx.glance.preview.Preview
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.jm.harufocus.designsystem.component.TimerColorPresets
-import com.jm.harufocus.widget.theme.FocusTimerGlanceTheme
+import com.jm.harufocus.widget.theme.HaruFocusGlanceTheme
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -241,7 +241,7 @@ private class ColorProvider2(val color: Color) : androidx.glance.unit.ColorProvi
 @Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewIdleContent() {
-    FocusTimerGlanceTheme {
+    HaruFocusGlanceTheme {
         IdleContent(
             presetColor = TimerColorPresets.presetColors[1].progressColor,
             onStartClick = {})
@@ -252,7 +252,7 @@ private fun PreviewIdleContent() {
 @Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewRunningContent() {
-    FocusTimerGlanceTheme {
+    HaruFocusGlanceTheme {
         RunningContent(
             presetColor = TimerColorPresets.presetColors[1].progressColor,
             remainingTime = 25.minutes,
@@ -265,7 +265,7 @@ private fun PreviewRunningContent() {
 @Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewPausedContent() {
-    FocusTimerGlanceTheme {
+    HaruFocusGlanceTheme {
         PausedContent(
             presetColor = TimerColorPresets.presetColors[2].progressColor,
             remainingTime = 20.minutes,
@@ -278,7 +278,7 @@ private fun PreviewPausedContent() {
 @Preview(widthDp = 180, heightDp = 180)
 @Composable
 private fun PreviewCompletedContent() {
-    FocusTimerGlanceTheme {
+    HaruFocusGlanceTheme {
         CompletedContent(
             presetColor = TimerColorPresets.presetColors[3].progressColor,
             overtime = 1.minutes + 30.seconds,

@@ -75,7 +75,7 @@ val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun FocusTimerTheme(
+fun HaruFocusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // 브랜드 아이덴티티 유지를 위해 Dynamic Color 기본값 false
     dynamicColor: Boolean = false,

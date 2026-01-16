@@ -18,9 +18,9 @@ import kotlin.time.Duration
  * 타이머 서비스에서 위젯 상태를 업데이트하기 위한 헬퍼 클래스
  */
 @Singleton
-class FocusTimerWidgetUpdater @Inject constructor(
+class HaruFocusWidgetUpdater @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val stateManager: FocusTimerWidgetStateManager
+    private val stateManager: HaruFocusWidgetStateManager
 ) {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -130,7 +130,7 @@ class FocusTimerWidgetUpdater @Inject constructor(
      */
     private suspend fun updateWidget() {
         try {
-            FocusTimerWidget().updateAll(context)
+            HaruFocusWidget().updateAll(context)
         } catch (e: Exception) {
             // 위젯이 없거나 업데이트 실패 시 무시
             e.printStackTrace()

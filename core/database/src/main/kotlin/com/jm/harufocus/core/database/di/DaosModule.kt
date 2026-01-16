@@ -1,6 +1,6 @@
 package com.jm.harufocus.core.database.di
 
-import com.jm.harufocus.core.database.FocusTimerDatabase
+import com.jm.harufocus.core.database.HaruFocusDatabase
 import com.jm.harufocus.core.database.dao.PresetDao
 import com.jm.harufocus.core.database.dao.StatisticsDao
 import com.jm.harufocus.core.database.dao.TimerSessionDao
@@ -19,12 +19,12 @@ object DaosModule {
     /**
      * TimerSessionDao 인스턴스를 제공합니다.
      *
-     * @param database FocusTimerDatabase 인스턴스
+     * @param database HaruFocusDatabase 인스턴스
      * @return TimerSessionDao 인스턴스
      */
     @Provides
     fun provideTimerSessionDao(
-        database: FocusTimerDatabase
+        database: HaruFocusDatabase
     ): TimerSessionDao {
         return database.timerSessionDao()
     }
@@ -32,12 +32,12 @@ object DaosModule {
     /**
      * PresetDao 인스턴스를 제공합니다.
      *
-     * @param database FocusTimerDatabase 인스턴스
+     * @param database HaruFocusDatabase 인스턴스
      * @return PresetDao 인스턴스
      */
     @Provides
     fun providePresetDao(
-        database: FocusTimerDatabase
+        database: HaruFocusDatabase
     ): PresetDao {
         return database.presetDao()
     }
@@ -45,12 +45,12 @@ object DaosModule {
     /**
      * StatisticsDao 인스턴스를 제공합니다.
      *
-     * @param database FocusTimerDatabase 인스턴스
+     * @param database HaruFocusDatabase 인스턴스
      * @return StatisticsDao 인스턴스
      */
     @Provides
     fun provideStatisticsDao(
-        database: FocusTimerDatabase
+        database: HaruFocusDatabase
     ): StatisticsDao {
         return database.statisticsDao()
     }

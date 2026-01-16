@@ -8,7 +8,7 @@ import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.domain.usecase.session.ManageTimerSessionUseCase
 import com.jm.harufocus.timer.TimerManager
 import com.jm.harufocus.timer.usecase.TimerStatus
-import com.jm.harufocus.widget.FocusTimerWidgetUpdater
+import com.jm.harufocus.widget.HaruFocusWidgetUpdater
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +38,7 @@ class TimerService : Service() {
     lateinit var timerManager: TimerManager
 
     @Inject
-    lateinit var widgetUpdater: FocusTimerWidgetUpdater
+    lateinit var widgetUpdater: HaruFocusWidgetUpdater
 
     @Inject
     lateinit var manageTimerSessionUseCase: ManageTimerSessionUseCase

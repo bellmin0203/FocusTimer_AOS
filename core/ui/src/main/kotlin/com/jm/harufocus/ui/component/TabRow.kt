@@ -13,7 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * 통계 화면용 탭 (Daily/Weekly/Monthly)
@@ -59,7 +59,7 @@ fun StatisticsTabRow(
 @ThemePreviews
 @Composable
 fun StatisticsTabRowPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         var selectedTabIndex by remember { mutableIntStateOf(0) }
         StatisticsTabRow(
             selectedTabIndex = selectedTabIndex,

@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.component.PresetAddCard
 import com.jm.harufocus.designsystem.component.PresetCard
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.preset.Preset
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -120,7 +120,7 @@ fun PresetsBottomSheet(
                 item {
                     PresetAddCard(
                         onClick = onAddPreset,
-                        icon = FocusTimerIcons.Add
+                        icon = HaruFocusIcons.Add
                     )
                 }
             }
@@ -162,7 +162,7 @@ private class PresetListProvider : PreviewParameterProvider<List<Preset>> {
 @ThemePreviews
 @Composable
 private fun PresetsBottomSheetPreview() {
-    FocusTimerTheme() {
+    HaruFocusTheme() {
         PresetsBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
@@ -184,7 +184,7 @@ private fun PresetsBottomSheetPreview() {
 @ThemePreviews
 @Composable
 private fun PresetsBottomSheetManyPresetsPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetsBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
@@ -211,7 +211,7 @@ private fun PresetsBottomSheetManyPresetsPreview() {
 @ThemePreviews
 @Composable
 private fun PresetsBottomSheetEmptyPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetsBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
@@ -229,7 +229,7 @@ private fun PresetsBottomSheetEmptyPreview() {
 @ThemePreviews
 @Composable
 private fun PresetsBottomSheetCustomPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetsBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
@@ -259,7 +259,7 @@ private fun PresetsBottomSheetCustomPreview() {
 private fun PresetsBottomSheetParameterPreview(
     @PreviewParameter(PresetListProvider::class) presets: List<Preset>
 ) {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetsBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},

@@ -36,8 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.timer.R
 import com.jm.harufocus.ui.component.Picker
 import com.jm.harufocus.ui.component.PickerState
@@ -633,7 +633,7 @@ private fun NumericKeypad(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             KeypadIconButton(
-                icon = FocusTimerIcons.Refresh,
+                icon = HaruFocusIcons.Refresh,
                 contentDescription = stringResource(R.string.content_description_clear),
                 onClick = onClearClick,
                 modifier = Modifier.weight(1f)
@@ -644,7 +644,7 @@ private fun NumericKeypad(
                 modifier = Modifier.weight(1f)
             )
             KeypadIconButton(
-                icon = FocusTimerIcons.Backspace,
+                icon = HaruFocusIcons.Backspace,
                 contentDescription = stringResource(R.string.content_description_backspace),
                 onClick = onBackspaceClick,
                 modifier = Modifier.weight(1f)
@@ -711,7 +711,7 @@ private fun KeypadIconButton(
 @ThemePreviews
 @Composable
 private fun TimeInputBottomSheetPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         TimeInputBottomSheet(
             onDismissRequest = {},
             onConfirm = {}

@@ -2,7 +2,7 @@ package com.jm.harufocus.core.database.di
 
 import android.content.Context
 import androidx.room.Room
-import com.jm.harufocus.core.database.FocusTimerDatabase
+import com.jm.harufocus.core.database.HaruFocusDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,22 +18,22 @@ import javax.inject.Singleton
 object DatabaseModule {
 
     /**
-     * FocusTimerDatabase 인스턴스를 제공합니다.
+     * HaruFocusDatabase 인스턴스를 제공합니다.
      *
      * @param context 애플리케이션 컨텍스트
-     * @return FocusTimerDatabase 싱글톤 인스턴스
+     * @return HaruFocusDatabase 싱글톤 인스턴스
      */
     @Provides
     @Singleton
-    fun provideFocusTimerDatabase(
+    fun provideHaruFocusDatabase(
         @ApplicationContext context: Context
-    ): FocusTimerDatabase {
+    ): HaruFocusDatabase {
         return Room.databaseBuilder(
             context.applicationContext,
-            FocusTimerDatabase::class.java,
+            HaruFocusDatabase::class.java,
             "focus_timer_database"
         )
-            .addMigrations(FocusTimerDatabase.MIGRATION_1_2)
+            .addMigrations(HaruFocusDatabase.MIGRATION_1_2)
             .fallbackToDestructiveMigration(false) // 개발 단계에서 스키마 변경 시 데이터 삭제
             .build()
     }

@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * Focus Time 막대 차트
@@ -102,7 +102,7 @@ private fun ChartBar(
 
 @ThemePreviews
 @Composable
-fun FocusTimeBarChartPreview() {
+fun HaruFocusTimeBarChartPreview() {
     val data = listOf(
         ChartData(label = "Mon", value = 0.5f),
         ChartData(label = "Tue", value = 0.8f, isSelected = true),
@@ -112,7 +112,7 @@ fun FocusTimeBarChartPreview() {
         ChartData(label = "Sat", value = 0.6f),
         ChartData(label = "Sun", value = 0.4f)
     )
-    FocusTimerTheme {
+    HaruFocusTheme {
         FocusTimeBarChart(data = data)
     }
 }
@@ -120,7 +120,7 @@ fun FocusTimeBarChartPreview() {
 @ThemePreviews
 @Composable
 private fun ChartBarPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         ChartBar(
             label = "Mon",
             value = 0.75f,
@@ -132,7 +132,7 @@ private fun ChartBarPreview() {
 @ThemePreviews
 @Composable
 private fun ChartBarSelectedPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         ChartBar(
             label = "Tue",
             value = 0.9f,

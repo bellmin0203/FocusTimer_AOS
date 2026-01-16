@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.ui.R
 
 /**
@@ -49,7 +49,7 @@ fun FocusAlertDialog(
  * 확인/취소 다이얼로그
  */
 @Composable
-fun FocusTimerAlertDialog(
+fun HaruFocusAlertDialog(
     modifier: Modifier = Modifier,
     title: String,
     text: String,
@@ -87,8 +87,8 @@ fun FocusTimerAlertDialog(
  */
 @ThemePreviews
 @Composable
-private fun FocusAlertDialogPreview() {
-    FocusTimerTheme {
+private fun HaruFocusAlertDialogPreview() {
+    HaruFocusTheme {
         FocusAlertDialog(
             onDismissRequest = {},
             title = "알림",
@@ -110,8 +110,8 @@ private fun FocusAlertDialogPreview() {
  */
 @ThemePreviews
 @Composable
-private fun FocusAlertDialogWithDismissPreview() {
-    FocusTimerTheme {
+private fun HaruFocusAlertDialogWithDismissPreview() {
+    HaruFocusTheme {
         FocusAlertDialog(
             onDismissRequest = {},
             title = "경고",
@@ -141,9 +141,9 @@ private fun FocusAlertDialogWithDismissPreview() {
  */
 @ThemePreviews
 @Composable
-private fun FocusConfirmDialogPreview() {
-    FocusTimerTheme {
-        FocusTimerAlertDialog(
+private fun HaruFocusConfirmDialogPreview() {
+    HaruFocusTheme {
+        HaruFocusAlertDialog(
             onDismissRequest = {},
             onConfirm = {},
             title = "세션 종료",
@@ -157,9 +157,9 @@ private fun FocusConfirmDialogPreview() {
  */
 @ThemePreviews
 @Composable
-private fun FocusConfirmDialogCustomTextPreview() {
-    FocusTimerTheme {
-        FocusTimerAlertDialog(
+private fun HaruFocusConfirmDialogCustomTextPreview() {
+    HaruFocusTheme {
+        HaruFocusAlertDialog(
             onDismissRequest = {},
             onConfirm = {},
             title = "타이머 리셋",

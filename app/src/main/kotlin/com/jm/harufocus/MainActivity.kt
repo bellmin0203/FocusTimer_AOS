@@ -25,9 +25,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.jm.harufocus.common.model.ThemeMode
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.repository.SettingsRepository
-import com.jm.harufocus.navigation.FocusTimerNavHost
+import com.jm.harufocus.navigation.HaruFocusNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -67,21 +67,21 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.DARK -> true
             }
 
-            FocusTimerTheme(
+            HaruFocusTheme(
                 darkTheme = isDarkTheme
             ) {
-                FocusTimerApp()
+                HaruFocusApp()
             }
         }
     }
 }
 
 /**
- * FocusTimer 앱의 메인 컴포저블
+ * HaruFocus 앱의 메인 컴포저블
  * 네비게이션과 전역 상태를 관리
  */
 @Composable
-private fun FocusTimerApp() {
+private fun HaruFocusApp() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -114,7 +114,7 @@ private fun FocusTimerApp() {
         }
     }
 
-    FocusTimerNavHost(
+    HaruFocusNavHost(
         navController = navController,
         snackbarHostState = snackbarHostState
     )

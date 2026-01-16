@@ -7,6 +7,8 @@ import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,10 +41,22 @@ class StartupBenchmark {
             metrics = listOf(StartupTimingMetric()), // 시작 시간 측정
             iterations = 5, // 5번 반복 측정해서 평균 내기
             startupMode = StartupMode.COLD,
-            compilationMode = mode
+            compilationMode = mode,
+            setupBlock = {
+                pressHome()
+                killProcess()
+            }
         ) {
-            pressHome()
             startActivityAndWait()
+
+            // 첫 화면이 완전히 로드될 때까지 대기
+            // 앱의 메인 화면에 있는 특정 UI 요소가 나타날 때까지 기다림
+            device.wait(
+                Until.hasObject(
+                    By.pkg("com.jm.harufocus").depth(0)
+                ),
+                10_000L
+            )
         }
     }
 }

@@ -4,7 +4,7 @@
     <application>
         <!-- Timer Widget Receiver -->
         <receiver
-            android:name=".FocusTimerWidgetReceiver"
+            android:name=".HaruFocusWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -16,7 +16,7 @@
 
         <!-- Widget Action Receiver -->
         <receiver
-            android:name=".FocusTimerWidgetActionReceiver"
+            android:name=".HaruFocusWidgetActionReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.widget.ACTION_START_TIMER" />

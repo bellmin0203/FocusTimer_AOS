@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * Primary 액션 버튼
@@ -67,8 +67,8 @@ fun FocusPrimaryButton(
 
 @ThemePreviews
 @Composable
-fun FocusPrimaryButtonPreview() {
-    FocusTimerTheme {
+fun HaruFocusPrimaryButtonPreview() {
+    HaruFocusTheme {
         FocusPrimaryButton(
             onClick = {},
             icon = Icons.Default.Add,
@@ -121,8 +121,8 @@ fun FocusSecondaryButton(
 
 @ThemePreviews
 @Composable
-fun FocusSecondaryButtonPreview() {
-    FocusTimerTheme {
+fun HaruFocusSecondaryButtonPreview() {
+    HaruFocusTheme {
         FocusSecondaryButton(
             onClick = {},
             icon = Icons.Default.Add,
@@ -164,8 +164,8 @@ fun FocusIconButton(
 
 @ThemePreviews
 @Composable
-fun FocusIconButtonPreview() {
-    FocusTimerTheme {
+fun HaruFocusIconButtonPreview() {
+    HaruFocusTheme {
         FocusIconButton(
             onClick = {},
             icon = Icons.Default.Add,
@@ -205,8 +205,8 @@ fun FocusSmallIconButton(
 
 @ThemePreviews
 @Composable
-fun FocusSmallIconButtonPreview() {
-    FocusTimerTheme {
+fun HaruFocusSmallIconButtonPreview() {
+    HaruFocusTheme {
         FocusSmallIconButton(
             onClick = {},
             icon = Icons.Default.Add,

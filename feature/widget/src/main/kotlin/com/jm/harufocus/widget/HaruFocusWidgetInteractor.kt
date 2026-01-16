@@ -19,11 +19,11 @@ import kotlin.time.Duration.Companion.minutes
  * 위젯과 타이머 서비스 간의 통신을 담당하는 클래스
  */
 @Singleton
-class FocusTimerWidgetInteractor @Inject constructor(
+class HaruFocusWidgetInteractor @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val presetRepository: PresetRepository,
-    private val widgetStateManager: FocusTimerWidgetStateManager
+    private val widgetStateManager: HaruFocusWidgetStateManager
 ) {
     
     /**

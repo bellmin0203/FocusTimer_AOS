@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.statistics.MonthlyStats
 import com.jm.harufocus.domain.model.statistics.WeeklyFocusTime
 import com.jm.harufocus.stats.R
@@ -356,7 +356,7 @@ class MonthlyStatsProvider : PreviewParameterProvider<MonthlyStats> {
 private fun MonthlyStatsContentPreview(
     @PreviewParameter(MonthlyStatsProvider::class) stats: MonthlyStats
 ) {
-    FocusTimerTheme {
+    HaruFocusTheme {
         Column {
             MonthlyStatsContent(
                 stats = stats,

@@ -12,7 +12,7 @@
 
 #### `AddPresetUseCase`
 
-- **파일**: `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/AddPresetUseCase.kt`
+- **파일**: `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/AddPresetUseCase.kt`
 - **기능**: 새로운 프리셋 추가
 - **검증**:
     - 최대 5개 제한 확인
@@ -22,26 +22,26 @@
 
 #### `UpdatePresetUseCase`
 
-- **파일**: `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/UpdatePresetUseCase.kt`
+- **파일**: `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/UpdatePresetUseCase.kt`
 - **기능**: 기존 프리셋 수정
 - **검증**: 이름 및 시간 유효성 검사
 
 #### `DeletePresetUseCase`
 
-- **파일**: `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/DeletePresetUseCase.kt`
+- **파일**: `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/DeletePresetUseCase.kt`
 - **기능**: 프리셋 삭제
 - **특징**: 기본 프리셋으로 설정된 경우 자동으로 설정 해제
 
 #### `GetAllPresetsUseCase`
 
-- **파일**: `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/GetAllPresetsUseCase.kt`
+- **파일**: `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/GetAllPresetsUseCase.kt`
 - **기능**: 모든 프리셋 조회 (최신순)
 
 ### 2. ViewModel 확장
 
 #### `TimerViewModel` 업데이트
 
-- **파일**: `feature/timer/src/main/kotlin/com/jm/focustimer/timer/TimerViewModel.kt`
+- **파일**: `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/TimerViewModel.kt`
 - **추가 기능**:
     - 프리셋 목록 실시간 관찰
     - 프리셋 선택/저장/수정/삭제 Intent 처리
@@ -49,7 +49,7 @@
 
 #### `TimerIntent` 확장
 
-- **파일**: `feature/timer/src/main/kotlin/com/jm/focustimer/timer/model/TimerIntent.kt`
+- **파일**: `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/model/TimerIntent.kt`
 - **추가 Intent**:
     - `SelectPreset`: 프리셋 선택
     - `SaveAsPreset`: 현재 시간을 프리셋으로 저장
@@ -58,7 +58,7 @@
 
 #### `TimerUiState` 확장
 
-- **파일**: `feature/timer/src/main/kotlin/com/jm/focustimer/timer/model/TimerUiState.kt`
+- **파일**: `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/model/TimerUiState.kt`
 - **추가 속성**:
     - `presets`: 프리셋 목록
     - `selectedPresetId`: 현재 선택된 프리셋 ID
@@ -68,7 +68,7 @@
 
 #### `PresetSection`
 
-- **파일**: `feature/timer/src/main/kotlin/com/jm/focustimer/timer/component/PresetSection.kt`
+- **파일**: `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/component/PresetSection.kt`
 - **기능**:
     - 프리셋 목록을 가로 스크롤로 표시
     - 프리셋 개수 표시 (N/10)
@@ -78,7 +78,7 @@
 
 #### 다이얼로그 컴포넌트
 
-- **파일**: `feature/timer/src/main/kotlin/com/jm/focustimer/timer/component/PresetDialog.kt`
+- **파일**: `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/component/PresetDialog.kt`
 - **포함 내용**:
     - `AddPresetDialog`: 프리셋 추가 다이얼로그
     - `EditPresetDialog`: 프리셋 수정 다이얼로그
@@ -86,9 +86,9 @@
 
 ### 4. 아이콘 확장
 
-#### `FocusTimerIcons` 업데이트
+#### `HaruFocusIcons` 업데이트
 
-- **파일**: `core/designsystem/src/main/kotlin/com/jm/focustimer/designsystem/icon/FocusTimerIcons.kt`
+- **파일**: `core/designsystem/src/main/kotlin/com/jm/HaruFocus/designsystem/icon/HaruFocusIcons.kt`
 - **추가 아이콘**:
     - `Edit`: 프리셋 수정 아이콘
     - `Delete`: 프리셋 삭제 아이콘
@@ -97,7 +97,7 @@
 
 #### `TimerScreen` 업데이트
 
-- **파일**: `feature/timer/src/main/kotlin/com/jm/focustimer/timer/TimerScreen.kt`
+- **파일**: `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/TimerScreen.kt`
 - **변경사항**:
     - PresetSection을 QuickTimeButtons 아래에 배치
     - 스크롤 가능하도록 `verticalScroll` 추가
@@ -202,23 +202,23 @@
 
 ### Domain Layer
 
-- `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/AddPresetUseCase.kt`
-- `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/UpdatePresetUseCase.kt`
-- `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/DeletePresetUseCase.kt`
-- `core/domain/src/main/kotlin/com/jm/focustimer/domain/usecase/GetAllPresetsUseCase.kt`
+- `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/AddPresetUseCase.kt`
+- `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/UpdatePresetUseCase.kt`
+- `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/DeletePresetUseCase.kt`
+- `core/domain/src/main/kotlin/com/jm/HaruFocus/domain/usecase/GetAllPresetsUseCase.kt`
 
 ### Feature Layer
 
-- `feature/timer/src/main/kotlin/com/jm/focustimer/timer/TimerViewModel.kt`
-- `feature/timer/src/main/kotlin/com/jm/focustimer/timer/TimerScreen.kt`
-- `feature/timer/src/main/kotlin/com/jm/focustimer/timer/model/TimerIntent.kt`
-- `feature/timer/src/main/kotlin/com/jm/focustimer/timer/model/TimerUiState.kt`
-- `feature/timer/src/main/kotlin/com/jm/focustimer/timer/component/PresetSection.kt`
-- `feature/timer/src/main/kotlin/com/jm/focustimer/timer/component/PresetDialog.kt`
+- `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/TimerViewModel.kt`
+- `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/TimerScreen.kt`
+- `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/model/TimerIntent.kt`
+- `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/model/TimerUiState.kt`
+- `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/component/PresetSection.kt`
+- `feature/timer/src/main/kotlin/com/jm/HaruFocus/timer/component/PresetDialog.kt`
 
 ### Design System
 
-- `core/designsystem/src/main/kotlin/com/jm/focustimer/designsystem/icon/FocusTimerIcons.kt`
+- `core/designsystem/src/main/kotlin/com/jm/HaruFocus/designsystem/icon/HaruFocusIcons.kt`
 
 ### Build Configuration
 

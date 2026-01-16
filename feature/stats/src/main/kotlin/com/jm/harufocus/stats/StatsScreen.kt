@@ -38,7 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.statistics.AchievementMetrics
 import com.jm.harufocus.domain.model.statistics.DailyFocusTime
 import com.jm.harufocus.domain.model.statistics.DailyStats
@@ -300,7 +300,7 @@ fun StatsCard(
 @Preview(showBackground = true)
 @Composable
 private fun StatsScreenLoadingPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         StatsScreen(
             uiState = StatsUiState(isLoading = true),
             onPeriodSelected = {},
@@ -315,7 +315,7 @@ private fun StatsScreenLoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun StatsScreenDailyPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         StatsScreen(
             uiState = StatsUiState(
                 selectedPeriod = StatsPeriod.DAILY,
@@ -334,7 +334,7 @@ private fun StatsScreenDailyPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun StatsScreenWeeklyPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         StatsScreen(
             uiState = StatsUiState(
                 selectedPeriod = StatsPeriod.WEEKLY,
@@ -353,7 +353,7 @@ private fun StatsScreenWeeklyPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun StatsScreenMonthlyPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         StatsScreen(
             uiState = StatsUiState(
                 selectedPeriod = StatsPeriod.MONTHLY,
@@ -372,7 +372,7 @@ private fun StatsScreenMonthlyPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun StatsScreenErrorPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         StatsScreen(
             uiState = StatsUiState(
                 error = "데이터를 불러오는 중 오류가 발생했습니다."

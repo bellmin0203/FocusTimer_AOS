@@ -38,8 +38,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.component.TimerColorPresets
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.domain.usecase.preset.AddPresetUseCase
 import com.jm.harufocus.timer.R
@@ -279,7 +279,7 @@ private fun ColorOption(
     ) {
         if (isSelected) {
             Icon(
-                imageVector = FocusTimerIcons.Check,
+                imageVector = HaruFocusIcons.Check,
                 contentDescription = stringResource(R.string.content_description_selected),
                 tint = androidx.compose.ui.graphics.Color.White,
                 modifier = Modifier.size(20.dp)
@@ -510,7 +510,7 @@ fun DeletePresetDialog(
 @ThemePreviews
 @Composable
 private fun AddPresetDialogPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         AddPresetDialog(
             onDismiss = {},
             onConfirm = { _, _, _, _ -> }
@@ -524,7 +524,7 @@ private fun AddPresetDialogPreview() {
 @ThemePreviews
 @Composable
 private fun EditPresetDialogPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         EditPresetDialog(
             preset = Preset(
                 id = 1,
@@ -544,7 +544,7 @@ private fun EditPresetDialogPreview() {
 @ThemePreviews
 @Composable
 private fun DeletePresetDialogPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         DeletePresetDialog(
             presetName = "집중 시간",
             onDismiss = {},

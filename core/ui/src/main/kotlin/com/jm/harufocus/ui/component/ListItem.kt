@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.designsystem.component.FocusSwitch
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * 기본 설정 항목
@@ -75,7 +75,7 @@ fun SettingsItem(
 @ThemePreviews
 @Composable
 fun SettingsItemPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         SettingsItem(
             title = "설정 항목",
             subtitle = "설정 항목 부제목",
@@ -114,7 +114,7 @@ fun SettingsSwitchItem(
 @ThemePreviews
 @Composable
 fun SettingsSwitchItemPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         SettingsSwitchItem(
             title = "스위치 설정",
             checked = true,
@@ -168,13 +168,13 @@ fun SettingsClickableItem(
 @ThemePreviews
 @Composable
 fun SettingsClickableItemPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         SettingsClickableItem(
             title = "클릭 가능한 설정",
             subtitle = "부제목설정 항목 부제목설정 항목 부제목설정 항목 부제목설정 항목 부제목설정 항목 부제목",
             onClick = {},
             value = "값",
-            icon = FocusTimerIcons.KeyboardArrowRight
+            icon = HaruFocusIcons.KeyboardArrowRight
         )
     }
 }
@@ -198,7 +198,7 @@ fun SettingsSectionHeader(
 @ThemePreviews
 @Composable
 fun SettingsSectionHeaderPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         SettingsSectionHeader(title = "섹션 헤더")
     }
 }

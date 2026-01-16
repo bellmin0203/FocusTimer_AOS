@@ -7,12 +7,12 @@ import com.jm.harufocus.designsystem.theme.DarkColorScheme
 import com.jm.harufocus.designsystem.theme.LightColorScheme
 
 /**
- * FocusTimer 앱의 디자인 시스템을 Glance 위젯에 적용하기 위한 테마 래퍼
+ * HaruFocus 앱의 디자인 시스템을 Glance 위젯에 적용하기 위한 테마 래퍼
  *
  * 앱의 [LightColorScheme]과 [DarkColorScheme]을 [ColorProviders]로 변환하여 사용합니다.
  * 이를 통해 위젯에서도 앱과 동일한 컬러 팔레트를 유지할 수 있습니다.
  */
-object FocusTimerGlanceTheme {
+object HaruFocusGlanceTheme {
     val colors = ColorProviders(
         light = LightColorScheme,
         dark = DarkColorScheme
@@ -20,11 +20,11 @@ object FocusTimerGlanceTheme {
 }
 
 @Composable
-fun FocusTimerGlanceTheme(
+fun HaruFocusGlanceTheme(
     content: @Composable () -> Unit
 ) {
     GlanceTheme(
-        colors = FocusTimerGlanceTheme.colors,
+        colors = HaruFocusGlanceTheme.colors,
         content = content
     )
 }

@@ -33,8 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.domain.usecase.preset.AddPresetUseCase
 import com.jm.harufocus.timer.R
@@ -113,7 +113,7 @@ fun PresetManagementBottomSheet(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
-                            imageVector = FocusTimerIcons.ListAlt,
+                            imageVector = HaruFocusIcons.ListAlt,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -163,7 +163,7 @@ fun PresetManagementBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = FocusTimerIcons.Add,
+                            imageVector = HaruFocusIcons.Add,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -233,7 +233,7 @@ private fun PresetManagementCard(
             ) {
                 IconButton(onClick = onEdit) {
                     Icon(
-                        imageVector = FocusTimerIcons.Edit,
+                        imageVector = HaruFocusIcons.Edit,
                         contentDescription = stringResource(R.string.content_description_edit),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -241,7 +241,7 @@ private fun PresetManagementCard(
 
                 IconButton(onClick = onDelete) {
                     Icon(
-                        imageVector = FocusTimerIcons.Delete,
+                        imageVector = HaruFocusIcons.Delete,
                         contentDescription = stringResource(R.string.content_description_delete),
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -256,7 +256,7 @@ private fun PresetManagementCard(
 @Preview(showBackground = true)
 @Composable
 private fun PresetManagementBottomSheetPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetManagementBottomSheet(
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true
@@ -298,7 +298,7 @@ private fun PresetManagementBottomSheetPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun PresetManagementBottomSheetEmptyPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetManagementBottomSheet(
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true
@@ -318,7 +318,7 @@ private fun PresetManagementBottomSheetEmptyPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun PresetManagementBottomSheetFullPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetManagementBottomSheet(
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true
@@ -345,7 +345,7 @@ private fun PresetManagementBottomSheetFullPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun PresetManagementCardPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetManagementCard(
             preset = Preset(
                 id = 1,
@@ -364,7 +364,7 @@ private fun PresetManagementCardPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun PresetManagementCardLongNamePreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetManagementCard(
             preset = Preset(
                 id = 1,

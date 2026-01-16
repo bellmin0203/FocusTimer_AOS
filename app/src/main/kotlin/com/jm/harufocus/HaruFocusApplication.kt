@@ -9,15 +9,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @HiltAndroidApp
-class FocusTimerApplication : Application() {
+class HaruFocusApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        LogUtil.init(context = this, tag = "FocusTimerApp")
+        LogUtil.init(context = this, tag = "HaruFocusApp")
 
         // 타이머 알림 채널 생성 (메인 스레드 차단 방지)
         CoroutineScope(Dispatchers.Default).launch {
-            TimerNotificationHelper(this@FocusTimerApplication).createNotificationChannel()
+            TimerNotificationHelper(this@HaruFocusApplication).createNotificationChannel()
         }
     }
 }

@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
  * 하루 몰입 앱에서 사용되는 Material Icons
  * Material Symbols Outlined과 매핑
  */
-object FocusTimerIcons {
+object HaruFocusIcons {
     // Navigation Icons
     val Timer: ImageVector = Icons.Outlined.Timer
     val BarChart: ImageVector = Icons.Outlined.BarChart

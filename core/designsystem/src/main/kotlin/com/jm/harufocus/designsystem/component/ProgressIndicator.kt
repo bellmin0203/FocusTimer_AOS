@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -520,8 +520,8 @@ private fun createTextPaint(textSize: Float, color: Color): Paint {
 
 @Preview(name = "Haru Theme (Default)", showBackground = true)
 @Composable
-fun CircularTimerProgressHaruPreview() {
-    FocusTimerTheme {
+fun CircularProgressHaruPreviewHaru() {
+    HaruFocusTheme {
         CircularTimerProgress(
             progress = 0.65f,
             modifier = Modifier.size(200.dp),
@@ -533,8 +533,8 @@ fun CircularTimerProgressHaruPreview() {
 
 @Preview(name = "Coral Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressCoralPreview() {
-    FocusTimerTheme {
+fun CircularProgressCoralPreviewHaru() {
+    HaruFocusTheme {
         CircularTimerProgress(
             progress = 0.45f,
             modifier = Modifier.size(200.dp),
@@ -546,8 +546,8 @@ fun CircularTimerProgressCoralPreview() {
 
 @Preview(name = "Purple Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressPurplePreview() {
-    FocusTimerTheme {
+fun CircularProgressPurplePreviewHaru() {
+    HaruFocusTheme {
         CircularTimerProgress(
             progress = 0.80f,
             modifier = Modifier.size(200.dp),
@@ -559,8 +559,8 @@ fun CircularTimerProgressPurplePreview() {
 
 @Preview(name = "Sky Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressSkyPreview() {
-    FocusTimerTheme {
+fun CircularProgressSkyPreviewHaru() {
+    HaruFocusTheme {
         CircularTimerProgress(
             progress = 0.30f,
             modifier = Modifier.size(200.dp),
@@ -572,8 +572,8 @@ fun CircularTimerProgressSkyPreview() {
 
 @Preview(name = "Slate Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressSlatePreview() {
-    FocusTimerTheme {
+fun CircularProgressSlatePreviewHaru() {
+    HaruFocusTheme {
         CircularTimerProgress(
             progress = 0.55f,
             modifier = Modifier.size(200.dp),
@@ -585,8 +585,8 @@ fun CircularTimerProgressSlatePreview() {
 
 @Preview(name = "Green Theme", showBackground = true)
 @Composable
-fun CircularTimerProgressGreenPreview() {
-    FocusTimerTheme {
+fun CircularProgressGreenPreviewHaru() {
+    HaruFocusTheme {
         CircularTimerProgress(
             progress = 0.70f,
             modifier = Modifier.size(200.dp),
@@ -598,8 +598,8 @@ fun CircularTimerProgressGreenPreview() {
 
 @Preview(name = "Haru Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CircularTimerProgressHaruDarkPreview() {
-    FocusTimerTheme {
+fun CircularProgressHaruDarkPreviewHaru() {
+    HaruFocusTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             CircularTimerProgress(
                 progress = 0.65f,
@@ -613,8 +613,8 @@ fun CircularTimerProgressHaruDarkPreview() {
 
 @Preview(name = "Coral Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CircularTimerProgressCoralDarkPreview() {
-    FocusTimerTheme {
+fun CircularProgressCoralDarkPreviewHaru() {
+    HaruFocusTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             CircularTimerProgress(
                 progress = 0.45f,
@@ -628,8 +628,8 @@ fun CircularTimerProgressCoralDarkPreview() {
 
 @Preview(name = "Purple Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CircularTimerProgressPurpleDarkPreview() {
-    FocusTimerTheme {
+fun CircularProgressPurpleDarkPreviewHaru() {
+    HaruFocusTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             CircularTimerProgress(
                 progress = 0.80f,
@@ -643,8 +643,8 @@ fun CircularTimerProgressPurpleDarkPreview() {
 
 @Preview(name = "Sky Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CircularTimerProgressSkyDarkPreview() {
-    FocusTimerTheme {
+fun CircularProgressSkyDarkPreviewHaru() {
+    HaruFocusTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             CircularTimerProgress(
                 progress = 0.30f,
@@ -658,8 +658,8 @@ fun CircularTimerProgressSkyDarkPreview() {
 
 @Preview(name = "Slate Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CircularTimerProgressSlateDarkPreview() {
-    FocusTimerTheme {
+fun CircularProgressSlateDarkPreviewHaru() {
+    HaruFocusTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             CircularTimerProgress(
                 progress = 0.55f,
@@ -673,8 +673,8 @@ fun CircularTimerProgressSlateDarkPreview() {
 
 @Preview(name = "Green Theme (Dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CircularTimerProgressGreenDarkPreview() {
-    FocusTimerTheme {
+fun CircularProgressGreenDarkPreviewHaru() {
+    HaruFocusTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             CircularTimerProgress(
                 progress = 0.70f,

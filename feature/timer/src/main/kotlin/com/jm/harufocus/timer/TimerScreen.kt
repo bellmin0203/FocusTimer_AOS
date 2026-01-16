@@ -75,8 +75,8 @@ import com.jm.harufocus.designsystem.component.FocusIconButton
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.component.TimerColorPresets
 import com.jm.harufocus.designsystem.component.TimerColorScheme
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.timer.component.AddPresetDialog
 import com.jm.harufocus.timer.component.DeletePresetDialog
@@ -777,7 +777,7 @@ private fun TimerControlButtons(
                     }
                 ContextCompat.startForegroundService(context, intent)
             },
-            icon = FocusTimerIcons.Check,
+            icon = HaruFocusIcons.Check,
             contentDescription = stringResource(R.string.content_description_complete),
             containerColor = presetColors.progressColor,
             contentColor = Color.White
@@ -830,7 +830,7 @@ private fun TimerControlButtons(
                     }
                 }
             },
-            icon = if (uiState.isRunning) FocusTimerIcons.Pause else FocusTimerIcons.PlayArrow,
+            icon = if (uiState.isRunning) HaruFocusIcons.Pause else HaruFocusIcons.PlayArrow,
             contentDescription = if (uiState.isRunning) stringResource(R.string.content_description_pause) else stringResource(
                 R.string.content_description_play
             ),
@@ -857,7 +857,7 @@ private fun TimerControlButtons(
                         intent
                     )
                 },
-                icon = FocusTimerIcons.RestartAlt,
+                icon = HaruFocusIcons.RestartAlt,
                 contentDescription = stringResource(R.string.content_description_reset)
             )
         }
@@ -935,7 +935,7 @@ private fun PresetListRow(
 
 @ThemePreviews
 @Composable
-fun TimerScreenPreview() {
+fun ScreenPreviewHaru() {
     // 샘플 프리셋 데이터
     val presets = remember { PreviewProvider.samplePresets }
     val mockUiState = TimerUiState(
@@ -945,7 +945,7 @@ fun TimerScreenPreview() {
         presets = presets
     )
 
-    FocusTimerTheme {
+    HaruFocusTheme {
         TimerScreen(
             onIntent = {},
             uiState = mockUiState,
@@ -956,7 +956,7 @@ fun TimerScreenPreview() {
 
 @ThemePreviews
 @Composable
-fun TimerScreenIdlePreview() {
+fun ScreenIdlePreviewHaru() {
     // 샘플 프리셋: UI 확인용 목업 데이터 (실제 데이터 구조로 기입)
     val presets = remember { PreviewProvider.samplePresets }
     // Idle 상태의 UI State 예시
@@ -968,7 +968,7 @@ fun TimerScreenIdlePreview() {
         presets = presets,
     )
 
-    FocusTimerTheme {
+    HaruFocusTheme {
         TimerScreen(
             onIntent = {}, // 미리보기: 인텐트 기본 처리
             uiState = idleUiState,
@@ -979,7 +979,7 @@ fun TimerScreenIdlePreview() {
 
 @ThemePreviews
 @Composable
-fun TimerScreenCompletePreview() {
+fun ScreenCompletePreviewHaru() {
     // 샘플 프리셋: UI 확인용 목업 데이터 (실제 데이터 구조로 기입)
     val presets = remember { PreviewProvider.samplePresets }
     // Idle 상태의 UI State 예시
@@ -992,7 +992,7 @@ fun TimerScreenCompletePreview() {
         presets = presets,
     )
 
-    FocusTimerTheme {
+    HaruFocusTheme {
         TimerScreen(
             onIntent = {}, // 미리보기: 인텐트 기본 처리
             uiState = idleUiState,

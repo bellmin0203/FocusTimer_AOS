@@ -24,8 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.designsystem.icon.FocusTimerIcons
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.icon.HaruFocusIcons
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 
 /**
  * 통계 카드 - 통계 화면의 요약 카드
@@ -64,7 +64,7 @@ fun StatisticsCard(
 @ThemePreviews
 @Composable
 fun StatisticsCardPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         StatisticsCard(
             title = "오늘 집중한 시간",
             value = "3h 25m"
@@ -118,7 +118,7 @@ fun PresetCard(
 @ThemePreviews
 @Composable
 fun PresetCardPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetCard(
             title = "포모도로",
             duration = "25",
@@ -157,10 +157,10 @@ fun PresetAddCard(
 @ThemePreviews
 @Composable
 fun PresetAddCardPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         PresetAddCard(
             onClick = {},
-            icon = FocusTimerIcons.Add
+            icon = HaruFocusIcons.Add
         )
     }
 }
@@ -245,9 +245,9 @@ fun SessionCard(
 @ThemePreviews
 @Composable
 fun SessionCardPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         SessionCard(
-            icon = FocusTimerIcons.Timer,
+            icon = HaruFocusIcons.Timer,
             iconColor = MaterialTheme.colorScheme.primary,
             iconBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
             title = "집중",
@@ -261,16 +261,16 @@ fun SessionCardPreview() {
 @ThemePreviews
 @Composable
 fun SessionCardWithTrailingIconPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         SessionCard(
-            icon = FocusTimerIcons.Timer,
+            icon = HaruFocusIcons.Timer,
             iconColor = MaterialTheme.colorScheme.primary,
             iconBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
             title = "집중",
             duration = "25분",
             time = "오후 2:30",
             onClick = { /*TODO*/ },
-            trailingIcon = FocusTimerIcons.KeyboardArrowRight
+            trailingIcon = HaruFocusIcons.KeyboardArrowRight
         )
     }
 }

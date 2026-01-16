@@ -10,8 +10,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
-import com.jm.harufocus.navigation.FocusTimerNavHost
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
+import com.jm.harufocus.navigation.HaruFocusNavHost
 import com.jm.harufocus.navigation.Screen
 import com.jm.harufocus.uitesthilt.HiltTestActivity
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -22,7 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * FocusTimerNavHost 네비게이션 로직 테스트
+ * HaruFocusNavHost 네비게이션 로직 테스트
  *
  * 테스트 시나리오:
  * 1. 타이머 화면이 시작 화면으로 표시되는지 검증
@@ -31,7 +31,7 @@ import org.junit.Test
  * 4. 통계 버튼 클릭 시 스낵바가 표시되는지 검증 (향후 실제 네비게이션으로 대체 예정)
  */
 @HiltAndroidTest
-class FocusTimerNavHostTest {
+class HaruFocusNavHostTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -58,8 +58,8 @@ class FocusTimerNavHostTest {
             val snackbarHostState = SnackbarHostState()
             val scope = rememberCoroutineScope()
 
-            FocusTimerTheme {
-                FocusTimerNavHost(
+            HaruFocusTheme {
+                HaruFocusNavHost(
                     navController = navController,
                     snackbarHostState = snackbarHostState,
                     scope = scope
@@ -73,7 +73,7 @@ class FocusTimerNavHostTest {
     // ============================================================
 
     @Test
-    fun focusTimerNavHost_시작시_타이머화면이_표시됨() {
+    fun HaruFocusNavHost_시작시_타이머화면이_표시됨() {
         // Given: NavHost 초기화
         setupNavController()
 

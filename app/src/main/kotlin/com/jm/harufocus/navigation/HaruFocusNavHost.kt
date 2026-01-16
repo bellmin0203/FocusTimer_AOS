@@ -13,7 +13,7 @@ import com.jm.harufocus.timer.TimerScreen
  * 앱 전체 네비게이션 구조 정의
  */
 @Composable
-fun FocusTimerNavHost(
+fun HaruFocusNavHost(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState
 ) {

@@ -42,7 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jm.harufocus.designsystem.theme.FocusTimerTheme
+import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -526,7 +526,7 @@ class PickerState {
 @Preview(showBackground = true)
 @Composable
 private fun PickerPreview() {
-    FocusTimerTheme {
+    HaruFocusTheme {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -7,7 +7,7 @@ import kotlin.time.Duration
  *
  * 위젯에 표시될 타이머 상태를 정의합니다.
  */
-sealed interface FocusTimerWidgetState {
+sealed interface HaruFocusWidgetState {
 
     companion object {
         const val RUNNING = "running"
@@ -20,7 +20,7 @@ sealed interface FocusTimerWidgetState {
     /**
      * 대기 상태
      */
-    data object Idle : FocusTimerWidgetState
+    data object Idle : HaruFocusWidgetState
 
     /**
      * 실행 중 상태
@@ -29,7 +29,7 @@ sealed interface FocusTimerWidgetState {
      */
     data class Running(
         val remainingTime: Duration
-    ) : FocusTimerWidgetState
+    ) : HaruFocusWidgetState
 
     /**
      * 일시정지 상태
@@ -38,7 +38,7 @@ sealed interface FocusTimerWidgetState {
      */
     data class Paused(
         val remainingTime: Duration
-    ) : FocusTimerWidgetState
+    ) : HaruFocusWidgetState
 
     /**
      * 완료 상태
@@ -47,5 +47,5 @@ sealed interface FocusTimerWidgetState {
      */
     data class Completed(
         val overtime: Duration
-    ) : FocusTimerWidgetState
+    ) : HaruFocusWidgetState
 }

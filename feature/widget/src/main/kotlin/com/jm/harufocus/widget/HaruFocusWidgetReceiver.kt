@@ -12,10 +12,10 @@ import com.jm.logutil.LogUtil
  * 
  * Glance 위젯의 BroadcastReceiver
  */
-class FocusTimerWidgetReceiver : GlanceAppWidgetReceiver() {
+class HaruFocusWidgetReceiver : GlanceAppWidgetReceiver() {
     
     override val glanceAppWidget: GlanceAppWidget
-        get() = FocusTimerWidget()
+        get() = HaruFocusWidget()
 
     override fun onUpdate(
         context: Context,
