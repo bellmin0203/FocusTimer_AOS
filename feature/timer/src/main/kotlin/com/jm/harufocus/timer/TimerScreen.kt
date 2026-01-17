@@ -767,13 +767,13 @@ private fun TimerControlButtons(
     if (uiState.isCompleted) {
         FocusIconButton(
             onClick = {
-                // 타이머 완료 처리
+                // 타이머 완료 처리 (Snackbar 표시)
                 onIntent(TimerIntent.Complete)
 
-                // 서비스 종료
+                // 서비스에 완료 처리 요청
                 val intent =
                     Intent(context, TimerService::class.java).apply {
-                        action = TimerServiceAction.ACTION_STOP
+                        action = TimerServiceAction.ACTION_COMPLETE
                     }
                 ContextCompat.startForegroundService(context, intent)
             },

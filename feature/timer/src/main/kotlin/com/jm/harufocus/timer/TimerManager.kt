@@ -39,7 +39,6 @@ import kotlin.time.Duration.Companion.seconds
 interface TimerManager {
     val timerState: StateFlow<TimerState>
     val timerError: SharedFlow<TimerError>
-    val completeEvent: SharedFlow<Unit> // 완료 확인 이벤트 (UI에서 완료 버튼 클릭 시)
 
     fun setTime(duration: Duration)
     fun start(
@@ -51,7 +50,6 @@ interface TimerManager {
     fun pause()
     fun resume()
     fun stop(initialDuration: Duration)
-    fun complete() // 타이머 완료 확인 (세션 업데이트 후 리셋)
     fun cancelAll()
     fun selectPreset(preset: Preset)
 
@@ -82,11 +80,6 @@ class TimerManagerImpl @Inject constructor(
     )
     override val timerError: SharedFlow<TimerError> = _timerError.asSharedFlow()
 
-    private val _completeEvent = MutableSharedFlow<Unit>(
-        replay = 0,
-        extraBufferCapacity = 1
-    )
-    override val completeEvent: SharedFlow<Unit> = _completeEvent.asSharedFlow()
 
     private var timerJob: Job? = null
 
@@ -245,13 +238,6 @@ class TimerManagerImpl @Inject constructor(
         }
     }
 
-    override fun complete() {
-        if (_timerState.value.status is TimerStatus.Completed) {
-            scope.launch {
-                _completeEvent.emit(Unit)
-            }
-        }
-    }
 
     override fun cancelAll() {
         job.cancelChildren()

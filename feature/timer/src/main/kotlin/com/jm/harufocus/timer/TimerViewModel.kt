@@ -291,7 +291,7 @@ class TimerViewModel @Inject constructor(
     /**
      * 타이머 시작
      *
-     * 세션 관리는 TimerService에서 처리됩니다.
+     * 유효성 검사만 수행하고, 실제 타이머 제어는 TimerService에서 처리됩니다.
      */
     private fun startTimer(reminderThresholds: List<Duration>) {
         val currentState = _uiState.value
@@ -314,18 +314,14 @@ class TimerViewModel @Inject constructor(
             return
         }
 
-        LogUtil.d("타이머 시작")
-
-        // 타이머 시작 (세션 관리는 TimerService에서 처리)
-        timerManager.start(
-            initialDuration = currentState.initialTime,
-            duration = currentState.remainingTime,
-            reminderThresholds = reminderThresholds,
-        )
+        LogUtil.d("타이머 시작 요청")
+        // 실제 타이머 시작은 TimerService에서 처리
     }
 
     /**
      * 타이머 일시정지
+     *
+     * 유효성 검사만 수행하고, 실제 타이머 제어는 TimerService에서 처리됩니다.
      */
     private fun handlePause() {
         val currentState = _uiState.value
@@ -337,12 +333,14 @@ class TimerViewModel @Inject constructor(
             return
         }
 
-        LogUtil.d("타이머 일시정지")
-        timerManager.pause()
+        LogUtil.d("타이머 일시정지 요청")
+        // 실제 일시정지는 TimerService에서 처리
     }
 
     /**
      * 타이머 재개
+     *
+     * 유효성 검사만 수행하고, 실제 타이머 제어는 TimerService에서 처리됩니다.
      */
     private fun handleResume() {
         val currentState = _uiState.value
@@ -354,37 +352,35 @@ class TimerViewModel @Inject constructor(
             return
         }
 
-        LogUtil.d("타이머 재개")
-        timerManager.resume()
+        LogUtil.d("타이머 재개 요청")
+        // 실제 재개는 TimerService에서 처리
     }
 
     /**
      * 타이머 정지 및 초기화
      *
-     * 세션 미완료 처리는 TimerService에서 처리됩니다.
+     * 실제 타이머 정지 및 세션 미완료 처리는 TimerService에서 처리됩니다.
      */
     private fun handleStop() {
-        LogUtil.d("타이머 정지 및 초기화")
-        timerManager.stop(initialDuration = _uiState.value.initialTime)
+        LogUtil.d("타이머 정지 요청")
+        // 실제 정지 및 초기화는 TimerService에서 처리
     }
 
     /**
      * 타이머 완료 확인 처리
      *
      * 사용자가 완료 버튼을 클릭했을 때 호출됩니다.
-     * TimerService에서 세션 업데이트 및 타이머 리셋을 처리합니다.
+     * 실제 세션 업데이트 및 타이머 리셋은 TimerService에서 처리됩니다.
      */
     private fun handleComplete() {
-        LogUtil.d("타이머 완료 확인")
+        LogUtil.d("타이머 완료 확인 요청")
 
         if (!_uiState.value.isCompleted) {
             LogUtil.w("완료 상태가 아님")
             return
         }
 
-        // TimerManager를 통해 complete 이벤트 발생 -> TimerService에서 처리
-        timerManager.complete()
-
+        // 실제 완료 처리는 TimerService에서 처리
         emitSideEffect(
             TimerSideEffect.ShowSnackbar(
                 R.string.snackbar_timer_completed

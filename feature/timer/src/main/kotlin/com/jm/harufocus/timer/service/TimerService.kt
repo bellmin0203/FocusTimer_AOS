@@ -61,9 +61,6 @@ class TimerService : Service() {
 
         // 타이머 상태 관찰 시작
         observeTimerState()
-
-        // 완료 이벤트 관찰 (ViewModel에서 완료 버튼 클릭 시)
-        observeCompleteEvent()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -362,21 +359,6 @@ class TimerService : Service() {
                         widgetUpdater.onTimerStopped(preset = state.selectedPreset)
                     }
                 }
-            }
-            .launchIn(serviceScope)
-    }
-
-    /**
-     * 완료 이벤트 관찰
-     *
-     * ViewModel에서 완료 버튼을 클릭하면 timerManager.complete()가 호출되고,
-     * 이 이벤트를 받아서 handleComplete를 실행합니다.
-     */
-    private fun observeCompleteEvent() {
-        timerManager.completeEvent
-            .onEach {
-                LogUtil.d("TimerService completeEvent 수신")
-                handleComplete()
             }
             .launchIn(serviceScope)
     }
