@@ -789,8 +789,20 @@ private fun TimerControlButtons(
                 val intent = Intent(context, TimerService::class.java)
 
                 when {
-                    !uiState.isRunning -> {
-                        // 타이머 시작
+                    uiState.isPaused -> {
+                        // 타이머 재개 (Paused 상태를 먼저 체크해야 함)
+                        onIntent(TimerIntent.Resume)
+
+                        // 서비스에 재개 알림
+                        intent.action = TimerServiceAction.ACTION_RESUME
+                        ContextCompat.startForegroundService(
+                            context,
+                            intent
+                        )
+                    }
+
+                    uiState.isIdle -> {
+                        // 타이머 시작 (Idle 상태에서만)
                         onIntent(TimerIntent.Start())
 
                         // 서비스 시작
@@ -799,18 +811,6 @@ private fun TimerControlButtons(
                             TimerServiceAction.EXTRA_DURATION,
                             uiState.remainingTime.inWholeMilliseconds
                         )
-                        ContextCompat.startForegroundService(
-                            context,
-                            intent
-                        )
-                    }
-
-                    uiState.isPaused -> {
-                        // 타이머 재개
-                        onIntent(TimerIntent.Resume)
-
-                        // 서비스에 재개 알림
-                        intent.action = TimerServiceAction.ACTION_RESUME
                         ContextCompat.startForegroundService(
                             context,
                             intent
