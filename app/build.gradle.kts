@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.my.android.compose)
     alias(libs.plugins.my.hilt)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -79,4 +81,8 @@ dependencies {
 
     baselineProfile(project(":baselineprofile"))
     implementation(libs.androidx.profileinstaller)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 }
