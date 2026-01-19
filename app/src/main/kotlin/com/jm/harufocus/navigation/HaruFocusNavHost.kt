@@ -47,10 +47,6 @@ fun HaruFocusNavHost(
 
         // 설정 화면
         composable(Screen.Setting.route) {
-            // 테스트용 (개발 중에만 사용)
-            CrashReporter.recordException(RuntimeException("Test Exception"), "테스트")
-            throw RuntimeException("Test Exception")
-
             SettingScreen(
                 onBackClick = {
                     navController.popBackStack()
