@@ -3,6 +3,7 @@ package com.jm.harufocus.widget
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import com.jm.harufocus.domain.model.preset.Preset
+import com.jm.logutil.LogUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * 타이머가 시작됨
      */
     fun onTimerStarted(remainingTime: Duration, preset: Preset? = null) {
+        LogUtil.d("onTimerStarted: remainingTime=$remainingTime, preset=${preset?.name}")
         scope.launch {
             stateManager.setRunning(
                 remainingTime = remainingTime,
@@ -49,6 +51,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * 앱에서 시간을 설정하면 위젯의 Idle 상태 시간도 동기화합니다.
      */
     fun onTimeSet(duration: Duration, preset: Preset? = null) {
+        LogUtil.d("onTimeSet: duration=$duration, preset=${preset?.name}")
         scope.launch {
             stateManager.setIdleWithDuration(
                 duration = duration,
@@ -62,6 +65,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * 타이머가 일시정지됨
      */
     fun onTimerPaused(remainingTime: Duration, preset: Preset? = null) {
+        LogUtil.d("onTimerPaused: remainingTime=$remainingTime, preset=${preset?.name}")
         scope.launch {
             stateManager.setPaused(
                 remainingTime = remainingTime,
@@ -75,6 +79,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * 타이머가 재개됨
      */
     fun onTimerResumed(remainingTime: Duration, preset: Preset? = null) {
+        LogUtil.d("onTimerResumed: remainingTime=$remainingTime, preset=${preset?.name}")
         scope.launch {
             stateManager.setRunning(
                 remainingTime = remainingTime,
@@ -88,6 +93,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * 타이머가 완료됨
      */
     fun onTimerCompleted(overtime: Duration = Duration.ZERO, preset: Preset? = null) {
+        LogUtil.d("onTimerCompleted: overtime=$overtime, preset=${preset?.name}")
         scope.launch {
             stateManager.setCompleted(overtime = overtime, presetColorIndex = preset?.colorIndex)
             updateWidget()
@@ -98,6 +104,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * 타이머가 중지됨 (리셋)
      */
     fun onTimerStopped(preset: Preset? = null) {
+        LogUtil.d("onTimerStopped: preset=${preset?.name}")
         scope.launch {
             stateManager.setIdle(preset = preset)
             updateWidget()
@@ -144,11 +151,12 @@ class HaruFocusWidgetUpdater @Inject constructor(
      * Glance 위젯을 강제로 다시 렌더링합니다.
      */
     private suspend fun updateWidget() {
+        LogUtil.d("updateWidget: Refreshing all widgets")
         try {
             HaruFocusWidget().updateAll(context)
+            LogUtil.d("updateWidget: Success")
         } catch (e: Exception) {
-            // 위젯이 없거나 업데이트 실패 시 무시
-            e.printStackTrace()
+            LogUtil.e("updateWidget: Failed", e)
         }
     }
 }

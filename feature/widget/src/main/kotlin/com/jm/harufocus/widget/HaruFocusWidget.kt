@@ -86,6 +86,8 @@ private fun WidgetContent(context: Context) {
     val presetColorIndex =
         preferences[KEY_PRESET_COLOR_INDEX]?.toIntOrNull() ?: 0
 
+    LogUtil.d("WidgetContent: status=$status, remainingTime=$remainingTime, overtime=$overtime, presetColorIndex=$presetColorIndex")
+
     val widgetState = when (status) {
         HaruFocusWidgetState.RUNNING -> {
             if (overtime != null) HaruFocusWidgetState.Completed(overtime)
@@ -99,6 +101,8 @@ private fun WidgetContent(context: Context) {
 
         else -> HaruFocusWidgetState.Idle
     }
+
+    LogUtil.d("WidgetContent: widgetState=$widgetState")
 
     // 선택된 프리셋의 색상 가져오기
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES

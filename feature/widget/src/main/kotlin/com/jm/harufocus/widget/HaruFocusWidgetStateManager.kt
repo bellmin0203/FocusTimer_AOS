@@ -9,6 +9,7 @@ import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.jm.harufocus.domain.model.preset.Preset
+import com.jm.logutil.LogUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,23 +40,30 @@ class HaruFocusWidgetStateManager @Inject constructor(
      */
     suspend fun getRemainingTime(): Duration {
         val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(HaruFocusWidget::class.java)
-        if (glanceIds.isEmpty()) return HaruFocusWidgetState.DEFAULT_REMAINING_TIME.milliseconds
+        if (glanceIds.isEmpty()) {
+            LogUtil.d("getRemainingTime: No widgets found, returning default")
+            return HaruFocusWidgetState.DEFAULT_REMAINING_TIME.milliseconds
+        }
 
         // 첫 번째 위젯의 상태를 기준으로 함
         val glanceId = glanceIds.first()
         val prefs = getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)
-        return (prefs[KEY_REMAINING_TIME] ?: HaruFocusWidgetState.DEFAULT_REMAINING_TIME).milliseconds
+        val remainingTime = (prefs[KEY_REMAINING_TIME] ?: HaruFocusWidgetState.DEFAULT_REMAINING_TIME).milliseconds
+        LogUtil.d("getRemainingTime: $remainingTime")
+        return remainingTime
     }
 
     /**
      * 남은 시간을 조절합니다 (1분 ~ 59분 제한).
      */
     suspend fun updateRemainingTime(delta: Duration) {
+        LogUtil.d("updateRemainingTime: delta=$delta")
         updateAllWidgets { prefs ->
             val currentMillis = prefs[KEY_REMAINING_TIME] ?: HaruFocusWidgetState.DEFAULT_REMAINING_TIME
             val currentDuration = if (currentMillis == 0L) 25.minutes else currentMillis.milliseconds
             val newTime = (currentDuration + delta).coerceIn(1.minutes, 59.minutes)
             
+            LogUtil.d("updateRemainingTime: $currentDuration + $delta = $newTime")
             prefs[KEY_REMAINING_TIME] = newTime.inWholeMilliseconds
         }
     }
@@ -64,6 +72,7 @@ class HaruFocusWidgetStateManager @Inject constructor(
      * 위젯 상태를 Idle로 설정
      */
     suspend fun setIdle(preset: Preset? = null) {
+        LogUtil.d("setIdle: preset=${preset?.name}, duration=${preset?.duration}")
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = HaruFocusWidgetState.IDLE
             prefs[KEY_REMAINING_TIME] = preset?.duration?.inWholeMilliseconds ?: HaruFocusWidgetState.DEFAULT_REMAINING_TIME
@@ -78,6 +87,7 @@ class HaruFocusWidgetStateManager @Inject constructor(
      * 앱에서 시간을 직접 설정할 때 사용됩니다.
      */
     suspend fun setIdleWithDuration(duration: Duration, preset: Preset? = null) {
+        LogUtil.d("setIdleWithDuration: duration=$duration, preset=${preset?.name}")
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = HaruFocusWidgetState.IDLE
             prefs[KEY_REMAINING_TIME] = duration.inWholeMilliseconds
@@ -94,6 +104,7 @@ class HaruFocusWidgetStateManager @Inject constructor(
         overtime: Duration = Duration.ZERO,
         presetColorIndex: Int? = null
     ) {
+        LogUtil.d("setRunning: remainingTime=$remainingTime, overtime=$overtime, presetColorIndex=$presetColorIndex")
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = HaruFocusWidgetState.RUNNING
             prefs[KEY_REMAINING_TIME] = remainingTime.inWholeMilliseconds
@@ -109,6 +120,7 @@ class HaruFocusWidgetStateManager @Inject constructor(
      * 위젯 상태를 Paused로 설정
      */
     suspend fun setPaused(remainingTime: Duration, presetColorIndex: Int? = null) {
+        LogUtil.d("setPaused: remainingTime=$remainingTime, presetColorIndex=$presetColorIndex")
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = HaruFocusWidgetState.PAUSED
             prefs[KEY_REMAINING_TIME] = remainingTime.inWholeMilliseconds
@@ -120,6 +132,7 @@ class HaruFocusWidgetStateManager @Inject constructor(
      * 위젯 상태를 Completed로 설정
      */
     suspend fun setCompleted(overtime: Duration, presetColorIndex: Int? = null) {
+        LogUtil.d("setCompleted: overtime=$overtime, presetColorIndex=$presetColorIndex")
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = HaruFocusWidgetState.COMPLETED
             prefs[KEY_OVERTIME] = overtime.inWholeMilliseconds
@@ -135,6 +148,8 @@ class HaruFocusWidgetStateManager @Inject constructor(
     ) {
         val glanceIds = GlanceAppWidgetManager(context)
             .getGlanceIds(HaruFocusWidget::class.java)
+
+        LogUtil.d("updateAllWidgets: widgetCount=${glanceIds.size}")
 
         glanceIds.forEach { glanceId ->
             updateAppWidgetState(
