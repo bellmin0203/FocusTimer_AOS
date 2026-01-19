@@ -17,6 +17,7 @@ import com.jm.harufocus.timer.model.TimerSideEffect.ShowError
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.usecase.TimerStatus
 import com.jm.harufocus.util.NotificationSoundPlayer
+import com.jm.harufocus.widget.HaruFocusWidgetUpdater
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -47,6 +48,7 @@ class TimerViewModel @Inject constructor(
     private val timerManager: TimerManager,
     private val settingsRepository: SettingsRepository,
     private val notificationSoundPlayer: NotificationSoundPlayer,
+    private val widgetUpdater: HaruFocusWidgetUpdater,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -286,6 +288,12 @@ class TimerViewModel @Inject constructor(
      */
     private fun handleSetTime(totalTime: Duration) {
         timerManager.setTime(duration = totalTime)
+
+        // 위젯 상태도 동기화
+        widgetUpdater.onTimeSet(
+            duration = totalTime,
+            preset = _uiState.value.selectedPreset
+        )
     }
 
     /**
@@ -421,6 +429,12 @@ class TimerViewModel @Inject constructor(
             error = null,
         )
         _uiState.update { newState }
+
+        // 위젯 상태 동기화
+        widgetUpdater.onTimeSet(
+            duration = updatedMinutes,
+            preset = _uiState.value.selectedPreset
+        )
     }
 
     /**
@@ -443,7 +457,13 @@ class TimerViewModel @Inject constructor(
                     val remainingTime = preset.duration
                     val progress = calculateProgress(remainingTime)
 
-                    handleSetTime(preset.duration)
+                    timerManager.setTime(duration = preset.duration)
+
+                    // 위젯 상태 동기화 (preset 정보 포함)
+                    widgetUpdater.onTimeSet(
+                        duration = preset.duration,
+                        preset = preset
+                    )
 
                     _uiState.update {
                         it.copy(

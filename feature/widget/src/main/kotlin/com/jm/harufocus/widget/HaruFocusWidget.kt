@@ -46,7 +46,6 @@ import com.jm.logutil.LogUtil
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * 하루 몰입 Glance Widget
@@ -115,7 +114,6 @@ private fun WidgetContent(context: Context) {
         onStartClick = { actionStartTimer(context) },
         onPauseClick = { actionPauseTimer(context) },
         onResumeClick = { actionResumeTimer(context) },
-        onStopClick = { actionStopTimer(context) },
         onCompleteClick = { actionCompleteTimer(context) },
         onOpenAppClick = { actionOpenApp(context) },
         onIncreaseClick = { actionIncreaseTime(context) },
@@ -134,7 +132,6 @@ private fun HaruFocusWidgetContent(
     onStartClick: () -> Unit,
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
-    onStopClick: () -> Unit,
     onCompleteClick: () -> Unit,
     onOpenAppClick: () -> Unit,
     onIncreaseClick: () -> Unit,
@@ -151,7 +148,7 @@ private fun HaruFocusWidgetContent(
         when (state) {
             is HaruFocusWidgetState.Idle -> IdleContent(
                 presetColor = presetColor,
-                remainingTime = if (currentRemainingTime > Duration.ZERO) currentRemainingTime else 25.minutes,
+                remainingTime = currentRemainingTime,
                 onStartClick = onStartClick,
                 onIncreaseClick = onIncreaseClick,
                 onDecreaseClick = onDecreaseClick

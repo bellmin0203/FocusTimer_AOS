@@ -73,6 +73,20 @@ class HaruFocusWidgetStateManager @Inject constructor(
     }
 
     /**
+     * 위젯 상태를 Idle로 설정하며 특정 시간을 지정
+     *
+     * 앱에서 시간을 직접 설정할 때 사용됩니다.
+     */
+    suspend fun setIdleWithDuration(duration: Duration, preset: Preset? = null) {
+        updateAllWidgets { prefs ->
+            prefs[KEY_STATUS] = HaruFocusWidgetState.IDLE
+            prefs[KEY_REMAINING_TIME] = duration.inWholeMilliseconds
+            prefs[KEY_PRESET_COLOR_INDEX] = preset?.colorIndex.toString()
+            prefs.remove(KEY_OVERTIME)
+        }
+    }
+
+    /**
      * 위젯 상태를 Running으로 설정
      */
     suspend fun setRunning(

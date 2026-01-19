@@ -44,6 +44,21 @@ class HaruFocusWidgetUpdater @Inject constructor(
     }
 
     /**
+     * 타이머 시간이 설정됨 (Idle 상태에서 시간 변경 시)
+     *
+     * 앱에서 시간을 설정하면 위젯의 Idle 상태 시간도 동기화합니다.
+     */
+    fun onTimeSet(duration: Duration, preset: Preset? = null) {
+        scope.launch {
+            stateManager.setIdleWithDuration(
+                duration = duration,
+                preset = preset
+            )
+            updateWidget()
+        }
+    }
+
+    /**
      * 타이머가 일시정지됨
      */
     fun onTimerPaused(remainingTime: Duration, preset: Preset? = null) {
