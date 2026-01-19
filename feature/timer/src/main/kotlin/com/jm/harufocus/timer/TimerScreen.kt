@@ -353,7 +353,7 @@ private fun TimerScreen(
                                     Text(
                                         text = stringResource(R.string.timer_completed_label),
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.tertiary
+                                        color = MaterialTheme.colorScheme.onTertiary
                                     )
                                 }
                             }
@@ -473,7 +473,7 @@ private fun TimerScreen(
                                     Text(
                                         text = stringResource(R.string.timer_completed_label),
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.tertiary
+                                        color = MaterialTheme.colorScheme.onTertiary
                                     )
                                 }
                             }
