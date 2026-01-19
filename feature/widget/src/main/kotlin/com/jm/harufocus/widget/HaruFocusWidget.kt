@@ -89,16 +89,10 @@ private fun WidgetContent(context: Context) {
     LogUtil.d("WidgetContent: status=$status, remainingTime=$remainingTime, overtime=$overtime, presetColorIndex=$presetColorIndex")
 
     val widgetState = when (status) {
-        HaruFocusWidgetState.RUNNING -> {
-            if (overtime != null) HaruFocusWidgetState.Completed(overtime)
-            else HaruFocusWidgetState.Running(remainingTime)
-        }
-
+        HaruFocusWidgetState.RUNNING -> HaruFocusWidgetState.Running(remainingTime)
         HaruFocusWidgetState.PAUSED -> HaruFocusWidgetState.Paused(remainingTime)
-        HaruFocusWidgetState.COMPLETED -> HaruFocusWidgetState.Completed(
-            overtime ?: Duration.ZERO
-        )
-
+        HaruFocusWidgetState.COMPLETED -> HaruFocusWidgetState.Completed
+        HaruFocusWidgetState.OVERTIME -> HaruFocusWidgetState.Overtime(overtime ?: Duration.ZERO)
         else -> HaruFocusWidgetState.Idle
     }
 
@@ -170,6 +164,12 @@ private fun HaruFocusWidgetContent(
             )
 
             is HaruFocusWidgetState.Completed -> CompletedContent(
+                presetColor = presetColor,
+                overtime = Duration.ZERO,
+                onCompleteClick = onCompleteClick
+            )
+
+            is HaruFocusWidgetState.Overtime -> CompletedContent(
                 presetColor = presetColor,
                 overtime = state.overtime,
                 onCompleteClick = onCompleteClick

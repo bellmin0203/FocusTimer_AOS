@@ -162,9 +162,7 @@ class TimerViewModel @Inject constructor(
                             it.copy(
                                 initialTime = initialTime,
                                 remainingTime = remainingTime,
-                                isRunning = false,
-                                isPaused = false,
-                                isCompleted = false,
+                                status = TimerStatus.Idle,
                                 overtime = Duration.ZERO,
                                 progress = progress,
                                 error = null,
@@ -186,8 +184,7 @@ class TimerViewModel @Inject constructor(
                             it.copy(
                                 initialTime = initialTime,
                                 remainingTime = remainingTime,
-                                isRunning = true,
-                                isPaused = false,
+                                status = TimerStatus.Running,
                                 overtime = overtime,
                                 progress = progress,
                                 selectedPreset = selectedPreset,
@@ -200,9 +197,8 @@ class TimerViewModel @Inject constructor(
                             it.copy(
                                 initialTime = initialTime,
                                 remainingTime = remainingTime,
+                                status = TimerStatus.Paused,
                                 overtime = overtime,
-                                isPaused = true,
-                                isRunning = false,
                                 selectedPreset = selectedPreset,
                             )
                         }
@@ -213,26 +209,35 @@ class TimerViewModel @Inject constructor(
                             it.copy(
                                 initialTime = initialTime,
                                 remainingTime = remainingTime,
+                                status = TimerStatus.Completed,
                                 overtime = overtime,
-                                isRunning = isRunning,
-                                isPaused = isPaused,
-                                isCompleted = true,
                                 selectedPreset = selectedPreset,
                             )
                         }
-                        if (!timerState.isOvertime) {
-                            // 타이머가 정상 완료된 시점 (초과 시간 진입 전)
-                            emitSideEffect(TimerSideEffect.ShowTimerCompleted)
+                        // 타이머가 정상 완료된 시점 (초과 시간 진입 전)
+                        emitSideEffect(TimerSideEffect.ShowTimerCompleted)
 
-                            // 햅틱 피드백 (설정이 활성화된 경우)
-                            if (_uiState.value.isHapticFeedbackEnabled) {
-                                emitSideEffect(HapticFeedback(HapticPattern.COMPLETED))
-                            }
+                        // 햅틱 피드백 (설정이 활성화된 경우)
+                        if (_uiState.value.isHapticFeedbackEnabled) {
+                            emitSideEffect(HapticFeedback(HapticPattern.COMPLETED))
+                        }
 
-                            // 알림 소리 및 진동 재생
-                            playNotificationSound()
+                        // 알림 소리 및 진동 재생
+                        playNotificationSound()
 
-                            // 세션 완료 처리는 TimerService에서 처리됩니다
+                        // 세션 완료 처리는 TimerService에서 처리됩니다
+                    }
+
+                    is TimerStatus.Overtime -> {
+                        // 초과 시간 진행 중
+                        _uiState.update {
+                            it.copy(
+                                initialTime = initialTime,
+                                remainingTime = remainingTime,
+                                status = TimerStatus.Overtime,
+                                overtime = overtime,
+                                selectedPreset = selectedPreset,
+                            )
                         }
                     }
                 }
@@ -400,10 +405,10 @@ class TimerViewModel @Inject constructor(
      * 드래그를 통한 시간 조정
      */
     private fun handleDragProgress(newProgress: Float) {
-        LogUtil.d("newProgress=$newProgress, isActive=${_uiState.value.isTimerActiveOrPaused}")
+        LogUtil.d("newProgress=$newProgress, isActive=${_uiState.value.isTimerActive}")
 
         // 타이머가 실행 중이 아닐 때만 드래그 가능
-        if (_uiState.value.isTimerActiveOrPaused) {
+        if (_uiState.value.isTimerActive) {
             LogUtil.w("타이머 실행 중이므로 드래그 불가")
             return
         }
@@ -422,8 +427,7 @@ class TimerViewModel @Inject constructor(
         val newState = _uiState.value.copy(
             initialTime = updatedMinutes,
             remainingTime = updatedMinutes,
-            isRunning = false,
-            isPaused = false,
+            status = TimerStatus.Idle,
             overtime = Duration.ZERO,
             progress = newProgress,
             error = null,
@@ -441,13 +445,13 @@ class TimerViewModel @Inject constructor(
      * 프리셋 선택 처리
      */
     private fun handleSelectPreset(presetId: Int) {
-        LogUtil.d("presetId=$presetId, isActive=${_uiState.value.isTimerActiveOrPaused}")
+        LogUtil.d("presetId=$presetId, isActive=${_uiState.value.isTimerActive}")
 
         viewModelScope.launch {
             val result = managePresetUseCase.selectPreset(
                 presetId = presetId,
                 presets = _uiState.value.presets,
-                isTimerActive = _uiState.value.isTimerActiveOrPaused
+                isTimerActive = _uiState.value.isTimerActive
             )
 
             result.fold(
@@ -615,7 +619,7 @@ class TimerViewModel @Inject constructor(
                         )
 
                         // 수정된 프리셋이 현재 선택되어 있다면 타이머도 동기화
-                        if (_uiState.value.selectedPreset?.id == presetId && !_uiState.value.isTimerActiveOrPaused) {
+                        if (_uiState.value.selectedPreset?.id == presetId && !_uiState.value.isTimerActive) {
                             LogUtil.d("선택된 프리셋이므로 타이머 동기화")
                             handleSetTime(duration)
                             _uiState.update { it.copy(selectedPreset = preset) }

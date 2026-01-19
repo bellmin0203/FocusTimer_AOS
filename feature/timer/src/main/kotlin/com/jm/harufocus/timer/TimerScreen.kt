@@ -92,6 +92,7 @@ import com.jm.harufocus.timer.model.TimerSideEffect
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.model.toUiText
 import com.jm.harufocus.timer.service.TimerService
+import com.jm.harufocus.timer.usecase.TimerStatus
 import com.jm.harufocus.ui.component.rememberPickerState
 import com.jm.harufocus.ui.util.PreviewProvider
 import com.jm.harufocus.util.KeepScreenOnManager
@@ -303,7 +304,7 @@ private fun TimerScreen(
                         CircularTimerProgress(
                             progress = uiState.progress,
                             modifier = Modifier.weight(1f),
-                            enabled = !uiState.isTimerActiveOrPaused, // 타이머가 유휴 상태일 때만 드래그 가능
+                            enabled = !uiState.isTimerActive, // 타이머가 유휴 상태일 때만 드래그 가능
                             progressColor = if (uiState.isCompleted) {
                                 MaterialTheme.colorScheme.tertiary // 완료 상태일 때 다른 색상
                             } else {
@@ -328,7 +329,7 @@ private fun TimerScreen(
                                             MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
                                         },
                                     )
-                                    .clickable(enabled = !uiState.isTimerActiveOrPaused) {
+                                    .clickable(enabled = !uiState.isTimerActive) {
                                         showTimeInput = true
                                     }
                                     .padding(vertical = 6.dp, horizontal = 12.dp),
@@ -423,7 +424,7 @@ private fun TimerScreen(
                         CircularTimerProgress(
                             progress = uiState.progress,
                             modifier = Modifier.weight(1f),
-                            enabled = !uiState.isTimerActiveOrPaused, // 타이머가 유휴 상태일 때만 드래그 가능
+                            enabled = !uiState.isTimerActive, // 타이머가 유휴 상태일 때만 드래그 가능
                             progressColor = if (uiState.isCompleted) {
                                 MaterialTheme.colorScheme.tertiary // 완료 상태일 때 다른 색상
                             } else {
@@ -448,7 +449,7 @@ private fun TimerScreen(
                                             MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
                                         },
                                     )
-                                    .clickable(enabled = !uiState.isTimerActiveOrPaused) {
+                                    .clickable(enabled = !uiState.isTimerActive) {
                                         showTimeInput = true
                                     }
                                     .padding(vertical = 6.dp, horizontal = 12.dp),
@@ -838,7 +839,7 @@ private fun TimerControlButtons(
             contentColor = Color.White
         )
 
-        if (uiState.isTimerActiveOrPaused) {
+        if (uiState.isTimerActive) {
             // 리셋 버튼
             FocusIconButton(
                 onClick = {
@@ -982,10 +983,10 @@ fun ScreenIdlePreviewHaru() {
 fun ScreenCompletePreviewHaru() {
     // 샘플 프리셋: UI 확인용 목업 데이터 (실제 데이터 구조로 기입)
     val presets = remember { PreviewProvider.samplePresets }
-    // Idle 상태의 UI State 예시
-    val idleUiState = TimerUiState(
+    // Completed 상태의 UI State 예시
+    val completedUiState = TimerUiState(
         initialTime = 25.minutes,
-        isCompleted = true,
+        status = TimerStatus.Overtime,
         overtime = 5.minutes,
         progress = 0f,
         selectedPreset = presets.first(), // 첫번째 프리셋 선택
@@ -995,7 +996,7 @@ fun ScreenCompletePreviewHaru() {
     HaruFocusTheme {
         TimerScreen(
             onIntent = {}, // 미리보기: 인텐트 기본 처리
-            uiState = idleUiState,
+            uiState = completedUiState,
             drawerState = rememberDrawerState(DrawerValue.Closed)
         )
     }

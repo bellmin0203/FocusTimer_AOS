@@ -43,7 +43,9 @@ data class TimerState(
 ) {
     val isRunning: Boolean get() = status is TimerStatus.Running
     val isPaused: Boolean get() = status is TimerStatus.Paused
-    val isOvertime: Boolean get() = overtime > Duration.ZERO
+    val isCompleted: Boolean get() = status is TimerStatus.Completed
+    val isOvertimeStatus: Boolean get() = status is TimerStatus.Overtime
+    val hasOvertime: Boolean get() = overtime > Duration.ZERO
 }
 
 sealed interface TimerStatus {
@@ -51,6 +53,7 @@ sealed interface TimerStatus {
     data object Running : TimerStatus
     data object Paused : TimerStatus
     data object Completed : TimerStatus
+    data object Overtime : TimerStatus
 }
 
 enum class TimerValidationResult {

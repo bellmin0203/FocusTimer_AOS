@@ -90,12 +90,23 @@ class HaruFocusWidgetUpdater @Inject constructor(
     }
 
     /**
-     * 타이머가 완료됨
+     * 타이머가 완료됨 (남은 시간이 0이 된 순간)
      */
-    fun onTimerCompleted(overtime: Duration = Duration.ZERO, preset: Preset? = null) {
-        LogUtil.d("onTimerCompleted: overtime=$overtime, preset=${preset?.name}")
+    fun onTimerCompleted(preset: Preset? = null) {
+        LogUtil.d("onTimerCompleted: preset=${preset?.name}")
         scope.launch {
-            stateManager.setCompleted(overtime = overtime, presetColorIndex = preset?.colorIndex)
+            stateManager.setCompleted(presetColorIndex = preset?.colorIndex)
+            updateWidget()
+        }
+    }
+
+    /**
+     * 타이머가 초과 시간 상태로 진입
+     */
+    fun onTimerOvertime(overtime: Duration, preset: Preset? = null) {
+        LogUtil.d("onTimerOvertime: overtime=$overtime, preset=${preset?.name}")
+        scope.launch {
+            stateManager.setOvertime(overtime = overtime, presetColorIndex = preset?.colorIndex)
             updateWidget()
         }
     }

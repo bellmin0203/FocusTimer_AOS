@@ -13,6 +13,7 @@ sealed interface HaruFocusWidgetState {
         const val RUNNING = "running"
         const val PAUSED = "paused"
         const val COMPLETED = "completed"
+        const val OVERTIME = "overtime"
         const val IDLE = "idle"
         const val DEFAULT_REMAINING_TIME = 0L
     }
@@ -41,11 +42,16 @@ sealed interface HaruFocusWidgetState {
     ) : HaruFocusWidgetState
 
     /**
-     * 완료 상태
+     * 완료 상태 (남은 시간이 0이 된 순간)
+     */
+    data object Completed : HaruFocusWidgetState
+
+    /**
+     * 초과 시간 상태 (완료 후 계속 시간이 흐르는 상태)
      *
      * @param overtime 초과 시간 (포맷된 문자열, 예: "+02:30")
      */
-    data class Completed(
+    data class Overtime(
         val overtime: Duration
     ) : HaruFocusWidgetState
 }

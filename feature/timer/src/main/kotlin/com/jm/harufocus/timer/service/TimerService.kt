@@ -65,6 +65,7 @@ class TimerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         LogUtil.d("TimerService onStartCommand: action=${intent?.action}")
+        LogUtil.d("Timer State: ${timerManager.timerState.value}")
 
         when (intent?.action) {
             TimerServiceAction.ACTION_START -> {
@@ -209,7 +210,7 @@ class TimerService : Service() {
         val state = timerManager.timerState.value
 
         // 완료 상태가 아니면 무시
-        if (state.status !is TimerStatus.Completed) {
+        if (!state.isCompleted && !state.isOvertimeStatus) {
             LogUtil.w("완료 상태가 아님")
             return
         }
@@ -310,7 +311,7 @@ class TimerService : Service() {
                     is TimerStatus.Completed -> {
                         // 타이머가 완료되었을 때 알림 업데이트
                         val notification = notificationHelper.createCompletedNotification(
-                            overtime = state.overtime
+                            overtime = Duration.ZERO
                         )
                         val notificationManager =
                             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -321,12 +322,11 @@ class TimerService : Service() {
 
                         // 위젯 업데이트: 타이머 완료
                         widgetUpdater.onTimerCompleted(
-                            overtime = state.overtime,
                             preset = state.selectedPreset
                         )
 
-                        // 세션 완료 처리 (초과 시간 없이 최초 완료 시점에만)
-                        if (!isCompletionHandled && !state.isOvertime) {
+                        // 세션 완료 처리 (최초 완료 시점에만)
+                        if (!isCompletionHandled) {
                             isCompletionHandled = true
                             state.currentSessionId?.let { sessionId ->
                                 serviceScope.launch {
@@ -349,6 +349,27 @@ class TimerService : Service() {
                                 }
                             }
                         }
+                    }
+
+                    is TimerStatus.Overtime -> {
+                        // 초과 시간 진행 중 알림 업데이트
+                        val notification = notificationHelper.createRunningNotification(
+                            remainingTime = state.remainingTime,
+                            isRunning = true,
+                            overtime = state.overtime
+                        )
+                        val notificationManager =
+                            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                        notificationManager.notify(
+                            TimerNotificationHelper.NOTIFICATION_ID,
+                            notification
+                        )
+
+                        // 위젯 업데이트: 초과 시간 진행 중
+                        widgetUpdater.onTimerOvertime(
+                            overtime = state.overtime,
+                            preset = state.selectedPreset
+                        )
                     }
 
                     is TimerStatus.Idle -> {

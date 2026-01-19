@@ -164,7 +164,9 @@ class TimerManagerImpl @Inject constructor(
     }
 
     private fun handleTimerComplete(initialDuration: Duration) {
-        if (_timerState.value.status !is TimerStatus.Completed) {
+        val currentStatus = _timerState.value.status
+        // Completed나 Overtime 상태가 아닐 때만 완료 처리
+        if (currentStatus !is TimerStatus.Completed && currentStatus !is TimerStatus.Overtime) {
             _timerState.update { state ->
                 state.toCompleted(initialDuration)
             }
@@ -191,7 +193,7 @@ class TimerManagerImpl @Inject constructor(
         }.onEach { overtime ->
             _timerState.update {
                 it.copy(
-                    status = TimerStatus.Running,
+                    status = TimerStatus.Overtime,
                     remainingTime = Duration.ZERO,
                     overtime = overtime,
                 )

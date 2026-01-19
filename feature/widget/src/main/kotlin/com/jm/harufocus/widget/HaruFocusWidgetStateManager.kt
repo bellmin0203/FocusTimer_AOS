@@ -129,12 +129,25 @@ class HaruFocusWidgetStateManager @Inject constructor(
     }
 
     /**
-     * 위젯 상태를 Completed로 설정
+     * 위젯 상태를 Completed로 설정 (타이머 완료 순간)
      */
-    suspend fun setCompleted(overtime: Duration, presetColorIndex: Int? = null) {
-        LogUtil.d("setCompleted: overtime=$overtime, presetColorIndex=$presetColorIndex")
+    suspend fun setCompleted(presetColorIndex: Int? = null) {
+        LogUtil.d("setCompleted: presetColorIndex=$presetColorIndex")
         updateAllWidgets { prefs ->
             prefs[KEY_STATUS] = HaruFocusWidgetState.COMPLETED
+            prefs[KEY_REMAINING_TIME] = 0L
+            prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
+            prefs.remove(KEY_OVERTIME)
+        }
+    }
+
+    /**
+     * 위젯 상태를 Overtime으로 설정 (초과 시간 진행 중)
+     */
+    suspend fun setOvertime(overtime: Duration, presetColorIndex: Int? = null) {
+        LogUtil.d("setOvertime: overtime=$overtime, presetColorIndex=$presetColorIndex")
+        updateAllWidgets { prefs ->
+            prefs[KEY_STATUS] = HaruFocusWidgetState.OVERTIME
             prefs[KEY_OVERTIME] = overtime.inWholeMilliseconds
             prefs[KEY_PRESET_COLOR_INDEX] = presetColorIndex.toString()
         }

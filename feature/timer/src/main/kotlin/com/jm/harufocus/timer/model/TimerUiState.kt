@@ -3,6 +3,7 @@ package com.jm.harufocus.timer.model
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Immutable
 import com.jm.harufocus.domain.model.preset.Preset
+import com.jm.harufocus.timer.usecase.TimerStatus
 import java.time.Instant
 import kotlin.time.Duration
 
@@ -13,6 +14,7 @@ import kotlin.time.Duration
  * @property isRunning 타이머가 실행 중인지 여부
  * @property isPaused 타이머가 일시정지 상태인지 여부
  * @property isCompleted 타이머가 완료되었는지 여부
+ * @property isOvertime 타이머가 초과 시간 상태인지 여부
  * @property overtime 타이머 완료 후 경과한 초과 시간 (초 단위)
  * @property progress 타이머 진행률 (0.0 ~ 1.0)
  * @property error 에러 메시지 (에러가 없으면 null)
@@ -25,9 +27,7 @@ import kotlin.time.Duration
 data class TimerUiState(
     val initialTime: Duration = Duration.ZERO,
     val remainingTime: Duration = Duration.ZERO,
-    val isRunning: Boolean = false,
-    val isPaused: Boolean = false,
-    val isCompleted: Boolean = false,
+    val status: TimerStatus = TimerStatus.Idle,
     val overtime: Duration = Duration.ZERO,
     val progress: Float = 0f,
     val error: String? = null,
@@ -46,15 +46,40 @@ data class TimerUiState(
      * 타이머가 유휴 상태인지 (시작되지 않은 상태)
      */
     val isIdle: Boolean
-        get() = !isRunning && !isPaused && !isCompleted
+        get() = status is TimerStatus.Idle
 
     /**
-     * 타이머가 활성 상태인지 (실행 중이거나 일시정지 상태)
+     * 타이머가 실행 중인지 여부
      */
-    val isTimerActiveOrPaused: Boolean
-        get() = isRunning || isPaused
+    val isRunning: Boolean
+        get() = status is TimerStatus.Running
 
-    val isOvertime: Boolean = overtime > Duration.ZERO
+    /**
+     * 타이머가 일시정지 상태인지 여부
+     */
+    val isPaused: Boolean
+        get() = status is TimerStatus.Paused
+
+    /**
+     * 타이머가 완료된 상태인지 (Completed 또는 Overtime)
+     */
+    val isCompleted: Boolean
+        get() = status is TimerStatus.Completed || status is TimerStatus.Overtime
+
+    /**
+     * 타이머가 초과 시간 상태인지 여부
+     */
+    val isOvertime: Boolean
+        get() = status is TimerStatus.Overtime
+
+
+    /**
+     * 타이머가 활성 상태인지 (실행 중, 일시정지, 또는 초과 시간 상태)
+     */
+    val isTimerActive: Boolean
+        get() = status is TimerStatus.Running || status is TimerStatus.Paused || status is TimerStatus.Overtime
+
+
 
     /**
      * 시간 형식으로 포맷팅 (HH:MM:SS)
