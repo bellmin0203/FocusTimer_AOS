@@ -5,6 +5,7 @@ import android.content.Intent
 import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.domain.repository.PresetRepository
 import com.jm.harufocus.domain.repository.SettingsRepository
+import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -98,6 +99,7 @@ class HaruFocusWidgetInteractor @Inject constructor(
             LogUtil.d("startTimerWithDuration: Service started successfully")
         } catch (e: Exception) {
             LogUtil.e("startTimerWithDuration: Failed to start service", e)
+            CrashReporter.recordException(e, "Widget: 타이머 서비스 시작 실패")
         }
     }
     
@@ -119,6 +121,7 @@ class HaruFocusWidgetInteractor @Inject constructor(
             LogUtil.d("pauseTimer: Service command sent")
         } catch (e: Exception) {
             LogUtil.e("pauseTimer: Failed", e)
+            CrashReporter.recordException(e, "Widget: 타이머 일시정지 실패")
         }
     }
     
@@ -140,6 +143,7 @@ class HaruFocusWidgetInteractor @Inject constructor(
             LogUtil.d("resumeTimer: Service command sent")
         } catch (e: Exception) {
             LogUtil.e("resumeTimer: Failed", e)
+            CrashReporter.recordException(e, "Widget: 타이머 재개 실패")
         }
     }
 
@@ -161,6 +165,7 @@ class HaruFocusWidgetInteractor @Inject constructor(
             LogUtil.d("stopTimer: Service command sent")
         } catch (e: Exception) {
             LogUtil.e("stopTimer: Failed", e)
+            CrashReporter.recordException(e, "Widget: 타이머 정지 실패")
         }
     }
 
@@ -182,6 +187,7 @@ class HaruFocusWidgetInteractor @Inject constructor(
             LogUtil.d("completeTimer: Service command sent")
         } catch (e: Exception) {
             LogUtil.e("completeTimer: Failed", e)
+            CrashReporter.recordException(e, "Widget: 타이머 완료 실패")
         }
     }
 

@@ -16,6 +16,7 @@ import com.jm.harufocus.timer.model.TimerSideEffect.HapticFeedback
 import com.jm.harufocus.timer.model.TimerSideEffect.ShowError
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.usecase.TimerStatus
+import com.jm.harufocus.util.CrashReporter
 import com.jm.harufocus.util.NotificationSoundPlayer
 import com.jm.harufocus.widget.HaruFocusWidgetUpdater
 import com.jm.logutil.LogUtil
@@ -480,6 +481,9 @@ class TimerViewModel @Inject constructor(
 
                     timerManager.selectPreset(preset)
 
+                    // Crashlytics에 프리셋 정보 기록
+                    CrashReporter.setSelectedPreset(preset.id.toLong(), preset.name)
+
                     emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_selected,
@@ -489,6 +493,7 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("프리셋 선택 실패", error)
+                    CrashReporter.recordException(error, "프리셋 선택 실패")
                     val timerError = when (error) {
                         is PresetException.TimerRunning ->
                             TimerError.Preset(PresetError.TimerRunning)
@@ -527,6 +532,7 @@ class TimerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     LogUtil.e("프리셋 저장 실패", error)
+                    CrashReporter.recordException(error, "프리셋 저장 실패")
                     val timerError = when (error) {
                         is PresetException.InvalidDuration -> TimerError.Preset(PresetError.NoTime)
                         is PresetException.MaxCountExceeded -> TimerError.Preset(
@@ -576,6 +582,7 @@ class TimerViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         LogUtil.e("프리셋 삭제 실패", error)
+                        CrashReporter.recordException(error, "프리셋 삭제 실패")
                         emitSideEffect(
                             ShowError(
                                 TimerError.Preset(
@@ -627,6 +634,7 @@ class TimerViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         LogUtil.e("프리셋 수정 실패", error)
+                        CrashReporter.recordException(error, "프리셋 수정 실패")
                         emitSideEffect(
                             ShowError(
                                 TimerError.Preset(
@@ -658,6 +666,7 @@ class TimerViewModel @Inject constructor(
                 notificationSoundPlayer.playTimerComplete(vibrate = isVibrate)
             } catch (e: Exception) {
                 LogUtil.e("알림 재생 실패", e)
+                CrashReporter.recordException(e, "알림 재생 실패")
             }
         }
     }

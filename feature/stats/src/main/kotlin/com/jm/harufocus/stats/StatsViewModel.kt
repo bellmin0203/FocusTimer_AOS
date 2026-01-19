@@ -9,6 +9,7 @@ import com.jm.harufocus.domain.usecase.statistics.GetMonthlyStatsUseCase
 import com.jm.harufocus.domain.usecase.statistics.GetWeeklyStatsUseCase
 import com.jm.harufocus.stats.model.StatsPeriod
 import com.jm.harufocus.stats.model.StatsUiState
+import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -181,6 +182,7 @@ class StatsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 LogUtil.e("Failed to load stats", e)
+                CrashReporter.recordException(e, "통계 로드 실패: ${_uiState.value.selectedPeriod}")
                 _uiState.update {
                     it.copy(
                         isLoading = false, error = "통계를 불러오는데 실패했습니다: ${e.message}"
@@ -203,7 +205,7 @@ class StatsViewModel @Inject constructor(
                 LogUtil.d("Achievement metrics loaded: focusRate=${achievementMetrics.focusRatePercent}%%, consecutiveDays=${achievementMetrics.consecutiveFocusDays}")
             } catch (e: Exception) {
                 LogUtil.e("Failed to load achievement metrics", e)
-                e.printStackTrace()
+                CrashReporter.recordException(e, "성취 지표 로드 실패")
                 // 성취 지표 로드 실패는 에러로 표시하지 않음 (옵션)
             }
         }

@@ -10,4 +10,9 @@ android {
 dependencies {
     api(libs.jmlog)
     implementation(projects.core.common)
+
+    // Firebase Crashlytics
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 }

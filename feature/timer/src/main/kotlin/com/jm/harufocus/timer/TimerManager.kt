@@ -9,6 +9,7 @@ import com.jm.harufocus.timer.usecase.TimerControlUseCase
 import com.jm.harufocus.timer.usecase.TimerState
 import com.jm.harufocus.timer.usecase.TimerStatus
 import com.jm.harufocus.timer.usecase.TimerValidationResult
+import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -176,6 +177,7 @@ class TimerManagerImpl @Inject constructor(
 
     private suspend fun handleTimerError(exception: Throwable) {
         LogUtil.e("타이머 실행 중 오류 발생", exception)
+        CrashReporter.recordException(exception, "타이머 실행 중 오류 발생")
         _timerError.emit(TimerError.Run(message = exception.message))
         stop(initialDuration = _timerState.value.initialDuration)
     }

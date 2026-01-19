@@ -3,6 +3,7 @@ package com.jm.harufocus.widget
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -72,6 +73,7 @@ class HaruFocusWidgetActionReceiver : BroadcastReceiver() {
                 updateWidget(context)
             } catch (e: Exception) {
                 LogUtil.e("Error processing widget action", e)
+                CrashReporter.recordException(e, "Widget action 처리 실패: ${intent.action}")
             } finally {
                 pendingResult.finish()
             }

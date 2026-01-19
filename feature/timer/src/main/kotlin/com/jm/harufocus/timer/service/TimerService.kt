@@ -8,6 +8,8 @@ import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.domain.usecase.session.ManageTimerSessionUseCase
 import com.jm.harufocus.timer.TimerManager
 import com.jm.harufocus.timer.usecase.TimerStatus
+import com.jm.harufocus.util.CrashReporter
+import com.jm.harufocus.util.CrashReportingExceptionHandler
 import com.jm.harufocus.widget.HaruFocusWidgetUpdater
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,7 +46,9 @@ class TimerService : Service() {
     lateinit var manageTimerSessionUseCase: ManageTimerSessionUseCase
 
     private lateinit var notificationHelper: TimerNotificationHelper
-    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val serviceScope = CoroutineScope(
+        Dispatchers.Main + SupervisorJob() + CrashReportingExceptionHandler.withTag("TimerService")
+    )
 
     private var timerStateJob: Job? = null
 
@@ -92,6 +96,8 @@ class TimerService : Service() {
      */
     private fun handleStart(duration: Duration) {
         LogUtil.d("TimerService handleStart: duration=$duration")
+        CrashReporter.log("타이머 시작: duration=$duration")
+        CrashReporter.setTimerStatus("RUNNING")
 
         // 완료 처리 플래그 초기화
         isCompletionHandled = false
@@ -112,6 +118,7 @@ class TimerService : Service() {
                 },
                 onFailure = { error ->
                     LogUtil.e("세션 저장 실패", error)
+                    CrashReporter.recordException(error, "세션 저장 실패")
                     // 세션 저장 실패해도 타이머는 계속 동작
                 }
             )
@@ -139,6 +146,8 @@ class TimerService : Service() {
      */
     private fun handlePause() {
         LogUtil.d("TimerService handlePause")
+        CrashReporter.log("타이머 일시정지")
+        CrashReporter.setTimerStatus("PAUSED")
         timerManager.pause()
 
         // 위젯 업데이트: 타이머 일시정지
@@ -151,6 +160,8 @@ class TimerService : Service() {
      */
     private fun handleResume() {
         LogUtil.d("TimerService handleResume")
+        CrashReporter.log("타이머 재개")
+        CrashReporter.setTimerStatus("RUNNING")
         timerManager.resume()
 
         // 위젯 업데이트: 타이머 재개
@@ -165,6 +176,8 @@ class TimerService : Service() {
      */
     private fun handleStop() {
         LogUtil.d("TimerService handleStop")
+        CrashReporter.log("타이머 중지")
+        CrashReporter.setTimerStatus("STOPPED")
         val state = timerManager.timerState.value
         val selectedPreset = state.selectedPreset
 
@@ -184,6 +197,7 @@ class TimerService : Service() {
                     },
                     onFailure = { error ->
                         LogUtil.e("세션 업데이트 실패", error)
+                        CrashReporter.recordException(error, "세션 업데이트 실패 (미완료)")
                     }
                 )
             }
@@ -207,6 +221,8 @@ class TimerService : Service() {
      */
     private fun handleComplete() {
         LogUtil.d("TimerService handleComplete")
+        CrashReporter.log("타이머 완료 확인")
+        CrashReporter.setTimerStatus("COMPLETED")
         val state = timerManager.timerState.value
 
         // 완료 상태가 아니면 무시
@@ -235,6 +251,7 @@ class TimerService : Service() {
                         },
                         onFailure = { error ->
                             LogUtil.e("세션 초과 시간 업데이트 실패", error)
+                            CrashReporter.recordException(error, "세션 초과 시간 업데이트 실패")
                         }
                     )
                 }
@@ -344,6 +361,7 @@ class TimerService : Service() {
                                         },
                                         onFailure = { error ->
                                             LogUtil.e("세션 자동 완료 업데이트 실패", error)
+                                            CrashReporter.recordException(error, "세션 자동 완료 업데이트 실패")
                                         }
                                     )
                                 }

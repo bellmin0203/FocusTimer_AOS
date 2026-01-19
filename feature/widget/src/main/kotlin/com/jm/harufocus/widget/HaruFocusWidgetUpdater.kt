@@ -3,6 +3,7 @@ package com.jm.harufocus.widget
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import com.jm.harufocus.domain.model.preset.Preset
+import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -168,6 +169,7 @@ class HaruFocusWidgetUpdater @Inject constructor(
             LogUtil.d("updateWidget: Success")
         } catch (e: Exception) {
             LogUtil.e("updateWidget: Failed", e)
+            CrashReporter.recordException(e, "위젯 업데이트 실패")
         }
     }
 }

@@ -18,6 +18,7 @@ import com.jm.harufocus.setting.model.SettingCategory
 import com.jm.harufocus.setting.model.SettingSideEffect
 import com.jm.harufocus.setting.model.SettingType
 import com.jm.harufocus.ui.util.UiText
+import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -213,6 +214,7 @@ class SettingViewModel @Inject constructor(
                 updateAction()
             } catch (e: Exception) {
                 LogUtil.e("설정 업데이트 실패", e)
+                CrashReporter.recordException(e, "설정 업데이트 실패")
                 _sideEffect.send(
                     SettingSideEffect.ShowSnackbar(
                         UiText.StringResource(R.string.msg_update_setting_failed)

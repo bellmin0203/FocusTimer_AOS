@@ -2,12 +2,14 @@ package com.jm.harufocus.navigation
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.jm.harufocus.setting.SettingScreen
 import com.jm.harufocus.stats.StatsScreen
 import com.jm.harufocus.timer.TimerScreen
+import com.jm.harufocus.util.CrashReporter
 
 /**
  * 앱 전체 네비게이션 구조 정의
@@ -17,6 +19,15 @@ fun HaruFocusNavHost(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState
 ) {
+    // 현재 화면을 Crashlytics에 기록
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { entry ->
+            entry.destination.route?.let { route ->
+                CrashReporter.setCurrentScreen(route)
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Screen.Timer.route
@@ -36,6 +47,10 @@ fun HaruFocusNavHost(
 
         // 설정 화면
         composable(Screen.Setting.route) {
+            // 테스트용 (개발 중에만 사용)
+            CrashReporter.recordException(RuntimeException("Test Exception"), "테스트")
+            throw RuntimeException("Test Exception")
+
             SettingScreen(
                 onBackClick = {
                     navController.popBackStack()

@@ -81,8 +81,4 @@ dependencies {
 
     baselineProfile(project(":baselineprofile"))
     implementation(libs.androidx.profileinstaller)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
 }
