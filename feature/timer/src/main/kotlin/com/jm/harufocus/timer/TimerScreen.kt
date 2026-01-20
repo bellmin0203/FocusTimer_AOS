@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jm.harufocus.designsystem.component.ThemePreviews
-import com.jm.harufocus.designsystem.component.TimerColorPresets
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.timer.component.LandscapeTimerLayout
 import com.jm.harufocus.timer.component.MinimizedControlsState
@@ -59,6 +58,7 @@ import com.jm.harufocus.timer.model.TimerSideEffect
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.model.toUiText
 import com.jm.harufocus.timer.usecase.TimerStatus
+import com.jm.harufocus.timer.util.getPresetColorScheme
 import com.jm.harufocus.ui.component.rememberPickerState
 import com.jm.harufocus.ui.util.PreviewProvider
 import com.jm.logutil.LogUtil
@@ -245,10 +245,8 @@ private fun TimerScreenContent(
                         }
                     }
             ) {
-                // 선택된 프리셋의 색상 가져오기
-                val colorIndex = (uiState.selectedPreset?.colorIndex ?: 0)
-                    .coerceIn(0, TimerColorPresets.presetColors.lastIndex)
-                val presetColors = TimerColorPresets.presetColors[colorIndex]
+                // 선택된 프리셋의 색상 가져오기 (안전한 범위 검증 적용)
+                val presetColors = getPresetColorScheme(uiState.selectedPreset?.colorIndex)
 
                 // UI 컨트롤 표시 여부
                 val shouldShowUiControls = !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)

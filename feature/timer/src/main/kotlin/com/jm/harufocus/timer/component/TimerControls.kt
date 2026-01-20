@@ -25,13 +25,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.designsystem.component.FocusIconButton
-import com.jm.harufocus.designsystem.component.TimerColorPresets
 import com.jm.harufocus.designsystem.component.TimerColorScheme
 import com.jm.harufocus.designsystem.icon.HaruFocusIcons
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.timer.R
 import com.jm.harufocus.timer.model.TimerIntent
 import com.jm.harufocus.timer.model.TimerUiState
+import com.jm.harufocus.timer.util.getPresetColorScheme
 import com.jm.harufocus.timer.util.sendTimerServiceAction
 
 /**
@@ -195,9 +195,8 @@ fun PresetListRow(
 
         // 2. 프리셋 목록 표시
         items(items = presets, key = { it.id }) { preset ->
-            // 선택된 프리셋의 색상 테마 가져오기 (시각적 피드백)
-            val presetColor = TimerColorPresets.presetColors.getOrNull(preset.colorIndex)
-                ?: TimerColorPresets.presetColors[0]
+            // 선택된 프리셋의 색상 테마 가져오기 (안전한 범위 검증 적용)
+            val presetColor = getPresetColorScheme(preset.colorIndex)
 
             val isSelected = preset.id == selectedPresetId
 
