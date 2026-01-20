@@ -1,5 +1,6 @@
 package com.jm.harufocus.setting
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
@@ -44,6 +46,9 @@ import com.jm.harufocus.ui.component.SettingsSectionHeader
 import com.jm.harufocus.ui.component.SettingsSwitchItem
 import com.jm.harufocus.ui.util.UiText
 import kotlinx.coroutines.flow.collectLatest
+
+private const val PRIVACY_POLICY_URL = "https://doc-hosting.flycricket.io/haru-focus-privacy-policy/24ca44de-667c-4229-9fc3-3ffe35c4e6ff/privacy"
+private const val OPEN_SOURCE_LICENSES_URL = "https://github.com/bellmin0203/HaruFocus_AOS/blob/main/docs/open-source-licenses.md"
 
 /**
  * 설정 화면
@@ -59,6 +64,28 @@ fun SettingScreen(
     val settingItems by viewModel.settingItems.collectAsState(initial = emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    // 개인정보처리방침 클릭 처리
+    LaunchedEffect(viewModel.privacyPolicyClick) {
+        viewModel.privacyPolicyClick.collectLatest {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                PRIVACY_POLICY_URL.toUri()
+            )
+            context.startActivity(intent)
+        }
+    }
+
+    // 오픈소스 라이선스 클릭 처리
+    LaunchedEffect(viewModel.openSourceLicensesClick) {
+        viewModel.openSourceLicensesClick.collectLatest {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                OPEN_SOURCE_LICENSES_URL.toUri()
+            )
+            context.startActivity(intent)
+        }
+    }
 
     LaunchedEffect(viewModel.sideEffect) {
         viewModel.sideEffect.collectLatest { sideEffect ->
@@ -93,7 +120,8 @@ private fun SettingScreen(
         SettingCategory.APPEARANCE to stringResource(R.string.pref_category_appearance),
         SettingCategory.NOTIFICATION to stringResource(R.string.pref_category_notification),
         SettingCategory.TIMER to stringResource(R.string.pref_category_timer),
-        SettingCategory.INTERACTION to stringResource(R.string.pref_category_interaction)
+        SettingCategory.INTERACTION to stringResource(R.string.pref_category_interaction),
+        SettingCategory.APP_INFO to stringResource(R.string.pref_category_app_info)
     )
 
     Scaffold(
@@ -145,6 +173,15 @@ private fun SettingScreen(
 
                         is SettingType.Selector<*> -> {
                             SelectorSettingItem(item)
+                        }
+
+                        is SettingType.Clickable -> {
+                            SettingsClickableItem(
+                                title = item.title.asString(context),
+                                subtitle = item.description?.asString(context),
+                                value = item.value,
+                                onClick = item.onClick ?: {}
+                            )
                         }
                     }
                 }

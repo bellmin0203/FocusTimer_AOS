@@ -37,6 +37,14 @@
     <string name="pref_title_pulse_animation">Visual Completion Alert</string>
     <string name="pref_desc_pulse_animation">The circular timer pulses gently when completed.</string>
 
+    <!-- App Info -->
+    <string name="pref_category_app_info">App Info</string>
+    <string name="pref_title_version">Version</string>
+    <string name="pref_title_privacy_policy">Privacy Policy</string>
+    <string name="pref_desc_privacy_policy">View our privacy policy</string>
+    <string name="pref_title_open_source_licenses">Open Source Licenses</string>
+    <string name="pref_desc_open_source_licenses">View open source licenses used in this app</string>
+
     <!-- Formats -->
     <string name="format_minutes">%d min</string>
     <string name="msg_update_setting_failed">Failed to update setting.</string>

@@ -2,6 +2,7 @@ package com.jm.harufocus.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jm.harufocus.common.di.AppVersionName
 import com.jm.harufocus.common.model.NotificationSoundType
 import com.jm.harufocus.common.model.ThemeMode
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_MINIMIZED_CONTROLS
@@ -35,7 +36,8 @@ import kotlin.time.Duration.Companion.minutes
 @HiltViewModel
 class SettingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val getAllPresetsUseCase: GetAllPresetsUseCase
+    private val getAllPresetsUseCase: GetAllPresetsUseCase,
+    @param:AppVersionName private val appVersionName: String
 ) : ViewModel() {
 
     // 기본 세션 지속 시간 옵션 (5분, 10분, 15분, 25분, 30분, 45분, 60분)
@@ -64,6 +66,7 @@ class SettingViewModel @Inject constructor(
             addAll(createNotificationSettings())
             addAll(createTimerSettings(presets))
             addAll(createInteractionSettings())
+            addAll(createAppInfoSettings())
         }
     }
 
@@ -207,6 +210,36 @@ class SettingViewModel @Inject constructor(
             defaultValue = DEFAULT_IS_PULSE_ANIMATION_ENABLED
         )
     )
+
+    /**
+     * 앱 정보 설정 항목 생성
+     */
+    private fun createAppInfoSettings(): List<SettingType> = listOf(
+        SettingType.Clickable(
+            title = UiText.StringResource(R.string.pref_title_version),
+            category = SettingCategory.APP_INFO,
+            value = appVersionName,
+            onClick = null
+        ),
+        SettingType.Clickable(
+            title = UiText.StringResource(R.string.pref_title_privacy_policy),
+            description = UiText.StringResource(R.string.pref_desc_privacy_policy),
+            category = SettingCategory.APP_INFO,
+            onClick = { _privacyPolicyClick.trySend(Unit) }
+        ),
+        SettingType.Clickable(
+            title = UiText.StringResource(R.string.pref_title_open_source_licenses),
+            description = UiText.StringResource(R.string.pref_desc_open_source_licenses),
+            category = SettingCategory.APP_INFO,
+            onClick = { _openSourceLicensesClick.trySend(Unit) }
+        )
+    )
+
+    private val _privacyPolicyClick = Channel<Unit>(Channel.BUFFERED)
+    val privacyPolicyClick = _privacyPolicyClick.receiveAsFlow()
+
+    private val _openSourceLicensesClick = Channel<Unit>(Channel.BUFFERED)
+    val openSourceLicensesClick = _openSourceLicensesClick.receiveAsFlow()
 
     private fun updateSetting(updateAction: suspend() -> Unit) {
         viewModelScope.launch {

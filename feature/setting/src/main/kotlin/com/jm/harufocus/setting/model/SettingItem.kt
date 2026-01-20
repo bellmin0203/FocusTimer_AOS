@@ -51,6 +51,20 @@ sealed class SettingType {
         val onSelect: (T) -> Unit,
         val defaultValue: T
     ) : SettingType()
+
+    /**
+     * 클릭 가능한 설정 항목 (링크, 정보 표시 등)
+     *
+     * @param value 항목 옆에 표시될 값 (예: 버전 번호)
+     * @param onClick 클릭 시 호출될 콜백 함수
+     */
+    data class Clickable(
+        override val title: UiText,
+        override val description: UiText? = null,
+        override val category: SettingCategory,
+        val value: String? = null,
+        val onClick: (() -> Unit)? = null
+    ) : SettingType()
 }
 
 /**
@@ -60,5 +74,6 @@ enum class SettingCategory {
     APPEARANCE,    // 외관 (다크 테마 등)
     NOTIFICATION,  // 알림 (진동, 사운드 등)
     TIMER,         // 타이머 (세션 기억, 시간 표시 등)
-    INTERACTION    // 상호작용 (햅틱, 컨트롤 등)
+    INTERACTION,   // 상호작용 (햅틱, 컨트롤 등)
+    APP_INFO       // 앱 정보 (버전, 개인정보처리방침 등)
 }
