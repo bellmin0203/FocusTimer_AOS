@@ -48,7 +48,7 @@ import com.jm.harufocus.ui.util.UiText
 import kotlinx.coroutines.flow.collectLatest
 
 private const val PRIVACY_POLICY_URL = "https://doc-hosting.flycricket.io/haru-focus-privacy-policy/24ca44de-667c-4229-9fc3-3ffe35c4e6ff/privacy"
-private const val OPEN_SOURCE_LICENSES_URL = "https://github.com/bellmin0203/HaruFocus_AOS/blob/main/docs/open-source-licenses.md"
+private const val OPEN_SOURCE_LICENSES_URL = "https://github.com/bellmin0203/HaruFocus_AOS/blob/0cbb90e76bcdaf665b7f4fb683842fab98a95c77/docs/open-source-licenses.md"
 
 /**
  * 설정 화면
