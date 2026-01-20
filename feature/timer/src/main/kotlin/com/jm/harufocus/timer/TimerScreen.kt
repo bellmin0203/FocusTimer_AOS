@@ -2,33 +2,17 @@ package com.jm.harufocus.timer
 
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,11 +20,9 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,39 +31,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jm.harufocus.common.TimerServiceAction
-import com.jm.harufocus.designsystem.component.CircularTimerProgress
-import com.jm.harufocus.designsystem.component.FocusIconButton
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.component.TimerColorPresets
-import com.jm.harufocus.designsystem.component.TimerColorScheme
-import com.jm.harufocus.designsystem.icon.HaruFocusIcons
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
-import com.jm.harufocus.domain.model.preset.Preset
-import com.jm.harufocus.timer.component.AddPresetDialog
-import com.jm.harufocus.timer.component.DeletePresetDialog
-import com.jm.harufocus.timer.component.EditPresetDialog
+import com.jm.harufocus.timer.component.LandscapeTimerLayout
 import com.jm.harufocus.timer.component.MinimizedControlsState
 import com.jm.harufocus.timer.component.NavigationDrawerContent
-import com.jm.harufocus.timer.component.PresetManagementBottomSheet
-import com.jm.harufocus.timer.component.TimeInputBottomSheet
-import com.jm.harufocus.timer.component.TimerCenterContent
+import com.jm.harufocus.timer.component.PortraitTimerLayout
+import com.jm.harufocus.timer.component.TimerDialogs
 import com.jm.harufocus.timer.component.rememberMinimizedControlsState
+import com.jm.harufocus.timer.effect.KeepScreenOnEffect
+import com.jm.harufocus.timer.effect.ScreenOrientationEffect
+import com.jm.harufocus.timer.effect.SystemBarsVisibilityEffect
 import com.jm.harufocus.timer.model.HapticPattern
 import com.jm.harufocus.timer.model.TimerDialogState
 import com.jm.harufocus.timer.model.TimerIntent
@@ -89,18 +59,13 @@ import com.jm.harufocus.timer.model.TimerSideEffect
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.model.toUiText
 import com.jm.harufocus.timer.usecase.TimerStatus
-import com.jm.harufocus.timer.util.calculateDurationFromPickerStates
-import com.jm.harufocus.timer.util.sendTimerServiceAction
 import com.jm.harufocus.ui.component.rememberPickerState
 import com.jm.harufocus.ui.util.PreviewProvider
-import com.jm.harufocus.util.KeepScreenOnManager
-import com.jm.harufocus.util.findActivity
 import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun TimerScreen(
@@ -171,7 +136,7 @@ fun TimerScreen(
         }
     }
 
-    TimerScreen(
+    TimerScreenContent(
         uiState = uiState,
         scope = scope,
         snackbarHostState = snackbarHostState,
@@ -190,7 +155,7 @@ fun TimerScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TimerScreen(
+private fun TimerScreenContent(
     uiState: TimerUiState,
     scope: CoroutineScope = rememberCoroutineScope(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -199,8 +164,6 @@ private fun TimerScreen(
     onSettingsClick: () -> Unit = {},
     onStatsClick: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-
     // 화면 켜짐 유지
     KeepScreenOnEffect(
         shouldKeepScreenOn = uiState.isRunning && uiState.isScreenOnEnabled
@@ -216,7 +179,7 @@ private fun TimerScreen(
         minimizedControlsState.isControlsVisible
     ) {
         if (uiState.shouldStartAutoHideTimer(minimizedControlsState.isControlsVisible)) {
-            delay(MinimizedControlsState.UI_AUTO_HIDE_DELAY_MILLIS) // 2초 대기
+            delay(MinimizedControlsState.UI_AUTO_HIDE_DELAY_MILLIS)
             if (minimizedControlsState.shouldAutoHide()) {
                 minimizedControlsState.hideControls()
             }
@@ -235,10 +198,14 @@ private fun TimerScreen(
         shouldHide = uiState.shouldHideUi(minimizedControlsState.isControlsVisible)
     )
 
+    // 다이얼로그/바텀시트 상태
     val presetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    // 다이얼로그/바텀시트 상태 통합 관리
     var dialogState by remember { mutableStateOf<TimerDialogState>(TimerDialogState.None) }
+
+    // PickerState 생성
+    val hourPickerState = rememberPickerState()
+    val minutePickerState = rememberPickerState()
+    val secondPickerState = rememberPickerState()
 
     val isLandscape =
         LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -250,9 +217,7 @@ private fun TimerScreen(
             NavigationDrawerContent(
                 drawerState = drawerState,
                 onSettingsClick = onSettingsClick,
-                onPresetsClick = {
-                    dialogState = TimerDialogState.PresetManagement
-                },
+                onPresetsClick = { dialogState = TimerDialogState.PresetManagement },
                 onStatsClick = onStatsClick
             )
         }
@@ -265,7 +230,6 @@ private fun TimerScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    // 화면 터치 감지 - UI 표시
                     .pointerInput(
                         uiState.isRunning,
                         uiState.isMinimizedControlsEnabled,
@@ -281,159 +245,36 @@ private fun TimerScreen(
                         }
                     }
             ) {
-                // 선택된 프리셋의 색상 가져오기 (공통으로 한 번만 계산)
+                // 선택된 프리셋의 색상 가져오기
                 val colorIndex = (uiState.selectedPreset?.colorIndex ?: 0)
                     .coerceIn(0, TimerColorPresets.presetColors.lastIndex)
                 val presetColors = TimerColorPresets.presetColors[colorIndex]
 
-                // UI 컨트롤 표시 여부 (조건문 명확화)
+                // UI 컨트롤 표시 여부
                 val shouldShowUiControls = !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)
 
+                // 가로/세로 모드에 따른 레이아웃 분기
                 if (isLandscape) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 48.dp, vertical = 24.dp), // 가로 모드에서 좌우 여백 확보
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 원형 타이머 (좌측 배치, weight로 공간 차지)
-                        CircularTimerProgress(
-                            progress = uiState.progress,
-                            modifier = Modifier.weight(1f),
-                            enabled = !uiState.isTimerActive, // 타이머가 유휴 상태일 때만 드래그 가능
-                            progressColor = if (uiState.isCompleted) {
-                                MaterialTheme.colorScheme.tertiary // 완료 상태일 때 다른 색상
-                            } else {
-                                presetColors.progressColor // 일반 상태
-                            },
-                            knobColor = presetColors.knobColor,
-                            tickColor = presetColors.tickColor,
-                            labelColor = presetColors.labelColor,
-                            onProgressChange = { newProgress ->
-                                onIntent(TimerIntent.DragProgress(newProgress))
-                            },
-                            isCompleted = uiState.isCompleted,
-                            pulseAnimationEnabled = uiState.isPulseAnimationEnabled
-                        ) {
-                            TimerCenterContent(
-                                formattedTime = uiState.formattedTime,
-                                isCompleted = uiState.isCompleted,
-                                isTimerActive = uiState.isTimerActive,
-                                onTimeClick = { dialogState = TimerDialogState.TimeInput }
-                            )
-                        }
-
-                        // 우측 패널 (프리셋 선택 + 컨트롤 버튼)
-                        Column(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(start = 32.dp), // 타이머와의 간격
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // 프리셋 선택 AssistChip
-                            if (uiState.isIdle && shouldShowUiControls) {
-                                AssistChip(
-                                    onClick = { dialogState = TimerDialogState.PresetManagement },
-                                    label = {
-                                        Text(
-                                            text = uiState.selectedPreset?.name
-                                                ?: stringResource(R.string.preset_section_header),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                    },
-                                    trailingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowDropDown,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    },
-                                    shape = RoundedCornerShape(50),
-                                    colors = AssistChipDefaults.assistChipColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    ),
-                                    border = null
-                                )
-                                Spacer(modifier = Modifier.height(24.dp))
-                            }
-
-                            // 우측 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
-                            if (shouldShowUiControls) {
-                                TimerControlsSection(
-                                    uiState = uiState,
-                                    presetColors = presetColors,
-                                    onIntent = onIntent,
-                                    isVertical = true
-                                )
-                            }
-                        }
-                    }
+                    LandscapeTimerLayout(
+                        uiState = uiState,
+                        presetColors = presetColors,
+                        shouldShowUiControls = shouldShowUiControls,
+                        onIntent = onIntent,
+                        onTimeClick = { dialogState = TimerDialogState.TimeInput },
+                        onPresetManagementClick = { dialogState = TimerDialogState.PresetManagement }
+                    )
                 } else {
-                    // 세로 모드 UI
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // 원형 타이머
-                        CircularTimerProgress(
-                            progress = uiState.progress,
-                            modifier = Modifier.weight(1f),
-                            enabled = !uiState.isTimerActive, // 타이머가 유휴 상태일 때만 드래그 가능
-                            progressColor = if (uiState.isCompleted) {
-                                MaterialTheme.colorScheme.tertiary // 완료 상태일 때 다른 색상
-                            } else {
-                                presetColors.progressColor // 일반 상태
-                            },
-                            knobColor = presetColors.knobColor,
-                            tickColor = presetColors.tickColor,
-                            labelColor = presetColors.labelColor,
-                            onProgressChange = { newProgress ->
-                                onIntent(TimerIntent.DragProgress(newProgress))
-                            },
-                            isCompleted = uiState.isCompleted,
-                            pulseAnimationEnabled = uiState.isPulseAnimationEnabled
-                        ) {
-                            TimerCenterContent(
-                                formattedTime = uiState.formattedTime,
-                                isCompleted = uiState.isCompleted,
-                                isTimerActive = uiState.isTimerActive,
-                                onTimeClick = { dialogState = TimerDialogState.TimeInput }
-                            )
-                        }
-
-                        // 프리셋 선택 (타이머 다이얼 바로 아래)
-                        if (uiState.isIdle && shouldShowUiControls) {
-                            PresetListRow(
-                                presets = uiState.presets,
-                                selectedPresetId = uiState.selectedPreset?.id,
-                                isEnabled = uiState.isIdle,
-                                onPresetClick = { presetId ->
-                                    onIntent(TimerIntent.SelectPreset(presetId))
-                                },
-                                onManageClick = { dialogState = TimerDialogState.PresetManagement },
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-
-                        // 하단 컨트롤 영역 - 최소화된 컨트롤이 활성화되고 UI가 숨겨진 상태가 아닐 때만 표시
-                        if (shouldShowUiControls) {
-                            TimerControlsSection(
-                                uiState = uiState,
-                                presetColors = presetColors,
-                                onIntent = onIntent,
-                                isVertical = false
-                            )
-                        }
-                    }
+                    PortraitTimerLayout(
+                        uiState = uiState,
+                        presetColors = presetColors,
+                        shouldShowUiControls = shouldShowUiControls,
+                        onIntent = onIntent,
+                        onTimeClick = { dialogState = TimerDialogState.TimeInput },
+                        onPresetManagementClick = { dialogState = TimerDialogState.PresetManagement }
+                    )
                 }
 
+                // 메뉴 버튼
                 if (shouldShowUiControls) {
                     IconButton(
                         onClick = { scope.launch { drawerState.open() } },
@@ -451,386 +292,27 @@ private fun TimerScreen(
                 }
             }
 
-            // PickerState 생성
-            val hourPickerState = rememberPickerState()
-            val minutePickerState = rememberPickerState()
-            val secondPickerState = rememberPickerState()
-
             // 다이얼로그/바텀시트 통합 표시
-            when (val state = dialogState) {
-                TimerDialogState.None -> { /* 아무것도 표시하지 않음 */ }
-
-                TimerDialogState.TimeInput -> {
-                    TimeInputBottomSheet(
-                        initialTime = uiState.remainingTime,
-                        hourPickerState = hourPickerState,
-                        minutePickerState = minutePickerState,
-                        secondPickerState = secondPickerState,
-                        onDismissRequest = {
-                            val selectedTime = calculateDurationFromPickerStates(
-                                hourState = hourPickerState,
-                                minuteState = minutePickerState,
-                                secondState = secondPickerState
-                            )
-                            if (selectedTime > 0.seconds) {
-                                onIntent(TimerIntent.SetTime(selectedTime))
-                            }
-                            dialogState = TimerDialogState.None
-                        },
-                        onConfirm = { time ->
-                            onIntent(TimerIntent.SetTime(time))
-                            onIntent(TimerIntent.Start())
-
-                            // 서비스 시작
-                            context.sendTimerServiceAction(
-                                action = TimerServiceAction.ACTION_START,
-                                durationMillis = time.inWholeMilliseconds
-                            )
-
-                            dialogState = TimerDialogState.None
-                        }
-                    )
-                }
-
-                TimerDialogState.AddPreset -> {
-                    AddPresetDialog(
-                        initialMinutes = uiState.remainingTime.inWholeMinutes.toInt(),
-                        initialSeconds = (uiState.remainingTime.inWholeSeconds % 60).toInt(),
-                        initialColorIndex = 0,
-                        onDismiss = { dialogState = TimerDialogState.None },
-                        onConfirm = { name, minutes, seconds, colorIndex ->
-                            val duration = minutes.minutes + seconds.seconds
-                            onIntent(TimerIntent.SaveAsPreset(name, duration, colorIndex))
-                            dialogState = TimerDialogState.None
-                        }
-                    )
-                }
-
-                is TimerDialogState.EditPreset -> {
-                    EditPresetDialog(
-                        preset = state.preset,
-                        onDismiss = { dialogState = TimerDialogState.None },
-                        onConfirm = { name, minutes, seconds, colorIndex ->
-                            val duration = minutes.minutes + seconds.seconds
-                            val updatedPreset = state.preset.copy(
-                                name = name,
-                                duration = duration,
-                                colorIndex = colorIndex
-                            )
-                            onIntent(TimerIntent.UpdatePreset(updatedPreset))
-                            dialogState = TimerDialogState.None
-                        }
-                    )
-                }
-
-                is TimerDialogState.DeletePreset -> {
-                    DeletePresetDialog(
-                        presetName = state.preset.name,
-                        onDismiss = { dialogState = TimerDialogState.None },
-                        onConfirm = {
-                            onIntent(TimerIntent.DeletePreset(state.preset.id))
-                            dialogState = TimerDialogState.None
-                        }
-                    )
-                }
-
-                TimerDialogState.PresetManagement -> {
-                    PresetManagementBottomSheet(
-                        sheetState = presetSheetState,
-                        presets = uiState.presets,
-                        canAddPreset = uiState.hasPresetSpaceAvailable,
-                        onDismiss = {
-                            scope.launch {
-                                presetSheetState.hide()
-                                dialogState = TimerDialogState.None
-                            }
-                        },
-                        onPresetClick = { presetId ->
-                            onIntent(TimerIntent.SelectPreset(presetId))
-                            scope.launch {
-                                presetSheetState.hide()
-                                dialogState = TimerDialogState.None
-                            }
-                        },
-                        onAddPreset = {
-                            dialogState = TimerDialogState.AddPreset
-                        },
-                        onEditPreset = { preset ->
-                            dialogState = TimerDialogState.EditPreset(preset)
-                        },
-                        onDeletePreset = { presetId ->
-                            onIntent(TimerIntent.DeletePreset(presetId))
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * 화면 켜짐 유지를 관리하는 Composable Effect
- *
- * @param shouldKeepScreenOn 화면을 켜진 상태로 유지해야 하는지 여부
- */
-@Composable
-fun KeepScreenOnEffect(shouldKeepScreenOn: Boolean) {
-    val context = LocalContext.current
-    val window = context.findActivity()?.window
-
-    DisposableEffect(shouldKeepScreenOn) {
-        val manager = KeepScreenOnManager(window)
-
-        if (shouldKeepScreenOn) {
-            manager.enableKeepScreenOn()
-        } else {
-            manager.disableKeepScreenOn()
-        }
-
-        onDispose {
-            manager.release()
-        }
-    }
-}
-
-/**
- * 화면 방향을 강제로 제어하는 Effect
- * 시스템 설정을 무시하고 지정된 orientation을 따르도록 함
- */
-@Composable
-fun ScreenOrientationEffect(orientation: Int) {
-    val context = LocalContext.current
-
-    DisposableEffect(orientation) {
-        val activity = context.findActivity()
-        val originalOrientation =
-            activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-
-        // 요청된 방향으로 설정 (시스템 설정 무시)
-        activity?.requestedOrientation = orientation
-
-        onDispose {
-            // 화면을 벗어날 때 원래 방향 설정으로 복구
-            activity?.requestedOrientation = originalOrientation
-        }
-    }
-}
-
-// 시스템바 가시성 제어 Effect
-@Composable
-fun SystemBarsVisibilityEffect(shouldHide: Boolean) {
-    val context = LocalContext.current
-    val view = LocalView.current
-
-    DisposableEffect(shouldHide) {
-        val activity = context.findActivity()
-        val windowInsetsController = activity?.window?.let {
-            WindowCompat.getInsetsController(it, view)
-        }
-
-        if (shouldHide) {
-            windowInsetsController?.apply {
-                hide(WindowInsetsCompat.Type.systemBars())
-                systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-            LogUtil.d("시스템바 숨김")
-        } else {
-            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
-            LogUtil.d("시스템바 표시")
-        }
-
-        onDispose {
-            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
-        }
-    }
-}
-
-/**
- * 타이머 컨트롤 버튼들을 담당하는 섹션 컴포넌트
- *
- * @param uiState 현재 타이머 UI 상태
- * @param presetColors 선택된 프리셋의 색상 정보
- * @param onIntent 타이머 인텐트 처리 함수
- * @param isVertical 버튼들을 수직으로 배치할지 여부 (가로 모드 대응)
- */
-@Composable
-private fun TimerControlsSection(
-    uiState: TimerUiState,
-    presetColors: TimerColorScheme,
-    onIntent: (TimerIntent) -> Unit,
-    modifier: Modifier = Modifier,
-    isVertical: Boolean = false
-) {
-    if (isVertical) {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TimerControlButtons(uiState, presetColors, onIntent)
-        }
-    } else {
-        Row(
-            modifier = modifier.padding(bottom = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TimerControlButtons(uiState, presetColors, onIntent)
-        }
-    }
-}
-
-/**
- * 실제 타이머 컨트롤 버튼들의 집합
- * 레이아웃(Row/Column)과 무관하게 버튼 로직만 포함
- */
-@Composable
-private fun TimerControlButtons(
-    uiState: TimerUiState,
-    presetColors: TimerColorScheme,
-    onIntent: (TimerIntent) -> Unit
-) {
-    val context = LocalContext.current
-
-    // 완료 상태일 때는 완료 버튼 표시
-    if (uiState.isCompleted) {
-        FocusIconButton(
-            onClick = {
-                // 타이머 완료 처리 (Snackbar 표시)
-                onIntent(TimerIntent.Complete)
-
-                // 서비스에 완료 처리 요청
-                context.sendTimerServiceAction(TimerServiceAction.ACTION_COMPLETE)
-            },
-            icon = HaruFocusIcons.Check,
-            contentDescription = stringResource(R.string.content_description_complete),
-            containerColor = presetColors.progressColor,
-            contentColor = Color.White
-        )
-    } else {
-        // 재생/일시정지 버튼
-        FocusIconButton(
-            onClick = {
-                when {
-                    uiState.isPaused -> {
-                        // 타이머 재개 (Paused 상태를 먼저 체크해야 함)
-                        onIntent(TimerIntent.Resume)
-                        context.sendTimerServiceAction(TimerServiceAction.ACTION_RESUME)
-                    }
-
-                    uiState.isIdle -> {
-                        // 타이머 시작 (Idle 상태에서만)
-                        onIntent(TimerIntent.Start())
-                        context.sendTimerServiceAction(
-                            action = TimerServiceAction.ACTION_START,
-                            durationMillis = uiState.remainingTime.inWholeMilliseconds
-                        )
-                    }
-
-                    else -> {
-                        // 타이머 일시정지
-                        onIntent(TimerIntent.Pause)
-                        context.sendTimerServiceAction(TimerServiceAction.ACTION_PAUSE)
-                    }
-                }
-            },
-            icon = if (uiState.isRunning) HaruFocusIcons.Pause else HaruFocusIcons.PlayArrow,
-            contentDescription = if (uiState.isRunning) stringResource(R.string.content_description_pause) else stringResource(
-                R.string.content_description_play
-            ),
-            containerColor = presetColors.progressColor,
-            contentColor = Color.White
-        )
-
-        if (uiState.isTimerActive) {
-            // 리셋 버튼
-            FocusIconButton(
-                onClick = {
-                    // 타이머 정지
-                    onIntent(TimerIntent.Stop)
-                    context.sendTimerServiceAction(TimerServiceAction.ACTION_STOP)
-                },
-                icon = HaruFocusIcons.RestartAlt,
-                contentDescription = stringResource(R.string.content_description_reset)
+            TimerDialogs(
+                dialogState = dialogState,
+                uiState = uiState,
+                presetSheetState = presetSheetState,
+                hourPickerState = hourPickerState,
+                minutePickerState = minutePickerState,
+                secondPickerState = secondPickerState,
+                scope = scope,
+                onIntent = onIntent,
+                onDialogStateChange = { dialogState = it }
             )
         }
     }
 }
 
-@Composable
-private fun PresetListRow(
-    presets: List<Preset>,
-    selectedPresetId: Int?,
-    isEnabled: Boolean,
-    onPresetClick: (Int) -> Unit,
-    onManageClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 1. 프리셋 관리(목록/추가) 버튼을 맨 앞에 배치
-        item {
-            AssistChip(
-                onClick = onManageClick,
-                label = {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = stringResource(R.string.content_description_manage_presets),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                border = null,
-                enabled = isEnabled
-            )
-        }
-
-        // 2. 프리셋 목록 표시
-        items(items = presets, key = { it.id }) { preset ->
-            // 선택된 프리셋의 색상 테마 가져오기 (시각적 피드백)
-            val presetColor = TimerColorPresets.presetColors.getOrNull(preset.colorIndex)
-                ?: TimerColorPresets.presetColors[0]
-
-            val isSelected = preset.id == selectedPresetId
-
-            FilterChip(
-                selected = isSelected,
-                onClick = { onPresetClick(preset.id) },
-                label = {
-                    Text(
-                        text = preset.name,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = presetColor.progressColor.copy(alpha = 0.2f),
-                    selectedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = isEnabled,
-                    selected = isSelected,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
-                    selectedBorderColor = presetColor.progressColor
-                ),
-                enabled = isEnabled
-            )
-        }
-    }
-}
+// region Preview
 
 @ThemePreviews
 @Composable
-fun ScreenPreviewHaru() {
-    // 샘플 프리셋 데이터
+private fun ScreenPreviewHaru() {
     val presets = remember { PreviewProvider.samplePresets }
     val mockUiState = TimerUiState(
         initialTime = 25.minutes,
@@ -840,7 +322,7 @@ fun ScreenPreviewHaru() {
     )
 
     HaruFocusTheme {
-        TimerScreen(
+        TimerScreenContent(
             onIntent = {},
             uiState = mockUiState,
             drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -850,21 +332,19 @@ fun ScreenPreviewHaru() {
 
 @ThemePreviews
 @Composable
-fun ScreenIdlePreviewHaru() {
-    // 샘플 프리셋: UI 확인용 목업 데이터 (실제 데이터 구조로 기입)
+private fun ScreenIdlePreviewHaru() {
     val presets = remember { PreviewProvider.samplePresets }
-    // Idle 상태의 UI State 예시
     val idleUiState = TimerUiState(
         initialTime = 25.minutes,
         remainingTime = 25.minutes,
         progress = 0.5f,
-        selectedPreset = presets.first(), // 첫번째 프리셋 선택
+        selectedPreset = presets.first(),
         presets = presets,
     )
 
     HaruFocusTheme {
-        TimerScreen(
-            onIntent = {}, // 미리보기: 인텐트 기본 처리
+        TimerScreenContent(
+            onIntent = {},
             uiState = idleUiState,
             drawerState = rememberDrawerState(DrawerValue.Closed)
         )
@@ -873,24 +353,25 @@ fun ScreenIdlePreviewHaru() {
 
 @ThemePreviews
 @Composable
-fun ScreenCompletePreviewHaru() {
-    // 샘플 프리셋: UI 확인용 목업 데이터 (실제 데이터 구조로 기입)
+private fun ScreenCompletePreviewHaru() {
     val presets = remember { PreviewProvider.samplePresets }
-    // Completed 상태의 UI State 예시
     val completedUiState = TimerUiState(
         initialTime = 25.minutes,
         status = TimerStatus.Overtime,
         overtime = 5.minutes,
         progress = 0f,
-        selectedPreset = presets.first(), // 첫번째 프리셋 선택
+        selectedPreset = presets.first(),
         presets = presets,
     )
 
     HaruFocusTheme {
-        TimerScreen(
-            onIntent = {}, // 미리보기: 인텐트 기본 처리
+        TimerScreenContent(
+            onIntent = {},
             uiState = completedUiState,
             drawerState = rememberDrawerState(DrawerValue.Closed)
         )
     }
 }
+
+// endregion
+
