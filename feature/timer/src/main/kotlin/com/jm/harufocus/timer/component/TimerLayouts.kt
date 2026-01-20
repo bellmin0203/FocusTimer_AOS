@@ -125,9 +125,9 @@ fun LandscapeTimerLayout(
             if (shouldShowUiControls) {
                 TimerControlsSection(
                     uiState = uiState,
-                    presetColors = presetColors,
+                    selectedPresetColorScheme = presetColors,
                     onIntent = onIntent,
-                    isVertical = true
+                    useVerticalLayout = true
                 )
             }
         }
@@ -207,9 +207,9 @@ fun PortraitTimerLayout(
         if (shouldShowUiControls) {
             TimerControlsSection(
                 uiState = uiState,
-                presetColors = presetColors,
+                selectedPresetColorScheme = presetColors,
                 onIntent = onIntent,
-                isVertical = false
+                useVerticalLayout = false
             )
         }
     }

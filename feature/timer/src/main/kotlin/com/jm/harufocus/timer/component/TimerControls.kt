@@ -38,26 +38,26 @@ import com.jm.harufocus.timer.util.sendTimerServiceAction
  * 타이머 컨트롤 버튼들을 담당하는 섹션 컴포넌트
  *
  * @param uiState 현재 타이머 UI 상태
- * @param presetColors 선택된 프리셋의 색상 정보
+ * @param selectedPresetColorScheme 선택된 프리셋의 색상 정보
  * @param onIntent 타이머 인텐트 처리 함수
- * @param isVertical 버튼들을 수직으로 배치할지 여부 (가로 모드 대응)
+ * @param useVerticalLayout 버튼들을 수직으로 배치할지 여부 (가로 모드 대응)
  * @param modifier Modifier
  */
 @Composable
 fun TimerControlsSection(
     uiState: TimerUiState,
-    presetColors: TimerColorScheme,
+    selectedPresetColorScheme: TimerColorScheme,
     onIntent: (TimerIntent) -> Unit,
     modifier: Modifier = Modifier,
-    isVertical: Boolean = false
+    useVerticalLayout: Boolean = false
 ) {
-    if (isVertical) {
+    if (useVerticalLayout) {
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TimerControlButtons(uiState, presetColors, onIntent)
+            TimerControlButtons(uiState, selectedPresetColorScheme, onIntent)
         }
     } else {
         Row(
@@ -65,7 +65,7 @@ fun TimerControlsSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TimerControlButtons(uiState, presetColors, onIntent)
+            TimerControlButtons(uiState, selectedPresetColorScheme, onIntent)
         }
     }
 }
@@ -77,7 +77,7 @@ fun TimerControlsSection(
 @Composable
 internal fun TimerControlButtons(
     uiState: TimerUiState,
-    presetColors: TimerColorScheme,
+    selectedPresetColorScheme: TimerColorScheme,
     onIntent: (TimerIntent) -> Unit
 ) {
     val context = LocalContext.current
@@ -94,7 +94,7 @@ internal fun TimerControlButtons(
             },
             icon = HaruFocusIcons.Check,
             contentDescription = stringResource(R.string.content_description_complete),
-            containerColor = presetColors.progressColor,
+            containerColor = selectedPresetColorScheme.progressColor,
             contentColor = Color.White
         )
     } else {
@@ -130,7 +130,7 @@ internal fun TimerControlButtons(
             } else {
                 stringResource(R.string.content_description_play)
             },
-            containerColor = presetColors.progressColor,
+            containerColor = selectedPresetColorScheme.progressColor,
             contentColor = Color.White
         )
 
