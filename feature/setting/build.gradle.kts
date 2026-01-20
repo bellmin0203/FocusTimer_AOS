@@ -8,4 +8,6 @@ android {
 
 dependencies {
     testImplementation(projects.core.testing)
+
+    implementation(libs.play.services.oss.licenses)
 }

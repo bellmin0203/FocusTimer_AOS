@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.setting.model.SettingCategory
@@ -79,10 +80,7 @@ fun SettingScreen(
     // 오픈소스 라이선스 클릭 처리
     LaunchedEffect(viewModel.openSourceLicensesClick) {
         viewModel.openSourceLicensesClick.collectLatest {
-            val intent = Intent(
-                Intent.ACTION_VIEW,
-                OPEN_SOURCE_LICENSES_URL.toUri()
-            )
+            val intent = Intent(context, OssLicensesMenuActivity::class.java)
             context.startActivity(intent)
         }
     }

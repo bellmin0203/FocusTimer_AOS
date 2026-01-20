@@ -7,4 +7,11 @@
         <item name="windowSplashScreenAnimationDuration">0</item>
         <item name="postSplashScreenTheme">@style/Theme.HaruFocus</item>
     </style>
+
+    <!-- OSS Licenses Activity용 AppCompat 테마 (다크 모드) -->
+    <style name="Theme.HaruFocus.AppCompat" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/ic_launcher_background</item>
+        <item name="colorPrimaryDark">@color/ic_launcher_background</item>
+        <item name="colorAccent">@color/ic_launcher_background</item>
+    </style>
 </resources>
