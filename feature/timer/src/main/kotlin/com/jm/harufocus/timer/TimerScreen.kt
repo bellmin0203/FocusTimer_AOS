@@ -83,6 +83,7 @@ import com.jm.harufocus.timer.component.TimeInputBottomSheet
 import com.jm.harufocus.timer.component.TimerCenterContent
 import com.jm.harufocus.timer.component.rememberMinimizedControlsState
 import com.jm.harufocus.timer.model.HapticPattern
+import com.jm.harufocus.timer.model.TimerDialogState
 import com.jm.harufocus.timer.model.TimerIntent
 import com.jm.harufocus.timer.model.TimerSideEffect
 import com.jm.harufocus.timer.model.TimerUiState
@@ -235,13 +236,9 @@ private fun TimerScreen(
     )
 
     val presetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showPresets by remember { mutableStateOf(false) }
-    var showTimeInput by remember { mutableStateOf(false) }
 
-    // 프리셋 다이얼로그 상태
-    var showAddPresetDialog by remember { mutableStateOf(false) }
-    var showEditPresetDialog by remember { mutableStateOf<Preset?>(null) }
-    var showDeletePresetDialog by remember { mutableStateOf<Preset?>(null) }
+    // 다이얼로그/바텀시트 상태 통합 관리
+    var dialogState by remember { mutableStateOf<TimerDialogState>(TimerDialogState.None) }
 
     val isLandscape =
         LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -254,7 +251,7 @@ private fun TimerScreen(
                 drawerState = drawerState,
                 onSettingsClick = onSettingsClick,
                 onPresetsClick = {
-                    showPresets = true
+                    dialogState = TimerDialogState.PresetManagement
                 },
                 onStatsClick = onStatsClick
             )
@@ -323,7 +320,7 @@ private fun TimerScreen(
                                 formattedTime = uiState.formattedTime,
                                 isCompleted = uiState.isCompleted,
                                 isTimerActive = uiState.isTimerActive,
-                                onTimeClick = { showTimeInput = true }
+                                onTimeClick = { dialogState = TimerDialogState.TimeInput }
                             )
                         }
 
@@ -338,7 +335,7 @@ private fun TimerScreen(
                             // 프리셋 선택 AssistChip
                             if (uiState.isIdle && shouldShowUiControls) {
                                 AssistChip(
-                                    onClick = { showPresets = true },
+                                    onClick = { dialogState = TimerDialogState.PresetManagement },
                                     label = {
                                         Text(
                                             text = uiState.selectedPreset?.name
@@ -407,7 +404,7 @@ private fun TimerScreen(
                                 formattedTime = uiState.formattedTime,
                                 isCompleted = uiState.isCompleted,
                                 isTimerActive = uiState.isTimerActive,
-                                onTimeClick = { showTimeInput = true }
+                                onTimeClick = { dialogState = TimerDialogState.TimeInput }
                             )
                         }
 
@@ -420,7 +417,7 @@ private fun TimerScreen(
                                 onPresetClick = { presetId ->
                                     onIntent(TimerIntent.SelectPreset(presetId))
                                 },
-                                onManageClick = { showPresets = true },
+                                onManageClick = { dialogState = TimerDialogState.PresetManagement },
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
@@ -459,112 +456,111 @@ private fun TimerScreen(
             val minutePickerState = rememberPickerState()
             val secondPickerState = rememberPickerState()
 
-            // 시간 입력 Bottom Sheet
-            if (showTimeInput) {
-                TimeInputBottomSheet(
-                    initialTime = uiState.remainingTime,
-                    hourPickerState = hourPickerState,
-                    minutePickerState = minutePickerState,
-                    secondPickerState = secondPickerState,
-                    onDismissRequest = {
-                        val hours = hourPickerState.selectedItem.toIntOrNull() ?: 0
-                        val minutes = minutePickerState.selectedItem.toIntOrNull() ?: 0
-                        val seconds = secondPickerState.selectedItem.toIntOrNull() ?: 0
+            // 다이얼로그/바텀시트 통합 표시
+            when (val state = dialogState) {
+                TimerDialogState.None -> { /* 아무것도 표시하지 않음 */ }
 
-                        val setTime = hours.hours + minutes.minutes + seconds.seconds
-                        if (setTime > 0.seconds) onIntent(TimerIntent.SetTime(setTime))
-                        showTimeInput = false
-                    },
-                    onConfirm = { time ->
-                        onIntent(TimerIntent.SetTime(time))
-                        onIntent(TimerIntent.Start())
+                TimerDialogState.TimeInput -> {
+                    TimeInputBottomSheet(
+                        initialTime = uiState.remainingTime,
+                        hourPickerState = hourPickerState,
+                        minutePickerState = minutePickerState,
+                        secondPickerState = secondPickerState,
+                        onDismissRequest = {
+                            val hours = hourPickerState.selectedItem.toIntOrNull() ?: 0
+                            val minutes = minutePickerState.selectedItem.toIntOrNull() ?: 0
+                            val seconds = secondPickerState.selectedItem.toIntOrNull() ?: 0
 
-                        // 서비스 시작
-                        context.sendTimerServiceAction(
-                            action = TimerServiceAction.ACTION_START,
-                            durationMillis = time.inWholeMilliseconds
-                        )
+                            val setTime = hours.hours + minutes.minutes + seconds.seconds
+                            if (setTime > 0.seconds) onIntent(TimerIntent.SetTime(setTime))
+                            dialogState = TimerDialogState.None
+                        },
+                        onConfirm = { time ->
+                            onIntent(TimerIntent.SetTime(time))
+                            onIntent(TimerIntent.Start())
 
-                        showTimeInput = false
-                    }
-                )
-            }
+                            // 서비스 시작
+                            context.sendTimerServiceAction(
+                                action = TimerServiceAction.ACTION_START,
+                                durationMillis = time.inWholeMilliseconds
+                            )
 
-            // 프리셋 추가 다이얼로그
-            if (showAddPresetDialog) {
-                AddPresetDialog(
-                    initialMinutes = uiState.remainingTime.inWholeMinutes.toInt(),
-                    initialSeconds = (uiState.remainingTime.inWholeSeconds % 60).toInt(),
-                    initialColorIndex = 0,
-                    onDismiss = { showAddPresetDialog = false },
-                    onConfirm = { name, minutes, seconds, colorIndex ->
-                        val duration = minutes.minutes + seconds.seconds
-                        onIntent(TimerIntent.SaveAsPreset(name, duration, colorIndex))
-                        showAddPresetDialog = false
-                    }
-                )
-            }
-
-            // 프리셋 수정 다이얼로그
-            showEditPresetDialog?.let { preset ->
-                EditPresetDialog(
-                    preset = preset,
-                    onDismiss = { showEditPresetDialog = null },
-                    onConfirm = { name, minutes, seconds, colorIndex ->
-                        val duration = minutes.minutes + seconds.seconds
-                        val updatedPreset = preset.copy(
-                            name = name,
-                            duration = duration,
-                            colorIndex = colorIndex
-                        )
-                        onIntent(TimerIntent.UpdatePreset(updatedPreset))
-                        showEditPresetDialog = null
-                    }
-                )
-            }
-
-            // 프리셋 삭제 확인 다이얼로그
-            showDeletePresetDialog?.let { preset ->
-                DeletePresetDialog(
-                    presetName = preset.name,
-                    onDismiss = { showDeletePresetDialog = null },
-                    onConfirm = {
-                        onIntent(TimerIntent.DeletePreset(preset.id))
-                    }
-                )
-            }
-
-            // 프리셋 관리 BottomSheet
-            if (showPresets) {
-                PresetManagementBottomSheet(
-                    sheetState = presetSheetState,
-                    presets = uiState.presets,
-                    canAddPreset = uiState.hasPresetSpaceAvailable,
-                    onDismiss = {
-                        scope.launch {
-                            presetSheetState.hide()
-                            showPresets = false
+                            dialogState = TimerDialogState.None
                         }
-                    },
-                    onPresetClick = { presetId ->
-                        onIntent(TimerIntent.SelectPreset(presetId))
-                        scope.launch {
-                            presetSheetState.hide()
-                            showPresets = false
+                    )
+                }
+
+                TimerDialogState.AddPreset -> {
+                    AddPresetDialog(
+                        initialMinutes = uiState.remainingTime.inWholeMinutes.toInt(),
+                        initialSeconds = (uiState.remainingTime.inWholeSeconds % 60).toInt(),
+                        initialColorIndex = 0,
+                        onDismiss = { dialogState = TimerDialogState.None },
+                        onConfirm = { name, minutes, seconds, colorIndex ->
+                            val duration = minutes.minutes + seconds.seconds
+                            onIntent(TimerIntent.SaveAsPreset(name, duration, colorIndex))
+                            dialogState = TimerDialogState.None
                         }
-                    },
-                    onAddPreset = {
-                        showPresets = false
-                        showAddPresetDialog = true
-                    },
-                    onEditPreset = { preset ->
-//                        showPresets = false
-                        showEditPresetDialog = preset
-                    },
-                    onDeletePreset = { presetId ->
-                        onIntent(TimerIntent.DeletePreset(presetId))
-                    }
-                )
+                    )
+                }
+
+                is TimerDialogState.EditPreset -> {
+                    EditPresetDialog(
+                        preset = state.preset,
+                        onDismiss = { dialogState = TimerDialogState.None },
+                        onConfirm = { name, minutes, seconds, colorIndex ->
+                            val duration = minutes.minutes + seconds.seconds
+                            val updatedPreset = state.preset.copy(
+                                name = name,
+                                duration = duration,
+                                colorIndex = colorIndex
+                            )
+                            onIntent(TimerIntent.UpdatePreset(updatedPreset))
+                            dialogState = TimerDialogState.None
+                        }
+                    )
+                }
+
+                is TimerDialogState.DeletePreset -> {
+                    DeletePresetDialog(
+                        presetName = state.preset.name,
+                        onDismiss = { dialogState = TimerDialogState.None },
+                        onConfirm = {
+                            onIntent(TimerIntent.DeletePreset(state.preset.id))
+                            dialogState = TimerDialogState.None
+                        }
+                    )
+                }
+
+                TimerDialogState.PresetManagement -> {
+                    PresetManagementBottomSheet(
+                        sheetState = presetSheetState,
+                        presets = uiState.presets,
+                        canAddPreset = uiState.hasPresetSpaceAvailable,
+                        onDismiss = {
+                            scope.launch {
+                                presetSheetState.hide()
+                                dialogState = TimerDialogState.None
+                            }
+                        },
+                        onPresetClick = { presetId ->
+                            onIntent(TimerIntent.SelectPreset(presetId))
+                            scope.launch {
+                                presetSheetState.hide()
+                                dialogState = TimerDialogState.None
+                            }
+                        },
+                        onAddPreset = {
+                            dialogState = TimerDialogState.AddPreset
+                        },
+                        onEditPreset = { preset ->
+                            dialogState = TimerDialogState.EditPreset(preset)
+                        },
+                        onDeletePreset = { presetId ->
+                            onIntent(TimerIntent.DeletePreset(presetId))
+                        }
+                    )
+                }
             }
         }
     }
