@@ -89,6 +89,7 @@ import com.jm.harufocus.timer.model.TimerSideEffect
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.model.toUiText
 import com.jm.harufocus.timer.usecase.TimerStatus
+import com.jm.harufocus.timer.util.calculateDurationFromPickerStates
 import com.jm.harufocus.timer.util.sendTimerServiceAction
 import com.jm.harufocus.ui.component.rememberPickerState
 import com.jm.harufocus.ui.util.PreviewProvider
@@ -98,7 +99,6 @@ import com.jm.logutil.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -467,12 +467,14 @@ private fun TimerScreen(
                         minutePickerState = minutePickerState,
                         secondPickerState = secondPickerState,
                         onDismissRequest = {
-                            val hours = hourPickerState.selectedItem.toIntOrNull() ?: 0
-                            val minutes = minutePickerState.selectedItem.toIntOrNull() ?: 0
-                            val seconds = secondPickerState.selectedItem.toIntOrNull() ?: 0
-
-                            val setTime = hours.hours + minutes.minutes + seconds.seconds
-                            if (setTime > 0.seconds) onIntent(TimerIntent.SetTime(setTime))
+                            val selectedTime = calculateDurationFromPickerStates(
+                                hourState = hourPickerState,
+                                minuteState = minutePickerState,
+                                secondState = secondPickerState
+                            )
+                            if (selectedTime > 0.seconds) {
+                                onIntent(TimerIntent.SetTime(selectedTime))
+                            }
                             dialogState = TimerDialogState.None
                         },
                         onConfirm = { time ->
