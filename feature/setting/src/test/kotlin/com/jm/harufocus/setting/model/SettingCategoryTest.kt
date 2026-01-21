@@ -14,12 +14,13 @@ class SettingCategoryTest : BehaviorSpec({
 
     Given("SettingCategory Enum을 테스트할 때") {
         When("모든 카테고리 값을 확인하면") {
-            Then("TC-055: 4개의 값(APPEARANCE, NOTIFICATION, TIMER, INTERACTION)을 가져야 한다") {
-                SettingCategory.entries shouldHaveSize 4
+            Then("TC-055: 5개의 값(APPEARANCE, NOTIFICATION, TIMER, INTERACTION, APP_INFO)을 가져야 한다") {
+                SettingCategory.entries shouldHaveSize 5
                 SettingCategory.entries shouldContain SettingCategory.APPEARANCE
                 SettingCategory.entries shouldContain SettingCategory.NOTIFICATION
                 SettingCategory.entries shouldContain SettingCategory.TIMER
                 SettingCategory.entries shouldContain SettingCategory.INTERACTION
+                SettingCategory.entries shouldContain SettingCategory.APP_INFO
             }
         }
 
@@ -30,7 +31,8 @@ class SettingCategoryTest : BehaviorSpec({
                         SettingCategory.APPEARANCE,
                         SettingCategory.NOTIFICATION,
                         SettingCategory.TIMER,
-                        SettingCategory.INTERACTION
+                        SettingCategory.INTERACTION,
+                        SettingCategory.APP_INFO
                     )
                 ) shouldBe true
             }
@@ -42,6 +44,7 @@ class SettingCategoryTest : BehaviorSpec({
                 SettingCategory.valueOf("NOTIFICATION") shouldBe SettingCategory.NOTIFICATION
                 SettingCategory.valueOf("TIMER") shouldBe SettingCategory.TIMER
                 SettingCategory.valueOf("INTERACTION") shouldBe SettingCategory.INTERACTION
+                SettingCategory.valueOf("APP_INFO") shouldBe SettingCategory.APP_INFO
             }
         }
     }
@@ -125,6 +128,7 @@ class SettingCategoryTest : BehaviorSpec({
                     SettingCategory.NOTIFICATION -> "NOTIFICATION"
                     SettingCategory.TIMER -> "TIMER"
                     SettingCategory.INTERACTION -> "INTERACTION"
+                    else -> {}
                 }
                 result shouldBe "APPEARANCE"
             }

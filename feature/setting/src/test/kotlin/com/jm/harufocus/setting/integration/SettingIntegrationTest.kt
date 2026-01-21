@@ -50,6 +50,15 @@ class SettingIntegrationTest : BehaviorSpec({
     lateinit var getAllPresetsUseCase: GetAllPresetsUseCase
     lateinit var viewModel: SettingViewModel
 
+    // SettingViewModel 생성 헬퍼 함수
+    fun createViewModel(): SettingViewModel = SettingViewModel(
+        settingsRepository = settingsRepository,
+        getAllPresetsUseCase = getAllPresetsUseCase,
+        inAppReviewManager = mockk(relaxed = true),
+        analyticsHelper = mockk(relaxed = true),
+        appVersionName = "1.0.0"
+    )
+
     beforeContainer {
         // Fake Repository 생성
         settingsRepository = FakeSettingsRepository()
@@ -61,7 +70,7 @@ class SettingIntegrationTest : BehaviorSpec({
     Given("설정 항목을 생성하고 표시할 때") {
         When("ViewModel이 초기화되면") {
             Then("TC-058: 설정 항목들이 카테고리별로 올바르게 그룹화되어야 한다") {
-                viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                viewModel = createViewModel()
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 val items = viewModel.settingItems.value
@@ -74,7 +83,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
         When("설정 항목을 카테고리별로 필터링하면") {
             Then("TC-059: 각 카테고리가 최소 1개 이상의 설정 항목을 포함해야 한다") {
-                viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                viewModel = createViewModel()
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 val items = viewModel.settingItems.value
@@ -89,7 +98,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
     Given("사용자가 테마를 변경하는 시나리오") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -118,7 +127,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
     Given("사용자가 여러 설정을 연속으로 변경하는 시나리오") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -163,7 +172,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
         beforeEach {
             coEvery { getAllPresetsUseCase() } returns flowOf(testPresets)
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -197,7 +206,7 @@ class SettingIntegrationTest : BehaviorSpec({
                 val presetFlow = MutableStateFlow(testPresets)
                 coEvery { getAllPresetsUseCase() } returns presetFlow
                 
-                val dynamicViewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                val dynamicViewModel = createViewModel()
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 val initialItems = dynamicViewModel.settingItems.value
@@ -220,7 +229,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
     Given("세션 지속 시간을 설정하는 시나리오") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -241,7 +250,7 @@ class SettingIntegrationTest : BehaviorSpec({
     Given("ViewModel 생명주기를 테스트할 때") {
         When("초기화부터 종료까지의 전체 흐름을 실행하면") {
             Then("TC-042: 전체 흐름이 정상 동작해야 한다") {
-                viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                viewModel = createViewModel()
                 testDispatcher.scheduler.advanceUntilIdle()
                 
                 viewModel.settingItems.value shouldNotBe emptyList<Any>()
@@ -255,7 +264,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
     Given("복잡한 설정 변경 시나리오") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -267,6 +276,7 @@ class SettingIntegrationTest : BehaviorSpec({
                 viewModel.updateIsScreenOn(false)
                 viewModel.updateIsMinimizedControls(true)
                 viewModel.updateIsPulseAnimationEnabled(false)
+                viewModel.updateIsScreenRotationEnabled(false)
 
                 testDispatcher.scheduler.advanceUntilIdle()
 
@@ -276,6 +286,7 @@ class SettingIntegrationTest : BehaviorSpec({
                 settingsRepository.isScreenOn.value shouldBe false
                 settingsRepository.isMinimizedControls.value shouldBe true
                 settingsRepository.isPulseAnimationEnabled.value shouldBe false
+                settingsRepository.isScreenRotationEnabled.value shouldBe false
             }
         }
 
@@ -296,7 +307,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
     Given("에러 복구 시나리오") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -333,6 +344,7 @@ class SettingIntegrationTest : BehaviorSpec({
                 viewModel.updateThemeMode(ThemeMode.DARK) // Success
                 viewModel.updateIsMinimizedControls(true) // Success
                 viewModel.updateIsPulseAnimationEnabled(true) // Success
+                viewModel.updateIsScreenRotationEnabled(false) // Success
 
                 testDispatcher.scheduler.advanceUntilIdle()
 
@@ -340,13 +352,14 @@ class SettingIntegrationTest : BehaviorSpec({
                 settingsRepository.themeMode.value shouldBe ThemeMode.DARK
                 settingsRepository.isMinimizedControls.value shouldBe true
                 settingsRepository.isPulseAnimationEnabled.value shouldBe true
+                settingsRepository.isScreenRotationEnabled.value shouldBe false
             }
         }
     }
 
     Given("Turbine을 활용한 정밀한 Flow 검증") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 
@@ -409,7 +422,7 @@ class SettingIntegrationTest : BehaviorSpec({
 
     Given("실제 사용 패턴 시나리오") {
         beforeEach {
-            viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+            viewModel = createViewModel()
             testDispatcher.scheduler.advanceUntilIdle()
         }
 

@@ -62,7 +62,13 @@ class SettingViewModelTest : BehaviorSpec({
         getAllPresetsUseCase = mockk(relaxed = true)
         every { getAllPresetsUseCase() } returns flowOf(emptyList())
 
-        viewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+        viewModel = SettingViewModel(
+            settingsRepository = settingsRepository,
+            getAllPresetsUseCase = getAllPresetsUseCase,
+            inAppReviewManager = mockk(relaxed = true),
+            analyticsHelper = mockk(relaxed = true),
+            appVersionName = "1.0.0"
+        )
         testDispatcher.scheduler.advanceUntilIdle()
     }
 
@@ -166,7 +172,13 @@ class SettingViewModelTest : BehaviorSpec({
                 val newPresets = listOf(Preset(1, "Test", 25.minutes, 0, Instant.now()))
                 every { getAllPresetsUseCase() } returns flowOf(newPresets)
 
-                val newViewModel = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                val newViewModel = SettingViewModel(
+                    settingsRepository = settingsRepository,
+                    getAllPresetsUseCase = getAllPresetsUseCase,
+                    inAppReviewManager = mockk(relaxed = true),
+                    analyticsHelper = mockk(relaxed = true),
+                    appVersionName = "1.0.0"
+                )
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 val newItems = newViewModel.settingItems.value.filter { it.category == SettingCategory.TIMER }
@@ -189,6 +201,10 @@ class SettingViewModelTest : BehaviorSpec({
                 items.any { it is SettingType.Toggle && it.title == UiText.StringResource(R.string.pref_title_pulse_animation) } shouldBe true
             }
 
+            Then("TC-018-1: '화면 자동 회전' Toggle이 포함되어야 한다") {
+                items.any { it is SettingType.Toggle && it.title == UiText.StringResource(R.string.pref_title_screen_rotation) } shouldBe true
+            }
+
             Then("TC-019: 최소화된 컨트롤의 기본값이 DEFAULT_IS_MINIMIZED_CONTROLS이어야 한다") {
                 val toggle = items.first { it.title == UiText.StringResource(R.string.pref_title_minimized_controls) } as SettingType.Toggle
                 toggle.defaultValue shouldBe SettingsPreferencesDataSource.DEFAULT_IS_MINIMIZED_CONTROLS
@@ -197,6 +213,11 @@ class SettingViewModelTest : BehaviorSpec({
             Then("TC-020: 펄스 애니메이션의 기본값이 DEFAULT_IS_PULSE_ANIMATION_ENABLED이어야 한다") {
                 val toggle = items.first { it.title == UiText.StringResource(R.string.pref_title_pulse_animation) } as SettingType.Toggle
                 toggle.defaultValue shouldBe SettingsPreferencesDataSource.DEFAULT_IS_PULSE_ANIMATION_ENABLED
+            }
+
+            Then("TC-020-1: 화면 자동 회전의 기본값이 DEFAULT_IS_SCREEN_ROTATION_ENABLED이어야 한다") {
+                val toggle = items.first { it.title == UiText.StringResource(R.string.pref_title_screen_rotation) } as SettingType.Toggle
+                toggle.defaultValue shouldBe SettingsPreferencesDataSource.DEFAULT_IS_SCREEN_ROTATION_ENABLED
             }
         }
     }
@@ -337,6 +358,15 @@ class SettingViewModelTest : BehaviorSpec({
                 settingsRepository.isPulseAnimationEnabled.value shouldBe true
             }
         }
+
+        When("updateIsScreenRotationEnabled가 호출되면") {
+            viewModel.updateIsScreenRotationEnabled(false)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            Then("TC-035-1: Repository의 화면 회전 설정이 false로 변경되어야 한다") {
+                settingsRepository.isScreenRotationEnabled.value shouldBe false
+            }
+        }
     }
 
     Given("repository 업데이트 중 예외가 발생할 때") {
@@ -391,7 +421,13 @@ class SettingViewModelTest : BehaviorSpec({
                 // 만약 Loading 상태가 없다면 shouldNotBeEmpty일 수 있음.
                 // 여기서는 기존 테스트 로직을 존중하되, FakeRepo는 즉시 값을 방출함을 인지해야 함.
 
-                val freshVM = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                val freshVM = SettingViewModel(
+                    settingsRepository = settingsRepository,
+                    getAllPresetsUseCase = getAllPresetsUseCase,
+                    inAppReviewManager = mockk(relaxed = true),
+                    analyticsHelper = mockk(relaxed = true),
+                    appVersionName = "1.0.0"
+                )
                 // FakeRepo는 기본값을 즉시 가지고 있으므로 비어있지 않을 가능성이 높음.
                 // 로직상 combine이 즉시 실행됨.
                 freshVM.settingItems.value.shouldHaveSize(0)
@@ -403,7 +439,13 @@ class SettingViewModelTest : BehaviorSpec({
                 val flow = MutableStateFlow<List<Preset>>(emptyList())
                 every { getAllPresetsUseCase() } returns flow
 
-                val vm = SettingViewModel(settingsRepository, getAllPresetsUseCase)
+                val vm = SettingViewModel(
+                    settingsRepository = settingsRepository,
+                    getAllPresetsUseCase = getAllPresetsUseCase,
+                    inAppReviewManager = mockk(relaxed = true),
+                    analyticsHelper = mockk(relaxed = true),
+                    appVersionName = "1.0.0"
+                )
                 testDispatcher.scheduler.advanceUntilIdle()
 
                 flow.value = listOf(Preset(1, "A", 1.minutes, 0, Instant.now()))

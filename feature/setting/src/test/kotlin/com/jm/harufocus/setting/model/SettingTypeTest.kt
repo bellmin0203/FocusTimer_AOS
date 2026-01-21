@@ -172,6 +172,7 @@ class SettingTypeTest : BehaviorSpec({
                 val result = when (type) {
                     is SettingType.Toggle -> "Toggle"
                     is SettingType.Selector<*> -> "Selector"
+                    is SettingType.Clickable -> "Clickable"
                 }
                 result shouldBe "Toggle"
             }
