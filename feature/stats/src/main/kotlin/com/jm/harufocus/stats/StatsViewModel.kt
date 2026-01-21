@@ -9,6 +9,7 @@ import com.jm.harufocus.domain.usecase.statistics.GetMonthlyStatsUseCase
 import com.jm.harufocus.domain.usecase.statistics.GetWeeklyStatsUseCase
 import com.jm.harufocus.stats.model.StatsPeriod
 import com.jm.harufocus.stats.model.StatsUiState
+import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +32,7 @@ class StatsViewModel @Inject constructor(
     private val getMonthlyStatsUseCase: GetMonthlyStatsUseCase,
     private val getAchievementMetricsUseCase: GetAchievementMetricsUseCase,
     private val dummyDataHelper: DummyDataHelper,
+    private val analyticsHelper: AnalyticsHelper,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StatsUiState())
@@ -43,6 +45,8 @@ class StatsViewModel @Inject constructor(
 
     init {
         LogUtil.d("StatsViewModel initialized")
+        // 화면 조회 이벤트 로깅
+        analyticsHelper.logScreenView("stats_screen", "StatsScreen")
 
         // generateDummyData() // 릴리즈 빌드에서는 더미 데이터 생성하지 않음
         loadAchievementMetrics()
@@ -68,6 +72,15 @@ class StatsViewModel @Inject constructor(
      */
     fun selectPeriod(period: StatsPeriod) {
         LogUtil.d("Period selected: $period")
+
+        // Analytics 이벤트 로깅
+        val periodStr = when (period) {
+            StatsPeriod.DAILY -> AnalyticsHelper.StatsPeriod.DAILY
+            StatsPeriod.WEEKLY -> AnalyticsHelper.StatsPeriod.WEEKLY
+            StatsPeriod.MONTHLY -> AnalyticsHelper.StatsPeriod.MONTHLY
+        }
+        analyticsHelper.logStatsPeriodChanged(periodStr)
+
         _uiState.update { it.copy(selectedPeriod = period) }
         loadStats()
     }
@@ -76,6 +89,13 @@ class StatsViewModel @Inject constructor(
      * 이전 기간으로 이동
      */
     fun navigateToPreviousPeriod() {
+        val periodStr = when (_uiState.value.selectedPeriod) {
+            StatsPeriod.DAILY -> AnalyticsHelper.StatsPeriod.DAILY
+            StatsPeriod.WEEKLY -> AnalyticsHelper.StatsPeriod.WEEKLY
+            StatsPeriod.MONTHLY -> AnalyticsHelper.StatsPeriod.MONTHLY
+        }
+        analyticsHelper.logStatsNavigation(AnalyticsHelper.Direction.PREVIOUS, periodStr)
+
         when (_uiState.value.selectedPeriod) {
             StatsPeriod.DAILY -> {
                 currentDate = currentDate.minusDays(1)
@@ -102,11 +122,18 @@ class StatsViewModel @Inject constructor(
         val today = LocalDate.now()
         val currentMonth = YearMonth.now()
 
+        val periodStr = when (_uiState.value.selectedPeriod) {
+            StatsPeriod.DAILY -> AnalyticsHelper.StatsPeriod.DAILY
+            StatsPeriod.WEEKLY -> AnalyticsHelper.StatsPeriod.WEEKLY
+            StatsPeriod.MONTHLY -> AnalyticsHelper.StatsPeriod.MONTHLY
+        }
+
         when (_uiState.value.selectedPeriod) {
             StatsPeriod.DAILY -> {
                 if (currentDate.isBefore(today)) {
                     currentDate = currentDate.plusDays(1)
                     LogUtil.d("Navigate to next day: $currentDate")
+                    analyticsHelper.logStatsNavigation(AnalyticsHelper.Direction.NEXT, periodStr)
                     loadStats()
                 }
             }
@@ -117,6 +144,7 @@ class StatsViewModel @Inject constructor(
                 ) {
                     currentDate = currentDate.plusWeeks(1)
                     LogUtil.d("Navigate to next week: $currentDate")
+                    analyticsHelper.logStatsNavigation(AnalyticsHelper.Direction.NEXT, periodStr)
                     loadStats()
                 }
             }
@@ -125,6 +153,7 @@ class StatsViewModel @Inject constructor(
                 if (currentYearMonth.isBefore(currentMonth)) {
                     currentYearMonth = currentYearMonth.plusMonths(1)
                     LogUtil.d("Navigate to next month: $currentYearMonth")
+                    analyticsHelper.logStatsNavigation(AnalyticsHelper.Direction.NEXT, periodStr)
                     loadStats()
                 }
             }
@@ -135,6 +164,13 @@ class StatsViewModel @Inject constructor(
      * 오늘/이번 주/이번 달로 이동
      */
     fun navigateToToday() {
+        val periodStr = when (_uiState.value.selectedPeriod) {
+            StatsPeriod.DAILY -> AnalyticsHelper.StatsPeriod.DAILY
+            StatsPeriod.WEEKLY -> AnalyticsHelper.StatsPeriod.WEEKLY
+            StatsPeriod.MONTHLY -> AnalyticsHelper.StatsPeriod.MONTHLY
+        }
+        analyticsHelper.logStatsNavigation(AnalyticsHelper.Direction.TODAY, periodStr)
+
         currentDate = LocalDate.now()
         currentYearMonth = YearMonth.now()
         LogUtil.d("Navigate to today")

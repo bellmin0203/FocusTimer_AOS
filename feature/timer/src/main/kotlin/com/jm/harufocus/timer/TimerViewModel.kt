@@ -17,6 +17,7 @@ import com.jm.harufocus.timer.model.TimerSideEffect.HapticFeedback
 import com.jm.harufocus.timer.model.TimerSideEffect.ShowError
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.usecase.TimerStatus
+import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.harufocus.util.NotificationSoundPlayer
 import com.jm.harufocus.widget.HaruFocusWidgetUpdater
@@ -52,6 +53,7 @@ class TimerViewModel @Inject constructor(
     private val notificationSoundPlayer: NotificationSoundPlayer,
     private val widgetUpdater: HaruFocusWidgetUpdater,
     private val canRequestReviewUseCase: CanRequestReviewUseCase,
+    private val analyticsHelper: AnalyticsHelper,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -66,6 +68,8 @@ class TimerViewModel @Inject constructor(
 
     init {
         LogUtil.d("TimerViewModel initialized")
+        // 화면 조회 이벤트 로깅
+        analyticsHelper.logScreenView("timer_screen", "TimerScreen")
         // 프리셋 목록 관찰
         observePresets()
         // 타이머 매니저 관찰
@@ -333,6 +337,18 @@ class TimerViewModel @Inject constructor(
             return
         }
 
+        // Analytics 이벤트 로깅
+        val inputMethod = when {
+            currentState.selectedPreset != null -> AnalyticsHelper.InputMethod.PRESET
+            else -> AnalyticsHelper.InputMethod.DRAG
+        }
+        analyticsHelper.logTimerStarted(
+            durationMinutes = currentState.initialTime.inWholeMinutes,
+            presetId = currentState.selectedPreset?.id,
+            presetName = currentState.selectedPreset?.name,
+            inputMethod = inputMethod
+        )
+
         LogUtil.d("타이머 시작 요청")
         // 실제 타이머 시작은 TimerService에서 처리
     }
@@ -351,6 +367,13 @@ class TimerViewModel @Inject constructor(
             LogUtil.w("타이머가 실행 중이 아님")
             return
         }
+
+        // Analytics 이벤트 로깅
+        val elapsedMinutes = (currentState.initialTime - currentState.remainingTime).inWholeMinutes
+        analyticsHelper.logTimerPaused(
+            remainingMinutes = currentState.remainingTime.inWholeMinutes,
+            elapsedMinutes = elapsedMinutes
+        )
 
         LogUtil.d("타이머 일시정지 요청")
         // 실제 일시정지는 TimerService에서 처리
@@ -371,6 +394,11 @@ class TimerViewModel @Inject constructor(
             return
         }
 
+        // Analytics 이벤트 로깅
+        analyticsHelper.logTimerResumed(
+            remainingMinutes = currentState.remainingTime.inWholeMinutes
+        )
+
         LogUtil.d("타이머 재개 요청")
         // 실제 재개는 TimerService에서 처리
     }
@@ -381,6 +409,21 @@ class TimerViewModel @Inject constructor(
      * 실제 타이머 정지 및 세션 미완료 처리는 TimerService에서 처리됩니다.
      */
     private fun handleStop() {
+        val currentState = _uiState.value
+
+        // Analytics 이벤트 로깅 (타이머가 활성 상태일 때만)
+        if (currentState.isTimerActive) {
+            val elapsedMinutes = (currentState.initialTime - currentState.remainingTime).inWholeMinutes
+            val completionRate = if (currentState.initialTime > Duration.ZERO) {
+                ((currentState.initialTime - currentState.remainingTime) / currentState.initialTime * 100).toInt()
+            } else 0
+            analyticsHelper.logTimerStopped(
+                remainingMinutes = currentState.remainingTime.inWholeMinutes,
+                elapsedMinutes = elapsedMinutes,
+                completionRate = completionRate
+            )
+        }
+
         LogUtil.d("타이머 정지 요청")
         // 실제 정지 및 초기화는 TimerService에서 처리
     }
@@ -398,6 +441,14 @@ class TimerViewModel @Inject constructor(
             LogUtil.w("완료 상태가 아님")
             return
         }
+
+        // Analytics 이벤트 로깅
+        val currentState = _uiState.value
+        analyticsHelper.logTimerCompleted(
+            durationMinutes = currentState.initialTime.inWholeMinutes,
+            presetId = currentState.selectedPreset?.id,
+            overtimeSeconds = currentState.overtime.inWholeSeconds
+        )
 
         // 실제 완료 처리는 TimerService에서 처리
         emitSideEffect(
@@ -489,6 +540,13 @@ class TimerViewModel @Inject constructor(
                     // Crashlytics에 프리셋 정보 기록
                     CrashReporter.setSelectedPreset(preset.id.toLong(), preset.name)
 
+                    // Analytics 이벤트 로깅
+                    analyticsHelper.logPresetSelected(
+                        presetId = preset.id,
+                        presetName = preset.name,
+                        durationMinutes = preset.duration.inWholeMinutes
+                    )
+
                     emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_selected,
@@ -528,6 +586,15 @@ class TimerViewModel @Inject constructor(
             result.fold(
                 onSuccess = {
                     LogUtil.d("프리셋 저장 성공")
+
+                    // Analytics 이벤트 로깅
+                    analyticsHelper.logPresetCreated(
+                        presetName = name,
+                        durationMinutes = duration.inWholeMinutes,
+                        colorIndex = colorIndex,
+                        presetCount = _uiState.value.presets.size + 1
+                    )
+
                     emitSideEffect(
                         TimerSideEffect.ShowSnackbar(
                             R.string.snackbar_preset_saved,
@@ -573,6 +640,13 @@ class TimerViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         LogUtil.d("프리셋 삭제 성공")
+
+                        // Analytics 이벤트 로깅
+                        analyticsHelper.logPresetDeleted(
+                            presetId = preset.id,
+                            durationMinutes = preset.duration.inWholeMinutes
+                        )
+
                         emitSideEffect(
                             TimerSideEffect.ShowSnackbar(
                                 R.string.snackbar_preset_deleted,
@@ -623,6 +697,14 @@ class TimerViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         LogUtil.d("프리셋 수정 성공")
+
+                        // Analytics 이벤트 로깅
+                        analyticsHelper.logPresetUpdated(
+                            presetId = presetId,
+                            oldDurationMinutes = existingPreset.duration.inWholeMinutes,
+                            newDurationMinutes = duration.inWholeMinutes
+                        )
+
                         emitSideEffect(
                             TimerSideEffect.ShowSnackbar(
                                 R.string.snackbar_preset_updated,

@@ -54,6 +54,23 @@ class HaruFocusWidgetStateManager @Inject constructor(
     }
 
     /**
+     * 현재 위젯 상태(status)를 반환합니다.
+     */
+    suspend fun getStatus(): String {
+        val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(HaruFocusWidget::class.java)
+        if (glanceIds.isEmpty()) {
+            LogUtil.d("getStatus: No widgets found, returning idle")
+            return HaruFocusWidgetState.IDLE
+        }
+
+        val glanceId = glanceIds.first()
+        val prefs = getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)
+        val status = prefs[KEY_STATUS] ?: HaruFocusWidgetState.IDLE
+        LogUtil.d("getStatus: $status")
+        return status
+    }
+
+    /**
      * 남은 시간을 조절합니다 (1분 ~ 59분 제한).
      */
     suspend fun updateRemainingTime(delta: Duration) {

@@ -4,6 +4,7 @@ import android.app.Activity
 import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.jm.harufocus.domain.repository.InAppReviewRepository
+import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -18,7 +19,8 @@ import kotlin.coroutines.resume
  */
 @Singleton
 class InAppReviewManager @Inject constructor(
-    private val inAppReviewRepository: InAppReviewRepository
+    private val inAppReviewRepository: InAppReviewRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) {
     /**
      * In-App Review 플로우를 실행합니다.
@@ -49,6 +51,10 @@ class InAppReviewManager @Inject constructor(
             if (reviewInfo.isFailure) {
                 return Result.failure(reviewInfo.exceptionOrNull() ?: Exception("Failed to get ReviewInfo"))
             }
+
+            // Analytics 이벤트 로깅 - In-App Review 다이얼로그 표시됨
+            analyticsHelper.logInAppReviewShown()
+            LogUtil.d("In-App Review 다이얼로그 표시 이벤트 로깅")
 
             // Review Flow 실행
             val launchResult = suspendCancellableCoroutine { continuation ->

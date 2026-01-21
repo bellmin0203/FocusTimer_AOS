@@ -5,6 +5,7 @@ import android.content.Intent
 import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.domain.repository.PresetRepository
 import com.jm.harufocus.domain.repository.SettingsRepository
+import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -25,7 +26,8 @@ class HaruFocusWidgetInteractor @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val presetRepository: PresetRepository,
-    private val widgetStateManager: HaruFocusWidgetStateManager
+    private val widgetStateManager: HaruFocusWidgetStateManager,
+    private val analyticsHelper: AnalyticsHelper
 ) {
     
     /**
@@ -58,6 +60,9 @@ class HaruFocusWidgetInteractor @Inject constructor(
             widgetStateManager.updateRemainingTime(fetchedDuration)
             fetchedDuration
         }
+
+        // Analytics 이벤트 로깅
+        analyticsHelper.logWidgetTimerStarted(duration.inWholeMinutes)
 
         LogUtil.d("startTimer: Starting with duration=$duration")
         startTimerWithDuration(duration)
@@ -106,8 +111,13 @@ class HaruFocusWidgetInteractor @Inject constructor(
     /**
      * 타이머 일시정지
      */
-    fun pauseTimer() {
+    suspend fun pauseTimer() {
         LogUtil.d("pauseTimer")
+
+        // Analytics 이벤트 로깅
+        val remainingTime = widgetStateManager.getRemainingTime()
+        analyticsHelper.logWidgetTimerPaused(remainingTime.inWholeMinutes)
+
         val serviceIntent = Intent().apply {
             setClassName(
                 context.packageName,
@@ -196,8 +206,13 @@ class HaruFocusWidgetInteractor @Inject constructor(
      * 
      * 메인 액티비티를 실행하여 앱으로 진입합니다.
      */
-    fun openApp(context: Context) {
+    suspend fun openApp(context: Context) {
         LogUtil.d("openApp")
+
+        // Analytics 이벤트 로깅 - 현재 타이머 상태 가져오기
+        val status = widgetStateManager.getStatus()
+        analyticsHelper.logWidgetAppLaunched(status)
+
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         launchIntent?.let {
             it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

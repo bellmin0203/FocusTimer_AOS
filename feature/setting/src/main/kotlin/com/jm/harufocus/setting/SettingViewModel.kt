@@ -21,6 +21,7 @@ import com.jm.harufocus.setting.model.SettingCategory
 import com.jm.harufocus.setting.model.SettingSideEffect
 import com.jm.harufocus.setting.model.SettingType
 import com.jm.harufocus.ui.util.UiText
+import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.logutil.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,6 +41,7 @@ class SettingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val getAllPresetsUseCase: GetAllPresetsUseCase,
     private val inAppReviewManager: InAppReviewManager,
+    private val analyticsHelper: AnalyticsHelper,
     @param:AppVersionName private val appVersionName: String
 ) : ViewModel() {
 
@@ -55,6 +57,9 @@ class SettingViewModel @Inject constructor(
     val sideEffect = _sideEffect.receiveAsFlow()
 
     init {
+        // 화면 조회 이벤트 로깅
+        analyticsHelper.logScreenView("setting_screen", "SettingScreen")
+
         // 설정 항목 생성
         viewModelScope.launch {
             getAllPresetsUseCase()
@@ -228,19 +233,28 @@ class SettingViewModel @Inject constructor(
             title = UiText.StringResource(R.string.pref_title_rate_app),
             description = UiText.StringResource(R.string.pref_desc_rate_app),
             category = SettingCategory.APP_INFO,
-            onClick = { _rateAppClick.trySend(Unit) }
+            onClick = {
+                analyticsHelper.logRateAppClicked()
+                _rateAppClick.trySend(Unit)
+            }
         ),
         SettingType.Clickable(
             title = UiText.StringResource(R.string.pref_title_privacy_policy),
             description = UiText.StringResource(R.string.pref_desc_privacy_policy),
             category = SettingCategory.APP_INFO,
-            onClick = { _privacyPolicyClick.trySend(Unit) }
+            onClick = {
+                analyticsHelper.logPrivacyPolicyClicked()
+                _privacyPolicyClick.trySend(Unit)
+            }
         ),
         SettingType.Clickable(
             title = UiText.StringResource(R.string.pref_title_open_source_licenses),
             description = UiText.StringResource(R.string.pref_desc_open_source_licenses),
             category = SettingCategory.APP_INFO,
-            onClick = { _openSourceLicensesClick.trySend(Unit) }
+            onClick = {
+                analyticsHelper.logOpenSourceLicensesClicked()
+                _openSourceLicensesClick.trySend(Unit)
+            }
         )
     )
 
@@ -284,45 +298,57 @@ class SettingViewModel @Inject constructor(
 
     fun updateThemeMode(value: ThemeMode) = updateSetting {
         settingsRepository.updateThemeMode(value)
+        analyticsHelper.logThemeChanged(value.name.lowercase())
+        analyticsHelper.setPreferredTheme(value.name.lowercase())
     }
 
     fun updateNotificationSoundType(soundType: NotificationSoundType) = updateSetting {
         settingsRepository.updateNotificationSoundType(soundType)
+        analyticsHelper.logSettingChanged("notification_sound", "", soundType.name)
     }
 
     fun updateIsNotificationVibrate(value: Boolean) = updateSetting {
         settingsRepository.updateNotificationVibrate(value)
+        analyticsHelper.logSettingChanged("notification_vibrate", "", value.toString())
     }
 
     fun updateIsTickSound(value: Boolean) = updateSetting {
         settingsRepository.updateTickSound(value)
+        analyticsHelper.logSettingChanged("tick_sound", "", value.toString())
     }
 
     fun updateIsRememberLastSession(value: Boolean) = updateSetting {
         settingsRepository.updateRememberLastSession(value)
+        analyticsHelper.logSettingChanged("remember_last_session", "", value.toString())
     }
 
     fun updateIsScreenOn(value: Boolean) = updateSetting {
         settingsRepository.updateScreenOn(value)
+        analyticsHelper.logSettingChanged("screen_on", "", value.toString())
     }
 
     fun updateIsHapticFeedback(value: Boolean) = updateSetting {
         settingsRepository.updateHapticFeedback(value)
+        analyticsHelper.logSettingChanged("haptic_feedback", "", value.toString())
     }
 
     fun updateIsMinimizedControls(value: Boolean) = updateSetting {
         settingsRepository.updateMinimizedControls(value)
+        analyticsHelper.logSettingChanged("minimized_controls", "", value.toString())
     }
 
     fun updateDefaultSessionDuration(duration: Duration) = updateSetting {
         settingsRepository.updateDefaultSessionDuration(duration)
+        analyticsHelper.logDefaultDurationChanged(duration.inWholeMinutes)
     }
 
     fun updateDefaultPresetId(presetId: Int?) = updateSetting {
         settingsRepository.updateDefaultPresetId(presetId)
+        analyticsHelper.logDefaultPresetChanged(presetId, null)
     }
 
     fun updateIsPulseAnimationEnabled(value: Boolean) = updateSetting {
         settingsRepository.updatePulseAnimationEnabled(value)
+        analyticsHelper.logSettingChanged("pulse_animation", "", value.toString())
     }
 }

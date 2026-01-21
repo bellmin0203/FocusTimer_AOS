@@ -5,9 +5,11 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.jm.harufocus.common.TimerServiceAction
+import com.jm.harufocus.domain.usecase.analytics.TrackConversionEventsUseCase
 import com.jm.harufocus.domain.usecase.session.ManageTimerSessionUseCase
 import com.jm.harufocus.timer.TimerManager
 import com.jm.harufocus.timer.usecase.TimerStatus
+import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.harufocus.util.CrashReportingExceptionHandler
 import com.jm.harufocus.widget.HaruFocusWidgetUpdater
@@ -44,6 +46,12 @@ class TimerService : Service() {
 
     @Inject
     lateinit var manageTimerSessionUseCase: ManageTimerSessionUseCase
+
+    @Inject
+    lateinit var trackConversionEventsUseCase: TrackConversionEventsUseCase
+
+    @Inject
+    lateinit var analyticsHelper: AnalyticsHelper
 
     private lateinit var notificationHelper: TimerNotificationHelper
     private val serviceScope = CoroutineScope(
@@ -358,6 +366,8 @@ class TimerService : Service() {
                                     updateResult.fold(
                                         onSuccess = {
                                             LogUtil.d("세션 자동 완료 업데이트 성공, sessionId=$sessionId")
+                                            // 전환 이벤트 추적
+                                            trackAndLogConversionEvents(state.initialDuration)
                                         },
                                         onFailure = { error ->
                                             LogUtil.e("세션 자동 완료 업데이트 실패", error)
@@ -411,5 +421,35 @@ class TimerService : Service() {
 
         // 코루틴 스코프 취소
         serviceScope.cancel()
+    }
+
+    /**
+     * 전환 이벤트 추적 및 Analytics 로깅
+     */
+    private suspend fun trackAndLogConversionEvents(sessionDuration: Duration) {
+        try {
+            val events = trackConversionEventsUseCase(sessionDuration)
+            LogUtil.d("전환 이벤트 확인: $events")
+
+            // 첫 번째 세션 완료 이벤트
+            if (events.isFirstSessionCompleted) {
+                LogUtil.d("첫 번째 세션 완료 이벤트 로깅")
+                analyticsHelper.logFirstSessionCompleted(sessionDuration.inWholeMinutes)
+            }
+
+            // 연속 집중 일수 마일스톤 달성 이벤트
+            if (events.isConsecutiveDaysMilestone) {
+                LogUtil.d("연속 집중 ${events.consecutiveFocusDays}일 달성 이벤트 로깅")
+                analyticsHelper.logConsecutiveDaysAchieved(events.consecutiveFocusDays)
+            }
+
+            // 사용자 속성 업데이트
+            analyticsHelper.setTotalSessionsCompleted(events.totalCompletedSessions)
+            analyticsHelper.setConsecutiveFocusDays(events.consecutiveFocusDays)
+
+        } catch (e: Exception) {
+            LogUtil.e("전환 이벤트 추적 실패", e)
+            CrashReporter.recordException(e, "전환 이벤트 추적 실패")
+        }
     }
 }
