@@ -36,6 +36,8 @@
     <string name="pref_desc_minimized_controls">Show minimized control buttons on the timer screen.</string>
     <string name="pref_title_pulse_animation">Visual Completion Alert</string>
     <string name="pref_desc_pulse_animation">The circular timer pulses gently when completed.</string>
+    <string name="pref_title_screen_rotation">Auto-rotate Screen</string>
+    <string name="pref_desc_screen_rotation">Allow screen rotation on the timer screen regardless of system settings.</string>
 
     <!-- App Info -->
     <string name="pref_category_app_info">App Info</string>

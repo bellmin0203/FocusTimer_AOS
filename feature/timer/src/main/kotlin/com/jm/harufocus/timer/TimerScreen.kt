@@ -81,8 +81,10 @@ fun TimerScreen(
     val context = LocalContext.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    // 시스템 설정과 무관하게 센서에 따라 화면 회전 허용
-    ScreenOrientationEffect(orientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR)
+    // 시스템 설정과 무관하게 센서에 따라 화면 회전 허용 (설정에서 활성화된 경우에만)
+    if (uiState.isScreenRotationEnabled) {
+        ScreenOrientationEffect(orientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.sideEffect.collect { effect ->

@@ -102,20 +102,26 @@ class TimerViewModel @Inject constructor(
         LogUtil.d("설정 관찰 시작")
 
         combine(
-            settingsRepository.isScreenOn,
-            settingsRepository.isHapticFeedback,
-            settingsRepository.isTickSound,
-            settingsRepository.isMinimizedControls,
-            settingsRepository.isPulseAnimationEnabled
-        ) { screenOn, haptic, tick, minimized, pulse ->
-            LogUtil.d("설정 업데이트: screenOn=$screenOn, haptic=$haptic, tick=$tick, minimized=$minimized, pulse=$pulse")
+            combine(
+                settingsRepository.isScreenOn,
+                settingsRepository.isHapticFeedback,
+                settingsRepository.isTickSound
+            ) { screenOn, haptic, tick -> Triple(screenOn, haptic, tick) },
+            combine(
+                settingsRepository.isMinimizedControls,
+                settingsRepository.isPulseAnimationEnabled,
+                settingsRepository.isScreenRotationEnabled
+            ) { minimized, pulse, screenRotation -> Triple(minimized, pulse, screenRotation) }
+        ) { (screenOn, haptic, tick), (minimized, pulse, screenRotation) ->
+            LogUtil.d("설정 업데이트: screenOn=$screenOn, haptic=$haptic, tick=$tick, minimized=$minimized, pulse=$pulse, screenRotation=$screenRotation")
             _uiState.update {
                 it.copy(
                     isScreenOnEnabled = screenOn,
                     isHapticFeedbackEnabled = haptic,
                     isTickSoundEnabled = tick,
                     isMinimizedControlsEnabled = minimized,
-                    isPulseAnimationEnabled = pulse
+                    isPulseAnimationEnabled = pulse,
+                    isScreenRotationEnabled = screenRotation
                 )
             }
         }.launchIn(viewModelScope)

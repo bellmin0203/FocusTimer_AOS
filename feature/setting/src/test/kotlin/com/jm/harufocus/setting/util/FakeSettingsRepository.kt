@@ -52,6 +52,9 @@ class FakeSettingsRepository : SettingsRepository {
     private val _isPulseAnimationEnabled = MutableStateFlow(true)
     override val isPulseAnimationEnabled: StateFlow<Boolean> = _isPulseAnimationEnabled.asStateFlow()
 
+    private val _isScreenRotationEnabled = MutableStateFlow(true)
+    override val isScreenRotationEnabled: StateFlow<Boolean> = _isScreenRotationEnabled.asStateFlow()
+
     // 에러 시뮬레이션을 위한 플래그 맵 (Method Name -> Should Fail)
     private val failureFlags = mutableMapOf<String, Boolean>()
 
@@ -126,5 +129,10 @@ class FakeSettingsRepository : SettingsRepository {
     override suspend fun updatePulseAnimationEnabled(isEnabled: Boolean) {
         checkFailure("updatePulseAnimationEnabled")
         _isPulseAnimationEnabled.value = isEnabled
+    }
+
+    override suspend fun updateScreenRotationEnabled(isEnabled: Boolean) {
+        checkFailure("updateScreenRotationEnabled")
+        _isScreenRotationEnabled.value = isEnabled
     }
 }

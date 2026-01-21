@@ -18,6 +18,7 @@ import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Compani
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_PULSE_ANIMATION_ENABLED
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
+import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ROTATION_ENABLED
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_TICK_SOUND
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_SESSION_DURATION
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_TIME_UNIT
@@ -79,6 +80,10 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
 
     override val isPulseAnimationEnabledFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[KEY_IS_PULSE_ANIMATION_ENABLED] ?: DEFAULT_IS_PULSE_ANIMATION_ENABLED
+    }
+
+    override val isScreenRotationEnabledFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_SCREEN_ROTATION_ENABLED] ?: DEFAULT_IS_SCREEN_ROTATION_ENABLED
     }
 
     override suspend fun updateThemeMode(themeMode: ThemeMode) {
@@ -157,6 +162,12 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
+    override suspend fun updateIsScreenRotationEnabled(isEnabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_SCREEN_ROTATION_ENABLED] = isEnabled
+        }
+    }
+
     companion object {
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_NOTIFICATION_SOUND_TYPE = stringPreferencesKey("notification_sound_type")
@@ -170,5 +181,6 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         private val KEY_IS_MINIMIZED_CONTROLS = booleanPreferencesKey("is_minimized_controls")
         private val KEY_DEFAULT_PRESET_ID = intPreferencesKey("default_preset_id")
         private val KEY_IS_PULSE_ANIMATION_ENABLED = booleanPreferencesKey("is_pulse_animation_enabled")
+        private val KEY_IS_SCREEN_ROTATION_ENABLED = booleanPreferencesKey("is_screen_rotation_enabled")
     }
 }

@@ -11,6 +11,7 @@ import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Compani
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_PULSE_ANIMATION_ENABLED
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_REMEMBER_LAST_SESSION
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
+import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ROTATION_ENABLED
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_SESSION_DURATION
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_THEME_MODE
 import com.jm.harufocus.data.review.InAppReviewManager
@@ -216,6 +217,14 @@ class SettingViewModel @Inject constructor(
             onToggle = ::updateIsPulseAnimationEnabled,
             category = SettingCategory.INTERACTION,
             defaultValue = DEFAULT_IS_PULSE_ANIMATION_ENABLED
+        ),
+        SettingType.Toggle(
+            title = UiText.StringResource(R.string.pref_title_screen_rotation),
+            description = UiText.StringResource(R.string.pref_desc_screen_rotation),
+            stateFlow = settingsRepository.isScreenRotationEnabled,
+            onToggle = ::updateIsScreenRotationEnabled,
+            category = SettingCategory.INTERACTION,
+            defaultValue = DEFAULT_IS_SCREEN_ROTATION_ENABLED
         )
     )
 
@@ -350,5 +359,10 @@ class SettingViewModel @Inject constructor(
     fun updateIsPulseAnimationEnabled(value: Boolean) = updateSetting {
         settingsRepository.updatePulseAnimationEnabled(value)
         analyticsHelper.logSettingChanged("pulse_animation", "", value.toString())
+    }
+
+    fun updateIsScreenRotationEnabled(value: Boolean) = updateSetting {
+        settingsRepository.updateScreenRotationEnabled(value)
+        analyticsHelper.logSettingChanged("screen_rotation", "", value.toString())
     }
 }

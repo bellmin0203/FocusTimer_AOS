@@ -48,7 +48,7 @@ class StatsViewModel @Inject constructor(
         // 화면 조회 이벤트 로깅
         analyticsHelper.logScreenView("stats_screen", "StatsScreen")
 
-        // generateDummyData() // 릴리즈 빌드에서는 더미 데이터 생성하지 않음
+         generateDummyData() // 릴리즈 빌드에서는 더미 데이터 생성하지 않음
         loadAchievementMetrics()
         loadStats()
     }

@@ -73,6 +73,12 @@ interface SettingsRepository {
     val isPulseAnimationEnabled: Flow<Boolean>
 
     /**
+     * 화면 회전 허용 여부 Flow
+     * 활성화 시 시스템 설정과 무관하게 센서에 따라 화면 회전
+     */
+    val isScreenRotationEnabled: Flow<Boolean>
+
+    /**
      * 테마 모드를 업데이트합니다.
      * @param themeMode 테마 모드
      */
@@ -143,4 +149,10 @@ interface SettingsRepository {
      * @param isEnabled 펄스 애니메이션 활성화 여부
      */
     suspend fun updatePulseAnimationEnabled(isEnabled: Boolean)
+
+    /**
+     * 화면 회전 허용 설정을 업데이트합니다.
+     * @param isEnabled 화면 회전 허용 여부
+     */
+    suspend fun updateScreenRotationEnabled(isEnabled: Boolean)
 }

@@ -40,6 +40,7 @@ data class TimerUiState(
     val isTickSoundEnabled: Boolean = false, // 틱 소리 활성화 여부
     val isMinimizedControlsEnabled: Boolean = false, // 최소화된 컨트롤 표시 활성화 여부
     val isPulseAnimationEnabled: Boolean = true, // 펄스 애니메이션 활성화 여부
+    val isScreenRotationEnabled: Boolean = true, // 화면 회전 허용 여부
 ) {
 
     /**

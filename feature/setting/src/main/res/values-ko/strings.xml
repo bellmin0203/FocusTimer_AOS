@@ -36,6 +36,8 @@
     <string name="pref_desc_minimized_controls">타이머 화면에서 컨트롤 버튼을 최소화하여 표시합니다.</string>
     <string name="pref_title_pulse_animation">완료 시 시각 알림</string>
     <string name="pref_desc_pulse_animation">타이머가 끝나면 원형 타이머가 부드럽게 움직이며 완료를 알려줍니다.</string>
+    <string name="pref_title_screen_rotation">화면 자동 회전</string>
+    <string name="pref_desc_screen_rotation">시스템 설정과 무관하게 타이머 화면에서 화면 회전을 허용합니다.</string>
 
     <!-- App Info -->
     <string name="pref_category_app_info">앱 정보</string>

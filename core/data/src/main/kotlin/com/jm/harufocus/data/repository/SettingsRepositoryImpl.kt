@@ -55,6 +55,9 @@ class SettingsRepositoryImpl @Inject constructor(
     override val isPulseAnimationEnabled: Flow<Boolean>
         get() = settingsDataSource.isPulseAnimationEnabledFlow
 
+    override val isScreenRotationEnabled: Flow<Boolean>
+        get() = settingsDataSource.isScreenRotationEnabledFlow
+
     override suspend fun updateThemeMode(themeMode: ThemeMode) {
         LogUtil.d("테마 설정 변경: $themeMode")
         settingsDataSource.updateThemeMode(themeMode)
@@ -113,5 +116,9 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updatePulseAnimationEnabled(isEnabled: Boolean) {
         settingsDataSource.updateIsPulseAnimationEnabled(isEnabled)
+    }
+
+    override suspend fun updateScreenRotationEnabled(isEnabled: Boolean) {
+        settingsDataSource.updateIsScreenRotationEnabled(isEnabled)
     }
 }
