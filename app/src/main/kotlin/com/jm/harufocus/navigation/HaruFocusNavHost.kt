@@ -17,7 +17,8 @@ import com.jm.harufocus.util.CrashReporter
 @Composable
 fun HaruFocusNavHost(
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onRequestInAppReview: () -> Unit = {}
 ) {
     // 현재 화면을 Crashlytics에 기록
     LaunchedEffect(navController) {
@@ -41,7 +42,8 @@ fun HaruFocusNavHost(
                 },
                 onStatsClick = {
                     navController.navigate(Screen.Stats.route)
-                }
+                },
+                onRequestInAppReview = onRequestInAppReview
             )
         }
 

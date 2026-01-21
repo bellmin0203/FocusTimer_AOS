@@ -22,6 +22,11 @@ sealed interface TimerSideEffect {
     data object ShowTimerCompleted : TimerSideEffect
 
     /**
+     * In-App Review 요청
+     */
+    data object RequestInAppReview : TimerSideEffect
+
+    /**
      * 햅틱 피드백 (진동)
      */
     data class HapticFeedback(val pattern: HapticPattern) : TimerSideEffect

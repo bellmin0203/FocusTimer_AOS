@@ -54,6 +54,9 @@ firebaseBom = "34.8.0"
 ossLicenses = "17.3.0"
 ossLicensesPlugin = "0.10.10"
 
+# Google Play In-App Review
+playReview = "2.0.2"
+
 # Testing
 junit4 = "4.13.2"
 junitJupiter = "6.0.2"
@@ -139,6 +142,9 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 
 # Google Play OSS Licenses
 play-services-oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "ossLicenses"}
+
+# Google Play In-App Review
+play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
 
 # === 단위 테스트 (Unit Test) ===
 # JUnit4 - 기본 테스트 프레임워크

@@ -65,6 +65,7 @@ fun SettingScreen(
     val settingItems by viewModel.settingItems.collectAsState(initial = emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val activity = context as? android.app.Activity
 
     // 개인정보처리방침 클릭 처리
     LaunchedEffect(viewModel.privacyPolicyClick) {
@@ -82,6 +83,13 @@ fun SettingScreen(
         viewModel.openSourceLicensesClick.collectLatest {
             val intent = Intent(context, OssLicensesMenuActivity::class.java)
             context.startActivity(intent)
+        }
+    }
+
+    // 앱 평가 클릭 처리
+    LaunchedEffect(viewModel.rateAppClick) {
+        viewModel.rateAppClick.collectLatest {
+            activity?.let { viewModel.launchReview(it) }
         }
     }
 

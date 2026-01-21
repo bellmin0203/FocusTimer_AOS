@@ -1,9 +1,11 @@
 package com.jm.harufocus.data.di
 
+import com.jm.harufocus.data.repository.InAppReviewRepositoryImpl
 import com.jm.harufocus.data.repository.PresetRepositoryImpl
 import com.jm.harufocus.data.repository.SettingsRepositoryImpl
 import com.jm.harufocus.data.repository.StatisticsRepositoryImpl
 import com.jm.harufocus.data.repository.TimerSessionRepositoryImpl
+import com.jm.harufocus.domain.repository.InAppReviewRepository
 import com.jm.harufocus.domain.repository.PresetRepository
 import com.jm.harufocus.domain.repository.SettingsRepository
 import com.jm.harufocus.domain.repository.StatisticsRepository
@@ -56,4 +58,13 @@ abstract class RepositoryModule {
     abstract fun bindStatisticsRepository(
         impl: StatisticsRepositoryImpl
     ): StatisticsRepository
+
+    /**
+     * InAppReviewRepository 구현체를 바인딩합니다.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindInAppReviewRepository(
+        impl: InAppReviewRepositoryImpl
+    ): InAppReviewRepository
 }

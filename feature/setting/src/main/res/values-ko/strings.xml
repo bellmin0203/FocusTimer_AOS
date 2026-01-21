@@ -44,6 +44,8 @@
     <string name="pref_desc_privacy_policy">개인정보 처리에 관한 정책을 확인합니다</string>
     <string name="pref_title_open_source_licenses">오픈소스 라이선스</string>
     <string name="pref_desc_open_source_licenses">앱에 사용된 오픈소스 라이선스를 확인합니다</string>
+    <string name="pref_title_rate_app">앱 평가하기</string>
+    <string name="pref_desc_rate_app">앱이 마음에 드셨다면 평가를 남겨주세요!</string>
 
     <!-- Formats -->
     <string name="format_minutes">%d분</string>

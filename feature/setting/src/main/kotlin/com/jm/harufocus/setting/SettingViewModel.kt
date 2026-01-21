@@ -1,5 +1,6 @@
 package com.jm.harufocus.setting
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.harufocus.common.di.AppVersionName
@@ -12,6 +13,7 @@ import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Compani
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_IS_SCREEN_ON
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_SESSION_DURATION
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource.Companion.DEFAULT_THEME_MODE
+import com.jm.harufocus.data.review.InAppReviewManager
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.domain.repository.SettingsRepository
 import com.jm.harufocus.domain.usecase.preset.GetAllPresetsUseCase
@@ -37,6 +39,7 @@ import kotlin.time.Duration.Companion.minutes
 class SettingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val getAllPresetsUseCase: GetAllPresetsUseCase,
+    private val inAppReviewManager: InAppReviewManager,
     @param:AppVersionName private val appVersionName: String
 ) : ViewModel() {
 
@@ -222,6 +225,12 @@ class SettingViewModel @Inject constructor(
             onClick = null
         ),
         SettingType.Clickable(
+            title = UiText.StringResource(R.string.pref_title_rate_app),
+            description = UiText.StringResource(R.string.pref_desc_rate_app),
+            category = SettingCategory.APP_INFO,
+            onClick = { _rateAppClick.trySend(Unit) }
+        ),
+        SettingType.Clickable(
             title = UiText.StringResource(R.string.pref_title_privacy_policy),
             description = UiText.StringResource(R.string.pref_desc_privacy_policy),
             category = SettingCategory.APP_INFO,
@@ -240,6 +249,22 @@ class SettingViewModel @Inject constructor(
 
     private val _openSourceLicensesClick = Channel<Unit>(Channel.BUFFERED)
     val openSourceLicensesClick = _openSourceLicensesClick.receiveAsFlow()
+
+    private val _rateAppClick = Channel<Unit>(Channel.BUFFERED)
+    val rateAppClick = _rateAppClick.receiveAsFlow()
+
+    /**
+     * In-App Review 플로우를 실행합니다.
+     * @param activity 현재 Activity
+     */
+    fun launchReview(activity: Activity) {
+        viewModelScope.launch {
+            inAppReviewManager.launchReviewFlow(activity)
+                .onFailure { e ->
+                    LogUtil.e("In-App Review 실행 실패", e)
+                }
+        }
+    }
 
     private fun updateSetting(updateAction: suspend() -> Unit) {
         viewModelScope.launch {

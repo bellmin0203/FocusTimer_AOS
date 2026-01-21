@@ -72,7 +72,8 @@ fun TimerScreen(
     onSettingsClick: () -> Unit = {},
     onStatsClick: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    viewModel: TimerViewModel = hiltViewModel()
+    viewModel: TimerViewModel = hiltViewModel(),
+    onRequestInAppReview: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -131,6 +132,10 @@ fun TimerScreen(
                         }
                         haptics.performHapticFeedback(feedbackConstant)
                     }
+                }
+
+                is TimerSideEffect.RequestInAppReview -> {
+                    onRequestInAppReview()
                 }
             }
         }

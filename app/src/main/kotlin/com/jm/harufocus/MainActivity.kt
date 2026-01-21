@@ -25,9 +25,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.jm.harufocus.common.model.ThemeMode
+import com.jm.harufocus.data.review.InAppReviewManager
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.repository.SettingsRepository
 import com.jm.harufocus.navigation.HaruFocusNavHost
+import com.jm.logutil.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,6 +39,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var inAppReviewManager: InAppReviewManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -70,8 +75,25 @@ class MainActivity : ComponentActivity() {
             HaruFocusTheme(
                 darkTheme = isDarkTheme
             ) {
-                HaruFocusApp()
+                HaruFocusApp(
+                    onRequestInAppReview = { launchInAppReview() }
+                )
             }
+        }
+    }
+
+    /**
+     * In-App Review 플로우를 실행합니다.
+     */
+    private fun launchInAppReview() {
+        kotlinx.coroutines.MainScope().launch {
+            inAppReviewManager.launchReviewFlow(this@MainActivity)
+                .onSuccess {
+                    LogUtil.d("In-App Review 플로우 완료")
+                }
+                .onFailure { e ->
+                    LogUtil.e("In-App Review 플로우 실패", e)
+                }
         }
     }
 }
@@ -81,7 +103,9 @@ class MainActivity : ComponentActivity() {
  * 네비게이션과 전역 상태를 관리
  */
 @Composable
-private fun HaruFocusApp() {
+private fun HaruFocusApp(
+    onRequestInAppReview: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -116,6 +140,7 @@ private fun HaruFocusApp() {
 
     HaruFocusNavHost(
         navController = navController,
-        snackbarHostState = snackbarHostState
+        snackbarHostState = snackbarHostState,
+        onRequestInAppReview = onRequestInAppReview
     )
 }

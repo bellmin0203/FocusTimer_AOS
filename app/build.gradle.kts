@@ -64,6 +64,7 @@ dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.util)
     implementation(projects.core.common)
+    implementation(projects.core.data)
 
     implementation(projects.feature.timer)
     implementation(projects.feature.stats)

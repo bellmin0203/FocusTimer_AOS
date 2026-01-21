@@ -44,6 +44,8 @@
     <string name="pref_desc_privacy_policy">View our privacy policy</string>
     <string name="pref_title_open_source_licenses">Open Source Licenses</string>
     <string name="pref_desc_open_source_licenses">View open source licenses used in this app</string>
+    <string name="pref_title_rate_app">Rate App</string>
+    <string name="pref_desc_rate_app">If you like the app, please leave a rating!</string>
 
     <!-- Formats -->
     <string name="format_minutes">%d min</string>

@@ -1,6 +1,7 @@
 package com.jm.harufocus.domain.usecase.session
 
 import com.jm.harufocus.domain.model.session.TimerSession
+import com.jm.harufocus.domain.usecase.review.IncrementSessionForReviewUseCase
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -12,6 +13,7 @@ import kotlin.time.Duration
 class ManageTimerSessionUseCase @Inject constructor(
     private val saveTimerSessionUseCase: SaveTimerSessionUseCase,
     private val updateTimerSessionUseCase: UpdateTimerSessionUseCase,
+    private val incrementSessionForReviewUseCase: IncrementSessionForReviewUseCase,
 ) {
     /**
      * 새로운 타이머 세션을 시작합니다
@@ -56,7 +58,12 @@ class ManageTimerSessionUseCase @Inject constructor(
             overrunTime = if (overtime > Duration.ZERO) overtime else null
         )
 
-        return updateTimerSessionUseCase(session)
+        return updateTimerSessionUseCase(session).also { result ->
+            // 세션 완료 성공 시 리뷰용 세션 카운트 증가
+            if (result.isSuccess) {
+                incrementSessionForReviewUseCase()
+            }
+        }
     }
 
     /**

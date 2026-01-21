@@ -20,4 +20,7 @@ dependencies {
     implementation(projects.core.datastore.impl)
 
     implementation(libs.androidx.dataStore)
+
+    // Google Play In-App Review
+    implementation(libs.play.review.ktx)
 }

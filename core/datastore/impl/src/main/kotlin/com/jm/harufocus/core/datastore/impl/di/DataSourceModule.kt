@@ -1,6 +1,8 @@
 package com.jm.harufocus.core.datastore.impl.di
 
+import com.jm.harufocus.core.datastore.api.InAppReviewPreferencesDataSource
 import com.jm.harufocus.core.datastore.api.SettingsPreferencesDataSource
+import com.jm.harufocus.core.datastore.impl.DefaultInAppReviewPreferencesDataSource
 import com.jm.harufocus.core.datastore.impl.DefaultSettingsPreferencesDataSource
 import dagger.Binds
 import dagger.Module
@@ -15,5 +17,10 @@ internal abstract class DataSourceModule {
     abstract fun bindSettingPreferenceDataSource(
         dataSource: DefaultSettingsPreferencesDataSource
     ): SettingsPreferencesDataSource
+
+    @Binds
+    abstract fun bindInAppReviewPreferencesDataSource(
+        dataSource: DefaultInAppReviewPreferencesDataSource
+    ): InAppReviewPreferencesDataSource
 
 }

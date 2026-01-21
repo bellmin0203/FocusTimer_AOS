@@ -6,6 +6,7 @@ import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.domain.repository.SettingsRepository
 import com.jm.harufocus.domain.usecase.preset.ManagePresetUseCase
 import com.jm.harufocus.domain.usecase.preset.PresetException
+import com.jm.harufocus.domain.usecase.review.CanRequestReviewUseCase
 import com.jm.harufocus.timer.model.HapticPattern
 import com.jm.harufocus.timer.model.PresetError
 import com.jm.harufocus.timer.model.SetTimeError
@@ -50,6 +51,7 @@ class TimerViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val notificationSoundPlayer: NotificationSoundPlayer,
     private val widgetUpdater: HaruFocusWidgetUpdater,
+    private val canRequestReviewUseCase: CanRequestReviewUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -171,6 +173,9 @@ class TimerViewModel @Inject constructor(
                                 sessionStartTime = null,
                             )
                         }
+
+                        // In-App Review 요청 가능 여부 확인
+                        checkAndRequestInAppReview()
                     }
 
                     is TimerStatus.Running -> {
@@ -678,6 +683,22 @@ class TimerViewModel @Inject constructor(
         LogUtil.d("${sideEffect::class.simpleName}")
         viewModelScope.launch {
             _sideEffect.send(sideEffect)
+        }
+    }
+
+    /**
+     * In-App Review 요청 가능 여부를 확인하고, 가능하면 SideEffect를 발생시킵니다.
+     */
+    private fun checkAndRequestInAppReview() {
+        viewModelScope.launch {
+            try {
+                if (canRequestReviewUseCase()) {
+                    LogUtil.d("In-App Review 요청 조건 충족")
+                    emitSideEffect(TimerSideEffect.RequestInAppReview)
+                }
+            } catch (e: Exception) {
+                LogUtil.e("In-App Review 요청 가능 여부 확인 실패", e)
+            }
         }
     }
 
