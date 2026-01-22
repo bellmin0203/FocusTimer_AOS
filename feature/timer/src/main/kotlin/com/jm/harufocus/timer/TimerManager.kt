@@ -1,6 +1,7 @@
 package com.jm.harufocus.timer
 
 import com.jm.harufocus.common.di.DefaultDispatcher
+import com.jm.harufocus.common.time.TimeProvider
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.timer.model.SetTimeError
 import com.jm.harufocus.timer.model.TimerError
@@ -63,6 +64,7 @@ interface TimerManager {
 class TimerManagerImpl @Inject constructor(
     private val timerControlUseCase: TimerControlUseCase,
     @param:DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    private val timeProvider: TimeProvider,
 ) : TimerManager {
     private val job = SupervisorJob()
     private val scope: CoroutineScope = CoroutineScope(defaultDispatcher + job)
@@ -145,7 +147,7 @@ class TimerManagerImpl @Inject constructor(
         when (event) {
             is TimerEvent.Tick -> {
                 // pause 시 정확한 시간 계산을 위해 Tick 시점 기록
-                lastTickTimestamp = System.currentTimeMillis()
+                lastTickTimestamp = timeProvider.currentTimeMillis()
                 lastTickRemainingTime = event.remainingTime
 
                 _timerState.update { state ->
@@ -213,7 +215,7 @@ class TimerManagerImpl @Inject constructor(
             timerJob?.cancel()
 
             // 마지막 Tick 이후 경과한 시간을 계산하여 정확한 남은 시간 산출
-            val elapsedSinceLastTick = (System.currentTimeMillis() - lastTickTimestamp).milliseconds
+            val elapsedSinceLastTick = (timeProvider.currentTimeMillis() - lastTickTimestamp).milliseconds
             val accurateRemainingTime = (lastTickRemainingTime - elapsedSinceLastTick)
                 .coerceAtLeast(Duration.ZERO)
 
