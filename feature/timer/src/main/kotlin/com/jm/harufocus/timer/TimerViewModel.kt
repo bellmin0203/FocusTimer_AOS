@@ -179,6 +179,7 @@ class TimerViewModel @Inject constructor(
                                 overtime = Duration.ZERO,
                                 progress = progress,
                                 error = null,
+                                selectedPreset = selectedPreset,
                                 currentSessionId = null,
                                 sessionStartTime = null,
                             )
