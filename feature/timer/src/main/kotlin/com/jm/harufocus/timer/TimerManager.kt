@@ -89,6 +89,11 @@ class TimerManagerImpl @Inject constructor(
     private var lastTickRemainingTime: Duration = Duration.ZERO
 
     override fun setTime(duration: Duration) {
+        if (_timerState.value.status !is TimerStatus.Idle) {
+            scope.launch { _timerError.emit(TimerError.SetTime(SetTimeError.TimerRunning)) }
+            return
+        }
+
         val validationResult = timerControlUseCase.validateTimerTime(duration)
         when (validationResult) {
             TimerValidationResult.InvalidTime -> {
