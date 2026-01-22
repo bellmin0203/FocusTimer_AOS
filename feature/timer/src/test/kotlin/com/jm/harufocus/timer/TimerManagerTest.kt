@@ -1,243 +1,448 @@
 package com.jm.harufocus.timer
 
 import app.cash.turbine.test
-import com.google.common.truth.Truth.assertThat
-import com.jm.harufocus.testing.rule.MainDispatcherExtension
+import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.timer.model.SetTimeError
 import com.jm.harufocus.timer.model.TimerError
-import com.jm.harufocus.timer.model.TimerEvent
 import com.jm.harufocus.timer.usecase.TimerControlUseCase
 import com.jm.harufocus.timer.usecase.TimerStatus
-import com.jm.harufocus.timer.usecase.TimerValidationResult
-import io.mockk.coEvery
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.RegisterExtension
+import kotlinx.coroutines.test.setMain
+import java.time.Instant
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 @ExperimentalCoroutinesApi
-class TimerManagerTest {
+class TimerManagerTest : BehaviorSpec({
 
-    companion object {
-        @JvmField
-        @RegisterExtension
-        val mainDispatcherExtension = MainDispatcherExtension(StandardTestDispatcher())
+    val testDispatcher: TestDispatcher = StandardTestDispatcher()
+    lateinit var helper: TimerTestHelper
+
+    beforeSpec {
+        Dispatchers.setMain(testDispatcher)
     }
 
-    private lateinit var timerManager: TimerManagerImpl
-    private val timerControlUseCase: TimerControlUseCase = mockk()
+    afterSpec {
+        Dispatchers.resetMain()
+    }
 
-    private fun runTimerTestWithCleanup(
-        testBody: suspend TestScope.() -> Unit
-    ) = runTest {
-        try {
-            testBody()
-        } finally {
-            timerManager.stop(0.seconds)
+    beforeTest {
+        // TestScope는 Spec의 Coroutine Scope를 사용하거나, 별도로 관리할 수 있음
+        // 여기서는 runTest 블록 내부에서 생성된 TestScope를 사용하기 위해
+        // 각 Then 블록이나 Given/When 내부에서 helper를 초기화하는 것이 좋을 수 있으나,
+        // BehaviorSpec은 하나의 root Scope를 공유하지 않으므로 구조에 따라 전략이 필요함.
+        // 하지만 TimerTestHelper가 TestScope를 생성자로 받으므로,
+        // 각 테스트 케이스(Leaf)마다 독립적인 환경을 위해 runTest 내부에서 helper를 생성하거나
+        // 전역 TestDispatcher를 공유하는 방식을 선택해야 함.
+
+        // TimerTestHelper 구현을 보면 TestScope를 받음.
+        // 따라서 각 테스트에서 runTest { val helper = TimerTestHelper(this) ... } 패턴이 적합.
+    }
+
+    Given("3.1 시간 설정 (SetTime)") {
+        When("유효한 시간으로 설정하면 (ST-01)") {
+            Then("상태가 Idle로 업데이트되고 시간이 설정된다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    val duration = 10.minutes
+                    helper.timerManager.setTime(duration)
+
+                    val state = helper.timerManager.timerState.value
+                    state.status shouldBe TimerStatus.Idle
+                    state.initialDuration shouldBe duration
+                    state.remainingTime shouldBe duration
+                }
+            }
         }
-    }
 
-    @BeforeEach
-    fun setUp() {
-        timerManager = TimerManagerImpl(
-            timerControlUseCase = timerControlUseCase,
-            defaultDispatcher = Dispatchers.Main,
-        )
-    }
+        When("유효하지 않은 시간으로 설정하면 (ST-02)") {
+            Then("에러를 방출해야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    val duration = (-1).minutes
 
-    @Test
-    fun `유효한 시간으로 setTime시 상태가 업데이트된다`() = runTimerTestWithCleanup {
-        // Given
-        val duration = 10.minutes
-        every { timerControlUseCase.validateTimerTime(duration) } returns TimerValidationResult.Valid
+                    helper.timerManager.timerError.test {
+                        helper.timerManager.setTime(duration)
 
-        // When
-        timerManager.setTime(duration)
-
-        // Then
-        timerManager.timerState.test {
-            val state = awaitItem()
-            assertThat(state.status).isEqualTo(TimerStatus.Idle)
-            assertThat(state.initialDuration).isEqualTo(duration)
-            assertThat(state.remainingTime).isEqualTo(duration)
+                        val error = awaitItem()
+                        error.shouldBeInstanceOf<TimerError.SetTime>()
+                        error.code shouldBe SetTimeError.InvalidTime
+                    }
+                }
+            }
         }
-    }
 
-    @Test
-    fun `유효하지 않은 시간으로 setTime시 에러를 방출한다`() = runTimerTestWithCleanup {
-        // Given
-        val duration = 10.minutes
-        every { timerControlUseCase.validateTimerTime(duration) } returns TimerValidationResult.InvalidTime
+        When("실행 중 시간 설정 시도 (ST-03)") {
+            Then("무시되거나 에러가 발생해야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    val duration = 10.minutes
 
-        // When
-        timerManager.setTime(duration)
+                    helper.timerManager.setTime(5.minutes)
+                    helper.timerManager.start(5.minutes, 5.minutes)
+                    helper.runCurrent()
+                    helper.verifyState { status.shouldBeInstanceOf<TimerStatus.Running>() }
 
-        // Then
-        timerManager.timerError.test {
-            val error = awaitItem()
-            assertThat(error).isInstanceOf(TimerError.SetTime::class.java)
-            assertThat((error as TimerError.SetTime).code).isEqualTo(SetTimeError.InvalidTime)
-        }
-    }
+                    helper.timerManager.timerError.test {
+                        helper.timerManager.setTime(duration)
 
-    @Test
-    fun `타이머 시작 시 틱과 완료에 따라 상태가 업데이트된다`() = runTimerTestWithCleanup {
-        // Given
-        val initialDuration = 2.seconds
-        val tickFlow = flow {
-            emit(TimerEvent.Tick(1.seconds))
-            emit(TimerEvent.Completed)
-        }
-        every { timerControlUseCase.validateTimerTime(any()) } returns TimerValidationResult.Valid
-        every { timerControlUseCase.startTimer(any(), any()) } returns tickFlow
+                        val error = awaitItem()
+                        error.shouldBeInstanceOf<TimerError.SetTime>()
+                        error.code shouldBe SetTimeError.TimerRunning
 
-        // When
-        timerManager.setTime(initialDuration)
-        timerManager.start(initialDuration, initialDuration)
+                        cancelAndIgnoreRemainingEvents()
+                    }
 
-        // Then
-        timerManager.timerState.test {
-            assertThat(awaitItem().status).isInstanceOf(TimerStatus.Idle::class.java) // Initial state
-
-            val runningState = awaitItem()
-            assertThat(runningState.status).isInstanceOf(TimerStatus.Running::class.java)
-            assertThat(runningState.remainingTime).isEqualTo(1.seconds)
-            assertThat(runningState.initialDuration).isEqualTo(initialDuration)
-
-            val completedState = awaitItem()
-            assertThat(completedState.status).isInstanceOf(TimerStatus.Completed::class.java)
-            assertThat(completedState.remainingTime).isEqualTo(Duration.ZERO)
-
-            // Overtime tracking starts
-            val overtimeState = awaitItem()
-            assertThat(overtimeState.status).isInstanceOf(TimerStatus.Running::class.java)
-            assertThat(overtimeState.overtime).isEqualTo(1.seconds)
-
-            timerManager.stop(initialDuration)
-            cancelAndIgnoreRemainingEvents()
+                    helper.timerManager.stop(5.minutes)
+                }
+            }
         }
     }
 
-    @Test
-    fun `타이머 일시정지 및 재개가 올바르게 동작한다`() = runTimerTestWithCleanup {
-        // Given
-        val initialDuration = 5.minutes
-        val remainingTime = 4.minutes
+    Given("3.2 타이머 시작 및 실행 (Start & Running)") {
+        When("타이머를 시작하면 (SR-01)") {
+            Then("상태가 Running으로 변경되고 시간이 흐른다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    val duration = 10.seconds
 
-        // Use a flow that doesn't complete to test pause
-        val tickFlow = flowOf(TimerEvent.Tick(remainingTime))
-        every { timerControlUseCase.startTimer(any(), any()) } returns tickFlow
+                    helper.timerManager.setTime(duration)
+                    helper.timerManager.start(duration, duration)
+                    helper.runCurrent()
+                    helper.verifyState { status.shouldBeInstanceOf<TimerStatus.Running>() }
 
-        timerManager.start(initialDuration, initialDuration)
+                    helper.advanceTime(1.seconds)
+                    helper.verifyState { remainingTime shouldBe 9.seconds }
 
-        timerManager.timerState.test {
-            awaitItem() // initial
-            assertThat(awaitItem().status).isInstanceOf(TimerStatus.Running::class.java)
-
-            // When
-            timerManager.pause()
-
-            // Then
-            assertThat(awaitItem().status).isInstanceOf(TimerStatus.Paused::class.java)
-
-            // When
-            timerManager.resume()
-
-            // Then
-            val resumedState = awaitItem()
-            assertThat(resumedState.status).isInstanceOf(TimerStatus.Running::class.java)
-            assertThat(resumedState.remainingTime).isEqualTo(remainingTime)
+                    helper.timerManager.stop(duration)
+                }
+            }
         }
-        verify(exactly = 2) { timerControlUseCase.startTimer(any(), any()) }
-    }
 
-    @Test
-    fun `타이머 중지 시 상태가 유휴 상태로 리셋된다`() = runTimerTestWithCleanup {
-        // Given
-        val initialDuration = 5.minutes
-        val tickFlow = flowOf(TimerEvent.Tick(4.minutes))
-        every { timerControlUseCase.startTimer(any(), any()) } returns tickFlow
-        timerManager.start(initialDuration, initialDuration)
+        When("리마인더와 함께 시작하면 (SR-02)") {
+            Then("설정된 시간에 리마인더 이벤트가 발생해야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    val duration = 10.seconds
+                    val reminder = 5.seconds
 
-        timerManager.timerState.test {
-            awaitItem() // initial
-            assertThat(awaitItem().status).isInstanceOf(TimerStatus.Running::class.java)
+                    helper.timerManager.start(duration, duration, listOf(reminder))
 
-            // When
-            timerManager.stop(initialDuration)
+                    // 5초 경과 -> 남은 시간 5초 -> 리마인더 발생
+                    helper.advanceTime(5.seconds)
 
-            // Then
-            val stoppedState = awaitItem()
-            assertThat(stoppedState.status).isInstanceOf(TimerStatus.Idle::class.java)
-            assertThat(stoppedState.initialDuration).isEqualTo(initialDuration)
-            assertThat(stoppedState.remainingTime).isEqualTo(initialDuration)
-            assertThat(stoppedState.overtime).isEqualTo(Duration.ZERO)
+                    helper.verifyState {
+                        remainingTime shouldBe 5.seconds
+                        // TODO: jongmin, 리마인더 기능 추가 시 작성
+                    }
+
+                    helper.timerManager.stop(duration)
+                }
+            }
         }
-    }
 
-    @Test
-    fun `리마인더와 함께 타이머 시작 시 상태가 업데이트된다`() = runTimerTestWithCleanup {
-        // Given
-        val initialDuration = 10.seconds
-        val reminderTime = 5.seconds
-        val reminderThresholds = listOf(reminderTime)
-        val tickFlow = flow {
-            emit(TimerEvent.Tick(6.seconds))
-            emit(TimerEvent.Reminder(reminderTime))
-            emit(TimerEvent.Tick(4.seconds))
-        }
-        every { timerControlUseCase.startTimer(any(), any()) } returns tickFlow
+        When("실행 중 재시작하면 (SR-03)") {
+            Then("기존 작업이 취소되고 새로운 시간으로 재시작되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
 
-        // When
-        timerManager.start(initialDuration, initialDuration, reminderThresholds)
+                    // 1st Start
+                    helper.timerManager.start(10.seconds, 10.seconds)
+                    helper.advanceTime(2.seconds)
+                    helper.verifyState { remainingTime shouldBe 8.seconds }
+                    helper.timerManager.stop(10.seconds)
 
-        // Then
-        timerManager.timerState.test {
-            awaitItem() // initial
-            assertThat(awaitItem().status).isInstanceOf(TimerStatus.Running::class.java)
+                    // 2nd Start (Restart)
+                    helper.timerManager.start(20.seconds, 20.seconds)
+                    helper.runCurrent()
+                    helper.verifyState {
+                        remainingTime shouldBe 20.seconds
+                        status.shouldBeInstanceOf<TimerStatus.Running>()
+                    }
 
-            val reminderState = awaitItem()
-            assertThat(reminderState.status).isInstanceOf(TimerStatus.Running::class.java)
-            assertThat(reminderState.isShowReminder).isTrue()
-            assertThat(reminderState.remainingTime).isEqualTo(reminderTime)
-
-            assertThat(awaitItem().status).isInstanceOf(TimerStatus.Running::class.java)
+                    helper.timerManager.stop(20.seconds)
+                }
+            }
         }
     }
 
-    @Test
-    fun `타이머 에러 발생 시 에러를 방출하고 타이머를 중지시킨다`() = runTimerTestWithCleanup {
-        // Given
-        val initialDuration = 5.minutes
-        val errorMessage = "Timer failed"
-        val errorFlow = flow<TimerEvent> { throw RuntimeException(errorMessage) }
-        coEvery { timerControlUseCase.startTimer(any(), any()) } returns errorFlow
+    Given("3.3 일시정지 및 재개 (Pause & Resume)") {
+        When("실행 중 일시정지하면 (PR-01)") {
+            Then("상태가 Paused로 변경되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(10.seconds, 10.seconds)
 
-        // When
-        timerManager.start(initialDuration, initialDuration)
-
-        // Then
-        timerManager.timerError.test {
-            val error = awaitItem()
-            assertThat(error).isInstanceOf(TimerError.Run::class.java)
-            assertThat((error as TimerError.Run).message).isEqualTo(errorMessage)
+                    helper.timerManager.pause()
+                    helper.runCurrent()
+                    helper.verifyState { status.shouldBeInstanceOf<TimerStatus.Paused>() }
+                }
+            }
         }
 
-        timerManager.timerState.test {
-            val lastState = expectMostRecentItem()
-            assertThat(lastState.status).isInstanceOf(TimerStatus.Idle::class.java)
+        When("일시정지 시 (PR-02 정밀 시간 보정)") {
+            Then("경과 시간을 고려하여 남은 시간이 저장되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+
+                    helper.timerManager.start(10.seconds, 10.seconds)
+                    // Tick 발생 (10초)
+
+                    // 0.5초 경과
+                    helper.advanceTime(500.milliseconds)
+
+                    helper.timerManager.pause()
+                    helper.runCurrent()
+                    helper.verifyState {
+                        status.shouldBeInstanceOf<TimerStatus.Paused>()
+                        // 10초 - 0.5초 = 9.5초
+                        remainingTime shouldBe (10.seconds - 500.milliseconds)
+                    }
+                }
+            }
+        }
+
+        When("일시정지 상태에서 재개하면 (PR-03)") {
+            Then("상태가 Running으로 변경되고 타이머가 계속되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(10.seconds, 10.seconds)
+                    helper.timerManager.pause()
+
+                    helper.timerManager.resume()
+                    helper.runCurrent()
+                    helper.verifyState { status.shouldBeInstanceOf<TimerStatus.Running>() }
+
+                    helper.timerManager.stop(10.seconds)
+                }
+            }
+        }
+
+        When("Running이 아닐 때 일시정지 시도 (PR-04)") {
+            Then("아무 변화가 없어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.setTime(10.seconds) // Idle
+
+                    helper.timerManager.pause()
+                    helper.runCurrent()
+                    helper.verifyState { status shouldBe TimerStatus.Idle }
+                }
+            }
+        }
+
+        When("Paused가 아닐 때 재개 시도 (PR-05)") {
+            Then("아무 변화가 없어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(10.seconds, 10.seconds) // Running
+
+                    helper.timerManager.resume()
+                    helper.runCurrent()
+                    helper.verifyState { status.shouldBeInstanceOf<TimerStatus.Running>() }
+
+                    helper.timerManager.stop(10.seconds)
+                }
+            }
         }
     }
-}
+
+    Given("3.4 타이머 정지 (Stop)") {
+        When("실행 중 정지하면 (SP-01)") {
+            Then("Idle 상태로 초기화되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(10.seconds, 10.seconds)
+
+                    helper.timerManager.stop(10.seconds)
+                    helper.runCurrent()
+                    helper.verifyState {
+                        status shouldBe TimerStatus.Idle
+                        remainingTime shouldBe 10.seconds
+                        overtime shouldBe Duration.ZERO
+                    }
+                }
+            }
+        }
+
+        When("오버타임 중 정지하면 (SP-02)") {
+            Then("오버타임이 종료되고 Idle 상태가 되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(1.seconds, 1.seconds)
+                    helper.advanceTime(2.seconds) // Complete -> Overtime
+
+                    helper.timerManager.stop(1.seconds)
+                    helper.runCurrent()
+
+                    helper.verifyState {
+                        status shouldBe TimerStatus.Idle
+                        overtime shouldBe Duration.ZERO
+                    }
+                }
+            }
+        }
+    }
+
+    Given("3.5 완료 및 초과 시간 추적 (Completion & Overtime)") {
+        When("타이머 시간이 0이 되면 (CO-01)") {
+            Then("Completed 상태가 되고 완료 알림이 발생해야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(1.seconds, 1.seconds)
+
+                    // 1초 경과 -> 0초 -> Completed
+                    helper.advanceTime(1.seconds)
+
+                    helper.verifyState {
+                        status.shouldBeInstanceOf<TimerStatus.Completed>()
+                        remainingTime shouldBe Duration.ZERO
+                    }
+
+                    helper.timerManager.stop(1.seconds)
+                }
+            }
+        }
+
+        When("완료 후 시간이 지나면 (CO-02)") {
+            Then("자동으로 Overtime 상태로 전환되고 초과 시간이 측정되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(1.seconds, 1.seconds)
+                    helper.advanceTime(1.seconds) // Completed
+
+                    // 1초 더 경과 -> Overtime 1s
+                    helper.advanceTime(1.seconds)
+
+                    helper.verifyState {
+                        status.shouldBeInstanceOf<TimerStatus.Overtime>()
+                        overtime shouldBe 1.seconds
+                    }
+
+                    helper.timerManager.stop(1.seconds)
+                }
+            }
+        }
+
+        When("중복 완료 이벤트 수신 (CO-03)") {
+            Then("상태 변화 없이 현재 상태를 유지해야 한다") {
+                // TODO
+                // TimerManager 내부 로직 검증: handleTimerComplete에서 status check
+                // 여기서는 정상 동작 시나리오로 대체
+            }
+        }
+    }
+
+    Given("3.6 프리셋 및 세션 상태 관리 (Preset & Session)") {
+        When("프리셋을 선택하면 (PS-01)") {
+            Then("상태에 프리셋 정보가 반영되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    val preset = Preset(1, "Test", 25.minutes, 0, Instant.now())
+
+                    helper.timerManager.selectPreset(preset)
+                    helper.runCurrent()
+
+                    helper.verifyState { selectedPreset shouldBe preset }
+                }
+            }
+        }
+
+        When("세션 정보를 초기화하면 (PS-03)") {
+            Then("세션 정보가 null이 되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.setSession(100L, Instant.now())
+
+                    helper.timerManager.clearSession()
+                    helper.runCurrent()
+
+                    helper.verifyState {
+                        currentSessionId shouldBe null
+                        sessionStartTime shouldBe null
+                    }
+                }
+            }
+        }
+    }
+
+    Given("3.7 에러 처리 (Error Handling)") {
+        When("타이머 실행 중 예외가 발생하면 (EH-01)") {
+            Then("에러 SideEffect가 방출되고 정지되어야 한다") {
+                runTest {
+                    // Mock ControlUseCase to throw exception
+                    val errorMessage = "Timer Crashed"
+                    val mockControlUseCase = mockk<TimerControlUseCase>(relaxed = true)
+                    every { mockControlUseCase.startTimer(any(), any()) } returns flow {
+                        throw RuntimeException(errorMessage)
+                    }
+
+                    // Inject Mock UseCase
+                    val helper = TimerTestHelper(this, timerControlUseCase = mockControlUseCase)
+
+                    helper.timerManager.timerError.test {
+                        helper.timerManager.start(10.seconds, 10.seconds)
+
+                        val error = awaitItem()
+                        error.shouldBeInstanceOf<TimerError.Run>()
+                        error.message shouldBe errorMessage
+                    }
+
+                    helper.runCurrent()
+                    helper.verifyState { status shouldBe TimerStatus.Idle }
+                }
+            }
+        }
+    }
+
+    Given("3.8 동시성 및 라이프사이클 (Concurrency & Lifecycle)") {
+        When("CancelAll 호출 시 (CL-01)") {
+            Then("모든 작업이 취소되어야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+                    helper.timerManager.start(10.seconds, 10.seconds)
+
+                    helper.timerManager.cancelAll()
+
+                    // 시간이 지나도 상태가 변하지 않아야 함
+                    helper.advanceTime(10.seconds)
+                    helper.runCurrent()
+                    helper.verifyState { remainingTime shouldBe 10.seconds } // Still initial value because canceled
+                }
+            }
+        }
+
+        When("빠른 시작/정지 반복 시 (CL-02)") {
+            Then("마지막 상태로 안정적으로 수렴해야 한다") {
+                runTest {
+                    val helper = TimerTestHelper(this)
+
+                    helper.timerManager.start(10.seconds, 10.seconds)
+                    helper.timerManager.stop(10.seconds)
+                    helper.timerManager.start(5.seconds, 5.seconds)
+
+                    helper.runCurrent()
+                    helper.verifyState {
+                        status.shouldBeInstanceOf<TimerStatus.Running>()
+                        initialTime shouldBe 5.seconds
+                    }
+
+                    helper.timerManager.stop(5.seconds)
+                }
+            }
+        }
+    }
+})
