@@ -4,12 +4,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.timer.model.TimerDialogState
 import com.jm.harufocus.timer.model.TimerIntent
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.util.calculateDurationFromPickerStates
-import com.jm.harufocus.timer.util.sendTimerServiceAction
 import com.jm.harufocus.ui.component.PickerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -67,12 +65,6 @@ fun TimerDialogs(
                 onConfirm = { time ->
                     onIntent(TimerIntent.SetTime(time))
                     onIntent(TimerIntent.Start())
-
-                    // 서비스 시작
-                    context.sendTimerServiceAction(
-                        action = TimerServiceAction.ACTION_START,
-                        durationMillis = time.inWholeMilliseconds
-                    )
 
                     onDialogStateChange(TimerDialogState.None)
                 }

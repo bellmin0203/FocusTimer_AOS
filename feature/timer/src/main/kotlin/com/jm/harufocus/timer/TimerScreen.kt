@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.timer.component.LandscapeTimerLayout
@@ -59,6 +60,7 @@ import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.model.toUiText
 import com.jm.harufocus.timer.usecase.TimerStatus
 import com.jm.harufocus.timer.util.getPresetColorScheme
+import com.jm.harufocus.timer.util.sendTimerServiceAction
 import com.jm.harufocus.ui.component.rememberPickerState
 import com.jm.harufocus.ui.util.PreviewProvider
 import com.jm.logutil.LogUtil
@@ -138,6 +140,30 @@ fun TimerScreen(
 
                 is TimerSideEffect.RequestInAppReview -> {
                     onRequestInAppReview()
+                }
+
+                // 서비스 제어 SideEffects 처리
+                is TimerSideEffect.StartTimerService -> {
+                    context.sendTimerServiceAction(
+                        TimerServiceAction.ACTION_START,
+                        effect.durationMillis
+                    )
+                }
+
+                is TimerSideEffect.PauseTimerService -> {
+                    context.sendTimerServiceAction(TimerServiceAction.ACTION_PAUSE)
+                }
+
+                is TimerSideEffect.ResumeTimerService -> {
+                    context.sendTimerServiceAction(TimerServiceAction.ACTION_RESUME)
+                }
+
+                is TimerSideEffect.StopTimerService -> {
+                    context.sendTimerServiceAction(TimerServiceAction.ACTION_STOP)
+                }
+
+                is TimerSideEffect.CompleteTimerService -> {
+                    context.sendTimerServiceAction(TimerServiceAction.ACTION_COMPLETE)
                 }
             }
         }

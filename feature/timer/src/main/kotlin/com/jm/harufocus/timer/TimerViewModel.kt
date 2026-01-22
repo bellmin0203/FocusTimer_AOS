@@ -356,7 +356,8 @@ class TimerViewModel @Inject constructor(
         )
 
         LogUtil.d("타이머 시작 요청")
-        // 실제 타이머 시작은 TimerService에서 처리
+        // 서비스 시작 요청
+        emitSideEffect(TimerSideEffect.StartTimerService(currentState.remainingTime.inWholeMilliseconds))
     }
 
     /**
@@ -382,7 +383,8 @@ class TimerViewModel @Inject constructor(
         )
 
         LogUtil.d("타이머 일시정지 요청")
-        // 실제 일시정지는 TimerService에서 처리
+        // 서비스 일시정지 요청
+        emitSideEffect(TimerSideEffect.PauseTimerService)
     }
 
     /**
@@ -406,7 +408,8 @@ class TimerViewModel @Inject constructor(
         )
 
         LogUtil.d("타이머 재개 요청")
-        // 실제 재개는 TimerService에서 처리
+        // 서비스 재개 요청
+        emitSideEffect(TimerSideEffect.ResumeTimerService)
     }
 
     /**
@@ -431,7 +434,8 @@ class TimerViewModel @Inject constructor(
         }
 
         LogUtil.d("타이머 정지 요청")
-        // 실제 정지 및 초기화는 TimerService에서 처리
+        // 서비스 정지 요청
+        emitSideEffect(TimerSideEffect.StopTimerService)
     }
 
     /**
@@ -462,6 +466,7 @@ class TimerViewModel @Inject constructor(
                 R.string.snackbar_timer_completed
             )
         )
+        emitSideEffect(TimerSideEffect.CompleteTimerService)
     }
 
     /**

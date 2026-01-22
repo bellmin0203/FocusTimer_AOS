@@ -36,6 +36,13 @@ sealed interface TimerSideEffect {
      * @param remainingTime 남은 시간 (초)
      */
     data class ShowReminder(val remainingTime: Duration) : TimerSideEffect
+
+    // 서비스 제어 SideEffects
+    data class StartTimerService(val durationMillis: Long) : TimerSideEffect
+    data object PauseTimerService : TimerSideEffect
+    data object ResumeTimerService : TimerSideEffect
+    data object StopTimerService : TimerSideEffect
+    data object CompleteTimerService : TimerSideEffect
 }
 
 enum class HapticPattern {

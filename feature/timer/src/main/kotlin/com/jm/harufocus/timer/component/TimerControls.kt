@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.designsystem.component.FocusIconButton
 import com.jm.harufocus.designsystem.component.TimerColorScheme
 import com.jm.harufocus.designsystem.icon.HaruFocusIcons
@@ -32,7 +31,6 @@ import com.jm.harufocus.timer.R
 import com.jm.harufocus.timer.model.TimerIntent
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.util.getPresetColorScheme
-import com.jm.harufocus.timer.util.sendTimerServiceAction
 
 /**
  * 타이머 컨트롤 버튼들을 담당하는 섹션 컴포넌트
@@ -86,11 +84,8 @@ internal fun TimerControlButtons(
     if (uiState.isCompleted) {
         FocusIconButton(
             onClick = {
-                // 타이머 완료 처리 (Snackbar 표시)
+                // 타이머 완료 처리 (Snackbar 표시 및 서비스 완료 요청)
                 onIntent(TimerIntent.Complete)
-
-                // 서비스에 완료 처리 요청
-                context.sendTimerServiceAction(TimerServiceAction.ACTION_COMPLETE)
             },
             icon = HaruFocusIcons.Check,
             contentDescription = stringResource(R.string.content_description_complete),
@@ -105,22 +100,16 @@ internal fun TimerControlButtons(
                     uiState.isPaused -> {
                         // 타이머 재개 (Paused 상태를 먼저 체크해야 함)
                         onIntent(TimerIntent.Resume)
-                        context.sendTimerServiceAction(TimerServiceAction.ACTION_RESUME)
                     }
 
                     uiState.isIdle -> {
                         // 타이머 시작 (Idle 상태에서만)
                         onIntent(TimerIntent.Start())
-                        context.sendTimerServiceAction(
-                            action = TimerServiceAction.ACTION_START,
-                            durationMillis = uiState.remainingTime.inWholeMilliseconds
-                        )
                     }
 
                     else -> {
                         // 타이머 일시정지
                         onIntent(TimerIntent.Pause)
-                        context.sendTimerServiceAction(TimerServiceAction.ACTION_PAUSE)
                     }
                 }
             },
@@ -140,7 +129,6 @@ internal fun TimerControlButtons(
                 onClick = {
                     // 타이머 정지
                     onIntent(TimerIntent.Stop)
-                    context.sendTimerServiceAction(TimerServiceAction.ACTION_STOP)
                 },
                 icon = HaruFocusIcons.RestartAlt,
                 contentDescription = stringResource(R.string.content_description_reset)
