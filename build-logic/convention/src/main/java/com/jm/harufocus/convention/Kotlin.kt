@@ -13,24 +13,11 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 internal fun Project.configureKotlinAndroid() {
     // Android settings
-    androidExtension.apply {
-        compileSdk = 36
-
-        defaultConfig {
-            minSdk = 26
-        }
-
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
-        }
-
-        testOptions {
-            unitTests {
-                isIncludeAndroidResources = true
-            }
-        }
-    }
+    androidExtension.compileSdk = 36
+    androidExtension.defaultConfig.minSdk = 26
+    androidExtension.compileOptions.sourceCompatibility = JavaVersion.VERSION_17
+    androidExtension.compileOptions.targetCompatibility = JavaVersion.VERSION_17
+    androidExtension.testOptions.unitTests.isIncludeAndroidResources = true
     println(">>> configureKotlinAndroid done")
 
     configureKotlin<KotlinAndroidProjectExtension>()

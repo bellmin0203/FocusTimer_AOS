@@ -8,9 +8,5 @@ internal fun Project.configureKotestAndroid() {
 }
 
 internal fun Project.configureJUnitAndroid() {
-    androidExtension.apply {
-        testOptions {
-            unitTests.all { it.useJUnitPlatform() }
-        }
-    }
+    androidExtension.testOptions.unitTests.all { it.useJUnitPlatform() }
 }

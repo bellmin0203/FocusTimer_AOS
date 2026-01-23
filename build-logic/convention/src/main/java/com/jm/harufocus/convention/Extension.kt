@@ -19,13 +19,13 @@ val Project.libs
  *
  * 공통적인 DSL(compileSdk, defaultConfig 등)
  */
-internal val Project.applicationExtension: CommonExtension<*, *, *, *, *, *>
+internal val Project.applicationExtension: ApplicationExtension
     get() = extensions.getByType<ApplicationExtension>()
 
 /**
  * @return com.android.library 플러그인 적용된 프로젝트에서 제공
  */
-internal val Project.libraryExtension: CommonExtension<*, *, *, *, *, *>
+internal val Project.libraryExtension: LibraryExtension
     get() = extensions.getByType<LibraryExtension>()
 
 /**
@@ -35,7 +35,7 @@ internal val Project.libraryExtension: CommonExtension<*, *, *, *, *, *>
  *
  * 둘 다 없으면 에러 발생
  */
-internal val Project.androidExtension: CommonExtension<*, *, *, *, *, *>
+internal val Project.androidExtension: CommonExtension
     get() = kotlin.runCatching { libraryExtension }
         .recoverCatching { applicationExtension }
         .onFailure { println("Could not find Library or Application extension from this project") }

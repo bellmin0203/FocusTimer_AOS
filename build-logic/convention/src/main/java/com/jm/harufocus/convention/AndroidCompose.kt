@@ -6,21 +6,19 @@ import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 
 internal fun Project.configureAndroidCompose() {
-    androidExtension.apply {
-        buildFeatures {
-            compose = true
-        }
+    androidExtension.buildFeatures.compose = true
 
-        dependencies {
-            val bom = libs.findLibrary("androidx-compose-bom").get()
-            "implementation"(platform(bom))
-            "androidTestImplementation"(platform(bom))
-            "debugImplementation"(libs.findLibrary("androidx.compose.ui.tooling").get())
+    dependencies {
+        val bom = libs.findLibrary("androidx-compose-bom").get()
+        "implementation"(platform(bom))
+        "androidTestImplementation"(platform(bom))
+        "debugImplementation"(libs.findLibrary("androidx.compose.ui.tooling").get())
 
-            "implementation"(libs.findBundle("compose").get())
-            "debugImplementation"(libs.findBundle("compose.debug").get())
-        }
+        "implementation"(libs.findBundle("compose").get())
+        "debugImplementation"(libs.findBundle("compose.debug").get())
     }
+
+
 
     extensions.getByType<ComposeCompilerGradlePluginExtension>().apply {
         /**
