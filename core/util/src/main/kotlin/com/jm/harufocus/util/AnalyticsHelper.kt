@@ -108,7 +108,7 @@ class AnalyticsHelper @Inject constructor(
             param(Param.ELAPSED_MINUTES, elapsedMinutes)
             param(Param.COMPLETION_RATE, completionRate.toLong())
         }
-        LogUtil.d("Timer stopped: remaining=$remainingMinutes min, elapsed=$elapsedMinutes min, rate=$completionRate%")
+        LogUtil.d("Timer stopped: remaining=$remainingMinutes min, elapsed=$elapsedMinutes min, rate=$completionRate%%")
     }
 
     /**
