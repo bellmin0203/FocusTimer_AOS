@@ -5,6 +5,7 @@ import com.jm.harufocus.timer.service.TimerNotificationHelper
 import com.jm.harufocus.util.AnalyticsHelper
 import com.jm.harufocus.util.CrashReporter
 import com.jm.harufocus.widget.HaruFocusWidgetUpdater
+import com.jm.logutil.LogMode
 import com.jm.logutil.LogUtil
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -33,7 +34,9 @@ class HaruFocusApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        LogUtil.init(context = this, tag = "HaruFocusApp")
+        val logMode = if (BuildConfig.DEBUG) LogMode.ALL else LogMode.NONE
+        LogUtil.init(context = this, logMode = logMode, tag = "HaruFocusApp")
+
         CrashReporter.init(isEnabled = !BuildConfig.DEBUG)
 
         // Analytics는 Release 빌드에서만 활성화
