@@ -19,13 +19,13 @@ val Project.libs
  *
  * 공통적인 DSL(compileSdk, defaultConfig 등)
  */
-internal val Project.applicationExtension: ApplicationExtension
+internal val Project.applicationExtension: CommonExtension
     get() = extensions.getByType<ApplicationExtension>()
 
 /**
  * @return com.android.library 플러그인 적용된 프로젝트에서 제공
  */
-internal val Project.libraryExtension: LibraryExtension
+internal val Project.libraryExtension: CommonExtension
     get() = extensions.getByType<LibraryExtension>()
 
 /**
