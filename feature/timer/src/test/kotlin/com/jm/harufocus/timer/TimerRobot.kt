@@ -1,25 +1,29 @@
 package com.jm.harufocus.timer
 
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
-import com.jm.harufocus.common.model.NotificationSoundType
 import com.jm.harufocus.common.time.TimeProvider
 import com.jm.harufocus.domain.repository.SettingsRepository
+import com.jm.harufocus.domain.usecase.preset.ManagePresetUseCase
+import com.jm.harufocus.domain.usecase.review.CanRequestReviewUseCase
+import com.jm.harufocus.setting.util.FakeSettingsRepository
 import com.jm.harufocus.timer.model.TimerIntent
 import com.jm.harufocus.timer.model.TimerSideEffect
 import com.jm.harufocus.timer.model.TimerUiState
 import com.jm.harufocus.timer.usecase.CountdownTimerUseCase
 import com.jm.harufocus.timer.usecase.TimerControlUseCase
+import com.jm.harufocus.util.AnalyticsHelper
+import com.jm.harufocus.util.NotificationSoundPlayer
+import com.jm.harufocus.widget.HaruFocusWidgetUpdater
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * ⏱️ TimerTestHelper (DSL)
@@ -32,7 +36,13 @@ import kotlin.time.Duration.Companion.minutes
 class TimerRobot(
     private val scope: TestScope,
     val timeProvider: TimeProvider = mockk(relaxed = true),
-    val timerControlUseCase: TimerControlUseCase = TimerControlUseCase(CountdownTimerUseCase())
+    val timerControlUseCase: TimerControlUseCase = TimerControlUseCase(CountdownTimerUseCase()),
+    val managePresetUseCase: ManagePresetUseCase = mockk(relaxed = true),
+    val analyticsHelper: AnalyticsHelper = mockk(relaxed = true),
+    val notificationSoundPlayer: NotificationSoundPlayer = mockk(relaxed = true),
+    val widgetUpdater: HaruFocusWidgetUpdater = mockk(relaxed = true),
+    val canRequestReviewUseCase: CanRequestReviewUseCase = mockk(relaxed = true),
+    val settingsRepository: SettingsRepository = FakeSettingsRepository()
 ) {
     // 1. Core Logic Setup
 
@@ -44,30 +54,20 @@ class TimerRobot(
     )
 
     // 2. Default Mock Setup (Settings)
-    private val settingsRepository = mockk<SettingsRepository>(relaxed = true) {
-        every { isScreenOn } returns flowOf(true)
-        every { isHapticFeedback } returns flowOf(true)
-        every { isTickSound } returns flowOf(true)
-        every { isMinimizedControls } returns flowOf(false)
-        every { isPulseAnimationEnabled } returns flowOf(true)
-        every { isScreenRotationEnabled } returns flowOf(false)
-        every { isRememberLastSession } returns flowOf(true)
-        every { defaultPresetId } returns flowOf(null)
-        every { defaultSessionDuration } returns flowOf(25.minutes)
-        every { notificationSoundType } returns flowOf(NotificationSoundType.BELL)
-        every { isNotificationVibrate } returns flowOf(true)
-    }
+    // Removed: val settingsRepository: SettingsRepository = FakeSettingsRepository()
 
     // 3. ViewModel Initialization
-    val viewModel = TimerViewModel(
-        timerManager = timerManager,
-        managePresetUseCase = mockk(relaxed = true),
-        settingsRepository = settingsRepository,
-        notificationSoundPlayer = mockk(relaxed = true),
-        widgetUpdater = mockk(relaxed = true),
-        canRequestReviewUseCase = mockk(relaxed = true),
-        analyticsHelper = mockk(relaxed = true),
-    )
+    val viewModel: TimerViewModel =
+        TimerViewModel(
+            timerManager = timerManager,
+            managePresetUseCase = managePresetUseCase,
+            settingsRepository = settingsRepository,
+            notificationSoundPlayer = notificationSoundPlayer,
+            widgetUpdater = widgetUpdater,
+            canRequestReviewUseCase = canRequestReviewUseCase,
+            analyticsHelper = analyticsHelper
+        )
+
 
     // 가상 시간과 동기화될 Mock Time
     private var currentMockTime = 1000L
@@ -75,6 +75,7 @@ class TimerRobot(
     init {
         // Mock TimeProvider가 항상 currentMockTime을 반환하도록 설정
         every { timeProvider.currentTimeMillis() } answers { currentMockTime }
+        scope.runCurrent()
     }
 
     // --- ⏳ Time Control DSL ---
@@ -114,20 +115,43 @@ class TimerRobot(
     fun start(reminderThresholds: List<Duration> = emptyList()) {
         viewModel.onIntent(TimerIntent.Start(reminderThresholds = reminderThresholds))
         scope.runCurrent()
+        
+        // Simulate Service: SideEffect를 받아서 TimerManager 시작
+        val state = viewModel.uiState.value
+        if (state.remainingTime > Duration.ZERO && !state.isRunning) {
+            timerManager.start(state.initialTime, state.remainingTime, reminderThresholds)
+            scope.runCurrent()
+        }
     }
 
     fun pause() {
         viewModel.onIntent(TimerIntent.Pause)
         scope.runCurrent()
+        
+        // Simulate Service
+        if (viewModel.uiState.value.isRunning) {
+            timerManager.pause()
+            scope.runCurrent()
+        }
     }
 
     fun resume() {
         viewModel.onIntent(TimerIntent.Resume)
         scope.runCurrent()
+        
+        // Simulate Service
+        if (viewModel.uiState.value.isPaused) {
+            timerManager.resume()
+            scope.runCurrent()
+        }
     }
 
     fun stop() {
         viewModel.onIntent(TimerIntent.Stop)
+        scope.runCurrent()
+        
+        // Simulate Service
+        timerManager.stop(viewModel.uiState.value.initialTime)
         scope.runCurrent()
     }
 
@@ -138,6 +162,16 @@ class TimerRobot(
 
     fun complete() {
         viewModel.onIntent(TimerIntent.Complete)
+        scope.runCurrent()
+
+        if (viewModel.uiState.value.isOvertime) {
+            timerManager.stop(viewModel.uiState.value.initialTime)
+            scope.runCurrent()
+        }
+    }
+
+    fun onIntent(intent: TimerIntent) {
+        viewModel.onIntent(intent)
         scope.runCurrent()
     }
 
@@ -156,6 +190,25 @@ class TimerRobot(
     suspend fun verifySideEffect(block: (TimerSideEffect) -> Unit) {
         viewModel.sideEffect.test {
             block(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    suspend fun testSideEffects(
+        validate: suspend TurbineTestContext<TimerSideEffect>.() -> Unit
+    ) {
+        viewModel.sideEffect.test {
+            validate()
+        }
+    }
+
+    /**
+     * SideEffect를 하나 소비하고 무시합니다.
+     * 테스트 시나리오상 발생했지만 검증할 필요가 없는 이전 이벤트를 처리할 때 사용합니다.
+     */
+    suspend fun consumeSideEffect() {
+        viewModel.sideEffect.test {
+            awaitItem()
             cancelAndIgnoreRemainingEvents()
         }
     }
