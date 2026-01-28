@@ -1,5 +1,6 @@
 package com.jm.harufocus.convention
 
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
@@ -18,7 +19,21 @@ internal fun Project.configureAndroidCompose() {
         "debugImplementation"(libs.findBundle("compose.debug").get())
     }
 
+    // testFixtures 설정은 build.gradle.kts 본문에서 활성화되므로,
+    // 평가가 끝난 시점에 확인해야 정확함
+    afterEvaluate {
+        val isTestFixturesEnabled = (androidExtension as? LibraryExtension)?.testFixtures?.enable == true
+        val testFixturesImpl = configurations.findByName("testFixturesImplementation")
 
+        if (isTestFixturesEnabled && testFixturesImpl != null) {
+            dependencies {
+                val bom = libs.findLibrary("androidx-compose-bom").get()
+                "testFixturesImplementation"(platform(bom))
+                "testFixturesImplementation"(libs.findBundle("compose").get())
+            }
+            println(">>> Auto-added Compose dependencies to testFixturesImplementation for project: $name")
+        }
+    }
 
     extensions.getByType<ComposeCompilerGradlePluginExtension>().apply {
         /**
