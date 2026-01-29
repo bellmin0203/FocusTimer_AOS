@@ -1,19 +1,15 @@
 package com.jm.harufocus.stats
 
-import com.jm.harufocus.data.util.DummyDataHelper
 import com.jm.harufocus.domain.model.statistics.AchievementMetrics
 import com.jm.harufocus.domain.model.statistics.DailyStats
 import com.jm.harufocus.domain.model.statistics.MonthlyStats
 import com.jm.harufocus.domain.model.statistics.WeeklyStats
 import com.jm.harufocus.domain.usecase.statistics.GetAchievementMetricsUseCase
 import com.jm.harufocus.domain.usecase.statistics.GetDailyStatsUseCase
-import com.jm.harufocus.domain.usecase.statistics.GetMonthlyStatsUseCase
-import com.jm.harufocus.domain.usecase.statistics.GetWeeklyStatsUseCase
 import com.jm.harufocus.stats.model.StatsPeriod
-import com.jm.logutil.LogUtil
+import com.jm.harufocus.util.CrashReporter
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -22,275 +18,289 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
-import io.mockk.unmockkStatic
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class StatsViewModelTest : BehaviorSpec({
 
-    // 테스트용 Dispatcher 설정
-    val testDispatcher = StandardTestDispatcher()
-
-    // Mocks
-    val getDailyStatsUseCase: GetDailyStatsUseCase = mockk()
-    val getWeeklyStatsUseCase: GetWeeklyStatsUseCase = mockk()
-    val getMonthlyStatsUseCase: GetMonthlyStatsUseCase = mockk()
-    val getAchievementMetricsUseCase: GetAchievementMetricsUseCase = mockk()
-    val dummyDataHelper: DummyDataHelper = mockk(relaxed = true)
-
-    // Dummy Response Models
-    val mockDailyStats: DailyStats = mockk(relaxed = true)
-    val mockWeeklyStats: WeeklyStats = mockk(relaxed = true)
-    val mockMonthlyStats: MonthlyStats = mockk(relaxed = true)
-    val mockAchievementMetrics: AchievementMetrics = mockk(relaxed = true)
-
-    // Fixed Date for Testing
-    val fixedDate = LocalDate.of(2026, 1, 5)
-
-    lateinit var viewModel: StatsViewModel
+    val testDispatcher: TestDispatcher = StandardTestDispatcher()
 
     beforeSpec {
         Dispatchers.setMain(testDispatcher)
-        mockkObject(LogUtil)
-        mockkStatic(LocalDate::class)
-        mockkStatic(YearMonth::class)
-        every { LocalDate.now() } returns fixedDate
-        every { YearMonth.now() } returns YearMonth.from(fixedDate)
-        every { LogUtil.d(any<String>()) } just Runs
-        every { LogUtil.d(any<String>(), any()) } just Runs
-        every { LogUtil.e(any<String>(), any()) } just Runs
+
+        mockkObject(CrashReporter)
+        every { CrashReporter.recordException(any(), any()) } just Runs
     }
 
     afterSpec {
         Dispatchers.resetMain()
-        unmockkStatic(LocalDate::class)
-        unmockkStatic(YearMonth::class)
-        unmockkAll()
+
+        unmockkObject(CrashReporter)
     }
 
-    beforeContainer {
-        clearMocks(
-            getDailyStatsUseCase,
-            getWeeklyStatsUseCase,
-            getMonthlyStatsUseCase,
-            getAchievementMetricsUseCase
-        )
+    Given("ViewModel이 초기화될 때") {
+        When("정상적으로 통계 데이터와 성취 지표를 불러오면") {
+            Then("초기 상태와 통계 데이터가 올바르게 업데이트되어야 한다") {
+                runTest {
+                    val testDailyStats = DailyStats(
+                        date = LocalDate.now(),
+                        totalFocusTime = Duration.ZERO,
+                        completedSessions = 0,
+                        hourlyBreakdown = emptyList(),
+                        mostProductiveHour = null
+                    )
+                    val testAchievementMetrics = AchievementMetrics(
+                        focusRate = 0.8,
+                        consecutiveFocusDays = 5,
+                        longestFocusTime = 30.minutes,
+                        averageSessionLength = 25.minutes,
+                        totalSessions = 10,
+                        completedSessions = 8,
+                        totalFocusTime = 200.minutes
+                    )
 
-        coEvery { getDailyStatsUseCase(any()) } returns mockDailyStats
-        coEvery { getWeeklyStatsUseCase(any()) } returns mockWeeklyStats
-        coEvery { getMonthlyStatsUseCase(any()) } returns mockMonthlyStats
-        coEvery { getAchievementMetricsUseCase() } returns mockAchievementMetrics
+                    val robot = StatsViewModelRobot(this)
+                    robot.setupDailyStats(testDailyStats)
+                    robot.setupAchievementMetrics(testAchievementMetrics)
 
-        viewModel = StatsViewModel(
-            getDailyStatsUseCase,
-            getWeeklyStatsUseCase,
-            getMonthlyStatsUseCase,
-            getAchievementMetricsUseCase,
-            dummyDataHelper
-        )
-        testDispatcher.scheduler.advanceUntilIdle()
-    }
+                    robot.createViewModel()
 
-    // 각 테스트 케이스 실행 전 기본 Mock 설정
-    beforeTest {
-
-    }
-
-    Given("StatsViewModel이 초기화될 때") {
-        When("초기 상태를 확인하면") {
-            Then("기본 기간은 DAILY여야 한다") {
-                viewModel.uiState.value.selectedPeriod shouldBe StatsPeriod.DAILY
-            }
-
-            Then("오늘 날짜의 통계 데이터를 불러와야 한다") {
-                viewModel.uiState.value.dailyStats shouldBe mockDailyStats
-                coVerify(exactly = 1) { getDailyStatsUseCase(fixedDate) }
-            }
-
-            Then("성취 지표를 불러와야 한다") {
-                viewModel.uiState.value.achievementMetrics shouldBe mockAchievementMetrics
-                coVerify(exactly = 1) { getAchievementMetricsUseCase() }
-            }
-        }
-    }
-
-    Given("통계 기간을 변경할 때") {
-
-        When("주간(WEEKLY)으로 변경하면") {
-            viewModel.selectPeriod(StatsPeriod.WEEKLY)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            Then("기간 상태가 WEEKLY로 변경되어야 한다") {
-                viewModel.uiState.value.selectedPeriod shouldBe StatsPeriod.WEEKLY
-            }
-
-            Then("주간 통계 데이터를 불러와야 한다") {
-                viewModel.uiState.value.weeklyStats shouldBe mockWeeklyStats
-                coVerify { getWeeklyStatsUseCase(any()) }
+                    robot.verifyState {
+                        selectedPeriod shouldBe StatsPeriod.DAILY
+                        dailyStats shouldBe testDailyStats
+                        achievementMetrics shouldBe testAchievementMetrics
+                        isLoading shouldBe false
+                        error shouldBe null
+                    }
+                }
             }
         }
 
-        When("월간(MONTHLY)으로 변경하면") {
-            viewModel.selectPeriod(StatsPeriod.MONTHLY)
-            testDispatcher.scheduler.advanceUntilIdle()
+        When("성취 지표 로드에 실패하면") {
+            Then("에러를 발생시키지 않고 성취 지표만 비어있어야 한다") {
+                runTest {
+                    val getAchievementMetricsUseCase = mockk<GetAchievementMetricsUseCase>()
+                    coEvery { getAchievementMetricsUseCase() } throws Exception("Test error")
 
-            Then("기간 상태가 MONTHLY로 변경되어야 한다") {
-                viewModel.uiState.value.selectedPeriod shouldBe StatsPeriod.MONTHLY
-            }
+                    val robot = StatsViewModelRobot(
+                        scope = this,
+                        getAchievementMetricsUseCase = getAchievementMetricsUseCase
+                    )
+                    robot.createViewModel()
 
-            Then("월간 통계 데이터를 불러와야 한다") {
-                viewModel.uiState.value.monthlyStats shouldBe mockMonthlyStats
-                coVerify { getMonthlyStatsUseCase(any()) }
+                    verify { CrashReporter.recordException(any(), "성취 지표 로드 실패") }
+                    robot.verifyState {
+                        achievementMetrics shouldBe null
+                    }
+                }
             }
         }
     }
 
-    Given("이전 기간으로 이동할 때 (Navigate Previous)") {
+    Given("기간 선택 기능에서") {
+        When("사용자가 주간 기간을 선택하면") {
+            Then("주간 통계를 로드하고 UI 상태를 업데이트해야 한다") {
+                runTest {
+                    val testWeeklyStats = WeeklyStats(
+                        weekStartDate = LocalDate.now(),
+                        weekEndDate = LocalDate.now(),
+                        totalFocusTime = Duration.ZERO,
+                        dailyBreakdown = emptyList(),
+                        averageSessionsPerDay = 0.0,
+                        mostProductiveDay = null,
+                        growthRate = 0.0
+                    )
+                    val robot = StatsViewModelRobot(this)
+                    robot.setupWeeklyStats(testWeeklyStats)
+                    robot.createViewModel()
 
-        When("Daily 모드에서 이전 버튼을 누르면") {
-            viewModel.selectPeriod(StatsPeriod.DAILY)
-            testDispatcher.scheduler.advanceUntilIdle()
+                    robot.selectPeriod(StatsPeriod.WEEKLY)
 
-            val initialCallCount = 1 // init에서 1회 호출됨
-            viewModel.navigateToPreviousPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            Then("하루 전 데이터가 로드되어야 한다") {
-                val slots = mutableListOf<LocalDate>()
-                // init(오늘) + navigatePrevious(어제) = 총 2회 호출 확인
-                coVerify(atLeast = 2) { getDailyStatsUseCase(capture(slots)) }
-
-                // 마지막으로 호출된 인자가 어제 날짜인지 확인
-                slots.last() shouldBe fixedDate.minusDays(1)
+                    robot.verifyState {
+                        selectedPeriod shouldBe StatsPeriod.WEEKLY
+                        weeklyStats shouldBe testWeeklyStats
+                    }
+                    coVerify { robot.getWeeklyStatsUseCase() }
+                }
             }
         }
 
-        When("Weekly 모드에서 이전 버튼을 누르면") {
-            viewModel.navigateToToday() // 상태 초기화 (날짜를 오늘로)
-            testDispatcher.scheduler.advanceUntilIdle()
+        When("사용자가 월간 기간을 선택하면") {
+            Then("월간 통계를 로드하고 UI 상태를 업데이트해야 한다") {
+                runTest {
+                    val testMonthlyStats = MonthlyStats(
+                        yearMonth = YearMonth.now(),
+                        totalFocusTime = Duration.ZERO,
+                        weeklyBreakdown = emptyList(),
+                        averageSessionsPerWeek = 0.0,
+                        mostProductiveWeek = null,
+                        growthRate = 0.0
+                    )
+                    val robot = StatsViewModelRobot(this)
+                    robot.setupMonthlyStats(testMonthlyStats)
+                    robot.createViewModel()
 
-            viewModel.selectPeriod(StatsPeriod.WEEKLY)
-            testDispatcher.scheduler.advanceUntilIdle()
+                    robot.selectPeriod(StatsPeriod.MONTHLY)
 
-            viewModel.navigateToPreviousPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            Then("지난주 데이터가 로드되어야 한다") {
-                val slots = mutableListOf<LocalDate>()
-                coVerify { getWeeklyStatsUseCase(capture(slots)) }
-                println("slots: $slots")
-
-                // Weekly 로직상 currentDate.minusWeeks(1)이 호출됨
-                slots.last() shouldBe fixedDate.minusWeeks(1)
-            }
-        }
-
-        When("Monthly 모드에서 이전 버튼을 누르면") {
-            viewModel.navigateToToday() // 상태 초기화
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            viewModel.selectPeriod(StatsPeriod.MONTHLY)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            viewModel.navigateToPreviousPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            Then("지난달 데이터가 로드되어야 한다") {
-                val slots = mutableListOf<YearMonth>()
-                coVerify { getMonthlyStatsUseCase(capture(slots)) }
-
-                slots.last() shouldBe YearMonth.now().minusMonths(1)
+                    robot.verifyState {
+                        selectedPeriod shouldBe StatsPeriod.MONTHLY
+                        monthlyStats shouldBe testMonthlyStats
+                    }
+                    coVerify { robot.getMonthlyStatsUseCase() }
+                }
             }
         }
     }
 
-    Given("다음 기간으로 이동할 때 (Navigate Next)") {
+    Given("기간 이동 기능에서") {
+        When("이전 기간으로 이동하면 - Daily") {
+            Then("선택된 기간의 이전 날짜로 변경하고 통계를 다시 로드해야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.createViewModel()
 
-        When("오늘 날짜에서 다음 버튼을 누르면 (미래 이동 시도)") {
-            // 초기 상태는 오늘임
-            viewModel.navigateToNextPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
+                    robot.navigateToPreviousPeriod()
 
-            Then("날짜가 변경되지 않아야 한다 (UseCase 추가 호출 없음)") {
-
-                // init에서 1번 호출된 것 외에 추가 호출이 없어야 함
-                coVerify(exactly = 1) { getDailyStatsUseCase(any()) }
+                    val yesterday = LocalDate.now().minusDays(1)
+                    coVerify { robot.getDailyStatsUseCase(yesterday) }
+                }
             }
         }
 
-        When("과거 날짜로 이동 후 다음 버튼을 누르면") {
-            // 어제로 이동
-            viewModel.navigateToPreviousPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
+        When("이전 기간으로 이동하면 - Weekly") {
+            Then("선택된 기간의 이전 날짜로 변경하고 통계를 다시 로드해야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.createViewModel()
+                    robot.selectPeriod(StatsPeriod.WEEKLY)
 
-            // 다시 내일(오늘)로 이동
-            viewModel.navigateToNextPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
+                    robot.navigateToPreviousPeriod()
 
-            Then("오늘 날짜 데이터가 다시 로드되어야 한다") {
-                val slots = mutableListOf<LocalDate>()
-                coVerify(atLeast = 1) { getDailyStatsUseCase(capture(slots)) }
-                slots.last() shouldBe fixedDate
+                    val previousDate = LocalDate.now().minusWeeks(1)
+                    coVerify { robot.getWeeklyStatsUseCase(previousDate) }
+                }
+            }
+        }
+
+        When("이전 기간으로 이동하면 - Monthly") {
+            Then("선택된 기간의 이전 날짜로 변경하고 통계를 다시 로드해야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.createViewModel()
+                    robot.selectPeriod(StatsPeriod.MONTHLY)
+
+                    robot.navigateToPreviousPeriod()
+
+                    val previousDate = YearMonth.now().minusMonths(1)
+                    coVerify { robot.getMonthlyStatsUseCase(previousDate) }
+                }
+            }
+        }
+
+        When("다음 기간으로 이동하면 - 미래가 아닌 경우") {
+            Then("선택된 기간의 다음 날짜로 변경하고 통계를 다시 로드해야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.createViewModel()
+
+                    // 오늘 -> 어제
+                    robot.navigateToPreviousPeriod()
+                    clearMocks(robot.getDailyStatsUseCase, answers = false, recordedCalls = true)
+
+                    // 어제 -> 오늘
+                    robot.navigateToNextPeriod()
+
+                    coVerify(exactly = 1) { robot.getDailyStatsUseCase(LocalDate.now()) }
+                }
+            }
+        }
+
+        When("다음 기간으로 이동하면 - 미래로 이동 시도") {
+            Then("날짜가 변경되지 않고 통계를 다시 로드하지 않아야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.createViewModel()
+                    clearMocks(robot.getDailyStatsUseCase, answers = false, recordedCalls = true)
+
+                    robot.navigateToNextPeriod()
+
+                    coVerify(exactly = 0) { robot.getDailyStatsUseCase(LocalDate.now()) }
+                }
+            }
+        }
+
+        When("오늘로 이동 기능을 사용하면") {
+            Then("오늘 날짜로 변경하고 통계를 다시 로드해야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.createViewModel()
+
+                    // 오늘 -> 어제
+                    robot.navigateToPreviousPeriod()
+                    clearMocks(robot.getDailyStatsUseCase, answers = false, recordedCalls = true)
+
+                    // 어제 -> 오늘
+                    robot.navigateToToday()
+
+                    coVerify(exactly = 1) { robot.getDailyStatsUseCase(LocalDate.now()) }
+                }
             }
         }
     }
 
-    Given("오늘로 이동할 때 (Navigate To Today)") {
+    Given("데이터 로드 실패 시") {
+        When("통계 데이터 로드 중 에러가 발생하면") {
+            Then("에러 메시지를 UI 상태에 표시해야 한다") {
+                runTest {
+                    val getDailyStatsUseCase = mockk<GetDailyStatsUseCase>()
+                    coEvery { getDailyStatsUseCase(any()) } throws RuntimeException("Data load failed")
 
-        When("과거 날짜에서 오늘로 이동 버튼을 누르면") {
-            // 며칠 전으로 이동
-            viewModel.navigateToPreviousPeriod()
-            viewModel.navigateToPreviousPeriod()
-            testDispatcher.scheduler.advanceUntilIdle()
+                    val robot = StatsViewModelRobot(
+                        scope = this,
+                        getDailyStatsUseCase = getDailyStatsUseCase
+                    )
+                    robot.createViewModel()
 
-            viewModel.navigateToToday()
-            testDispatcher.scheduler.advanceUntilIdle()
+                    robot.verifyState {
+                        isLoading shouldBe false
+                        error shouldBe "통계를 불러오는데 실패했습니다: Data load failed"
+                    }
 
-            Then("오늘 날짜 데이터가 로드되어야 한다") {
-                val slots = mutableListOf<LocalDate>()
-                coVerify(atLeast = 1) { getDailyStatsUseCase(capture(slots)) }
-                slots.last() shouldBe fixedDate
-            }
-        }
-    }
-
-    Given("에러가 발생했을 때") {
-
-        When("통계 로드 중 예외가 발생하면") {
-            val errorMessage = "Network Error"
-            coEvery { getDailyStatsUseCase(any()) } throws RuntimeException(errorMessage)
-
-            // 로드 트리거 (현재 Daily 상태라고 가정)
-            viewModel.selectPeriod(StatsPeriod.DAILY)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            Then("에러 메시지가 상태에 반영되어야 한다") {
-                viewModel.uiState.value.error shouldNotBe null
-                viewModel.uiState.value.error shouldBe "통계를 불러오는데 실패했습니다: $errorMessage"
-
-                // LogUtil.e가 호출되었는지 확인
-                io.mockk.verify { LogUtil.e(any<String>(), any()) }
+                    verify { CrashReporter.recordException(any(), any()) }
+                }
             }
         }
 
-        When("에러를 클리어하면") {
-            // 에러 상태 만들기
-            viewModel.selectPeriod(StatsPeriod.DAILY)
-            testDispatcher.scheduler.advanceUntilIdle()
+        When("에러 메시지가 표시된 상태에서 에러를 확인하면") {
+            Then("에러 메시지가 초기화되어야 한다") {
+                runTest {
+                    val getDailyStatsUseCase = mockk<GetDailyStatsUseCase>()
+                    coEvery { getDailyStatsUseCase(any()) } throws RuntimeException("Data load failed")
 
-            viewModel.clearError()
-            testDispatcher.scheduler.advanceUntilIdle()
+                    val robot = StatsViewModelRobot(
+                        scope = this,
+                        getDailyStatsUseCase = getDailyStatsUseCase
+                    )
+                    robot.createViewModel()
 
-            Then("에러 메시지가 사라져야 한다") {
-                viewModel.uiState.value.error shouldBe null
+                    // 에러 상태 확인
+                    robot.verifyState { error shouldBe "통계를 불러오는데 실패했습니다: Data load failed" }
+
+                    // 에러 클리어
+                    robot.viewModel.clearError()
+
+                    robot.verifyState { error shouldBe null }
+                }
             }
         }
     }
