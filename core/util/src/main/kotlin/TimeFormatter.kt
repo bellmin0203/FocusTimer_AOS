@@ -52,6 +52,7 @@ object TimeFormatter {
             hours > 0 && minutes > 0 && secs > 0 -> "$hours$hUnit $minutes$mUnit $secs$sUnit"
             hours > 0 && minutes > 0 -> "$hours$hUnit $minutes$mUnit"
             hours > 0 -> "$hours$hUnit"
+            minutes > 0 && secs > 0 -> "$minutes$mUnit $secs$sUnit"
             minutes > 0 -> "$minutes$mUnit"
             else -> "$secs$sUnit"
         }
@@ -101,14 +102,14 @@ object TimeFormatter {
         val absSeconds = abs(seconds)
         val minutes = absSeconds / 60
         val secs = absSeconds % 60
-        return String.Companion.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
+        return String.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
     }
 
     /**
      * 퍼센트 포맷팅
      */
     fun formatPercentage(value: Float): String {
-        return String.Companion.format(Locale.getDefault(), "%.0f%%", value * 100)
+        return String.format(Locale.getDefault(), "%.0f%%", value * 100)
     }
 
 
