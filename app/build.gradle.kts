@@ -14,6 +14,16 @@ android {
     defaultConfig {
         testInstrumentationRunner = "com.jm.harufocus.HiltTestRunner"
     }
+
+    ndkVersion = "27.0.12077973"
+
+    buildTypes {
+        release {
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
+        }
+    }
 }
 
 dependencies {
