@@ -1,8 +1,10 @@
+import com.android.build.api.dsl.LibraryExtension
+
 plugins {
     alias(libs.plugins.my.android.library)
 }
 
-android {
+configure<LibraryExtension> {
     namespace = "com.jm.harufocus.testing"
 }
 

@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.TestExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -5,7 +6,7 @@ plugins {
     alias(libs.plugins.baselineprofile)
 }
 
-android {
+configure<TestExtension> {
     namespace = "com.jm.harufocus.baselineprofile"
     compileSdk = 36
 
@@ -35,8 +36,6 @@ android {
             }
         }
     }
-
-
 }
 
 kotlin {
