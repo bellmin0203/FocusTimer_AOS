@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ApplicationExtension
+
 plugins {
     alias(libs.plugins.my.android.application)
     alias(libs.plugins.my.android.compose)
@@ -8,14 +10,14 @@ plugins {
     alias(libs.plugins.play.services.oss.licenses)
 }
 
-android {
+configure<ApplicationExtension> {
     namespace = "com.jm.harufocus"
 
     defaultConfig {
         testInstrumentationRunner = "com.jm.harufocus.HiltTestRunner"
     }
 
-    ndkVersion = "27.0.12077973"
+    ndkVersion = libs.versions.ndk.get()
 
     buildTypes {
         release {

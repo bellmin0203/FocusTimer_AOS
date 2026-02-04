@@ -7,6 +7,9 @@ projectMinSdkVersion = "26"
 projectTargetSdkVersion = "36"
 projectCompileSdkVersion = "36"
 
+# NDK
+ndk = "27.0.12077973"
+
 agp = "9.0.0"
 kotlin = "2.3.0"
 coreKtx = "1.17.0"
@@ -264,4 +267,3 @@ my-hilt = { id = "my.hilt", version = "unspecified" }
 my-android-room = { id = "my.android.room", version = "unspecified" }
 my-android-presentation-ui = { id = "my.android.presentation.ui", version = "unspecified" }
 my-kotlin-library = { id = "my.kotlin.library", version = "unspecified" }
-
