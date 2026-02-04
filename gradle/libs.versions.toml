@@ -54,7 +54,7 @@ firebaseCrashlyticsPlugin = "3.0.6"
 firebaseBom = "34.8.0"
 
 # Google Play OSS Licenses
-ossLicenses = "17.3.0"
+ossLicenses = "17.4.0"
 ossLicensesPlugin = "0.10.10"
 
 # Google Play In-App Review
