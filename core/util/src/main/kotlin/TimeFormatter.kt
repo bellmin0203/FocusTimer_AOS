@@ -68,8 +68,8 @@ object TimeFormatter {
         val secs = absSeconds % 60
 
         return when {
-            hours > 0 -> String.Companion.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs)
-            else -> String.Companion.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
+            hours > 0 -> String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs)
+            else -> String.format(Locale.getDefault(), "%02d:%02d", minutes, secs)
         }
     }
 

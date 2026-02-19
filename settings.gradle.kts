@@ -14,6 +14,12 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -50,6 +56,7 @@ include(
     ":feature:stats",
     ":feature:setting",
     ":feature:widget",
+    ":feature:onboarding",
 )
 
 // performance

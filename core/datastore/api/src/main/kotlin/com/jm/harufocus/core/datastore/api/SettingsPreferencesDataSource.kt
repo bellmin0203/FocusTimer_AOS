@@ -87,6 +87,6 @@ interface SettingsPreferencesDataSource {
         const val DEFAULT_IS_HAPTIC_FEEDBACK = false
         const val DEFAULT_IS_MINIMIZED_CONTROLS = true
         const val DEFAULT_IS_PULSE_ANIMATION_ENABLED = true
-        const val DEFAULT_IS_SCREEN_ROTATION_ENABLED = true
+        const val DEFAULT_IS_SCREEN_ROTATION_ENABLED = false
     }
 }

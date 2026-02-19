@@ -125,6 +125,12 @@ class TimerViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
+
+        viewModelScope.launch {
+            settingsRepository.themeMode.collect { themeMode ->
+                _uiState.update { it.copy(themeMode = themeMode) }
+            }
+        }
     }
 
     /**

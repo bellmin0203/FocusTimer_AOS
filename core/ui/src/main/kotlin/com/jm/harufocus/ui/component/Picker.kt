@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -80,8 +81,8 @@ fun Picker(
         rememberLazyListState(initialFirstVisibleItemIndex = scrollConfig.initialScrollIndex)
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = scrollState)
 
-    val itemHeightPixels = remember { mutableStateOf(0) }
-    val itemHeightDp = with(LocalDensity.current) { itemHeightPixels.value.toDp() }
+    val itemHeightPixels = remember { mutableIntStateOf(0) }
+    val itemHeightDp = with(LocalDensity.current) { itemHeightPixels.intValue.toDp() }
 
     val fadingEdgeGradient = rememberFadingEdgeGradient()
 
@@ -152,7 +153,7 @@ fun Picker(
                 scrollConfig = scrollConfig,
                 textStyle = textStyle,
                 textModifier = textModifier,
-                onSizeChanged = { itemHeightPixels.value = it }
+                onSizeChanged = { itemHeightPixels.intValue = it }
             )
         }
 

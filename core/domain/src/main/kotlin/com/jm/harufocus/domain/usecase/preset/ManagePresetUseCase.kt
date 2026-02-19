@@ -19,7 +19,7 @@ class ManagePresetUseCase @Inject constructor(
     fun getAllPresets(): Flow<List<Preset>> =
         getAllPresetsUseCase()
 
-    suspend fun selectPreset(
+    fun selectPreset(
         presetId: Int,
         presets: List<Preset>,
         isTimerActive: Boolean

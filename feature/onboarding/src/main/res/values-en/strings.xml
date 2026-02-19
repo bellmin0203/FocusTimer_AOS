@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_timer_title">Easy with Circular Timer</string>
+    <string name="onboarding_timer_desc">Drag the timer to set your desired time quickly and easily.</string>
+    <string name="onboarding_time_setting_title">Precise Time Setting</string>
+    <string name="onboarding_time_setting_desc">Click the time inside the timer to set the time accurately in hours, minutes, and seconds.</string>
+    <string name="onboarding_my_setting_title">My Custom Settings</string>
+    <string name="onboarding_my_setting_desc">Manage notifications, themes, and timer settings to create your own personalized timer.</string>
+    <string name="onboarding_statistics_title">Usage Statistics</string>
+    <string name="onboarding_statistics_desc">Check your daily, weekly, and monthly timer usage records and boost your productivity.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_next">Next</string>
+</resources>

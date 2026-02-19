@@ -9,14 +9,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 /**
- * 하루 몰입 카드 스타일
- */
-@Composable
-fun Modifier.HaruFocusCard(): Modifier = this
-    .clip(RoundedCornerShape(16.dp))
-    .background(MaterialTheme.colorScheme.surfaceVariant)
-
-/**
  * 세션 카드 스타일
  */
 @Composable

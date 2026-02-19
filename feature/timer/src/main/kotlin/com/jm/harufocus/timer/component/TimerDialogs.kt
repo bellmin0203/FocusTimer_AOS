@@ -76,6 +76,7 @@ fun TimerDialogs(
                 initialMinutes = uiState.remainingTime.inWholeMinutes.toInt(),
                 initialSeconds = (uiState.remainingTime.inWholeSeconds % 60).toInt(),
                 initialColorIndex = 0,
+                themeMode = uiState.themeMode,
                 onDismiss = { onDialogStateChange(TimerDialogState.None) },
                 onConfirm = { name, minutes, seconds, colorIndex ->
                     val duration = minutes.minutes + seconds.seconds
@@ -88,6 +89,7 @@ fun TimerDialogs(
         is TimerDialogState.EditPreset -> {
             EditPresetDialog(
                 preset = dialogState.preset,
+                themeMode = uiState.themeMode,
                 onDismiss = { onDialogStateChange(TimerDialogState.None) },
                 onConfirm = { name, minutes, seconds, colorIndex ->
                     val duration = minutes.minutes + seconds.seconds

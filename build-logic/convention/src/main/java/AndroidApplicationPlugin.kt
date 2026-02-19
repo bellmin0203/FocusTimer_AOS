@@ -21,7 +21,13 @@ class AndroidApplicationPlugin : Plugin<Project> {
                 defaultConfig {
                     applicationId = libs.findVersion("projectApplicationId").get().toString()
                     targetSdk = libs.findVersion("projectTargetSdkVersion").get().toString().toInt()
-                    versionCode = libs.findVersion("projectVersionCode").get().toString().toInt()
+
+                    // Semantic Versioning Mapping (Automated)
+                    val major = libs.findVersion("appVersion-major").get().toString().toInt()
+                    val minor = libs.findVersion("appVersion-minor").get().toString().toInt()
+                    val patch = libs.findVersion("appVersion-patch").get().toString().toInt()
+                    val build = libs.findVersion("appVersion-build").get().toString().toInt()
+                    versionCode = (major * 1_000_000) + (minor * 10_000) + (patch * 100) + build
                     versionName = libs.findVersion("projectVersionName").get().toString()
                 }
 

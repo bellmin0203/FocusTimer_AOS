@@ -195,6 +195,7 @@ fun PortraitTimerLayout(
                 presets = uiState.presets,
                 selectedPresetId = uiState.selectedPreset?.id,
                 isEnabled = uiState.isIdle,
+                themeMode = uiState.themeMode,
                 onPresetClick = { presetId ->
                     onIntent(TimerIntent.SelectPreset(presetId))
                 },

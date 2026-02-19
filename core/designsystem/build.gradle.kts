@@ -11,6 +11,7 @@ configure<LibraryExtension> {
 
 dependencies {
     implementation(libs.androidx.appcompat)
+    implementation(projects.core.common)
     api(libs.androidx.compose.material.icons.extended)
     api(projects.core.domain)
 }

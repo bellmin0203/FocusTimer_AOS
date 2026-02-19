@@ -1,5 +1,6 @@
 package com.jm.harufocus.designsystem.theme
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -8,7 +9,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 // 다크 테마 ColorScheme - Deep Focus (깊은 몰입)
 // Navy(#252A4E)를 Surface로, Yellow(#FAD79C)를 포인트로 사용
@@ -88,6 +92,16 @@ fun HaruFocusTheme(
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+
+    val view = LocalView.current
+    // Preview 모드(EditMode)에서는 해당 로직이 실행되지 않도록 예외 처리 추가
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            val isLightTheme = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = isLightTheme
+        }
     }
 
     MaterialTheme(

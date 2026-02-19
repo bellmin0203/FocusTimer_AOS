@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.jm.harufocus.feature.onboarding.OnboardingRoute
 import com.jm.harufocus.setting.SettingScreen
 import com.jm.harufocus.stats.StatsScreen
 import com.jm.harufocus.timer.TimerScreen
@@ -18,6 +19,7 @@ import com.jm.harufocus.util.CrashReporter
 fun HaruFocusNavHost(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
+    startDestination: String = Screen.Timer.route,
     onRequestInAppReview: () -> Unit = {}
 ) {
     // 현재 화면을 Crashlytics에 기록
@@ -31,8 +33,19 @@ fun HaruFocusNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Timer.route
+        startDestination = startDestination
     ) {
+        // 온보딩 튜토리얼 화면
+        composable(Screen.Onboarding.route) {
+            OnboardingRoute(
+                onTutorialComplete = {
+                    navController.navigate(Screen.Timer.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // 타이머 메인 화면
         composable(Screen.Timer.route) {
             TimerScreen(

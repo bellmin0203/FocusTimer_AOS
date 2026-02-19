@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.jm.harufocus.common.model.ThemeMode
 import com.jm.harufocus.designsystem.component.FocusIconButton
 import com.jm.harufocus.designsystem.component.TimerColorScheme
 import com.jm.harufocus.designsystem.icon.HaruFocusIcons
@@ -152,6 +153,7 @@ fun PresetListRow(
     presets: List<Preset>,
     selectedPresetId: Int?,
     isEnabled: Boolean,
+    themeMode: ThemeMode,
     onPresetClick: (Int) -> Unit,
     onManageClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -184,7 +186,10 @@ fun PresetListRow(
         // 2. 프리셋 목록 표시
         items(items = presets, key = { it.id }) { preset ->
             // 선택된 프리셋의 색상 테마 가져오기 (안전한 범위 검증 적용)
-            val presetColor = getPresetColorScheme(preset.colorIndex)
+            val presetColor = getPresetColorScheme(
+                colorIndex = preset.colorIndex,
+                themeMode = themeMode,
+            )
 
             val isSelected = preset.id == selectedPresetId
 

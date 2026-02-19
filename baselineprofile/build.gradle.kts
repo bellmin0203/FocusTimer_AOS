@@ -25,6 +25,7 @@ configure<TestExtension> {
 
     targetProjectPath = ":app"
 
+    @Suppress("UnstableApiUsage")
     testOptions {
         managedDevices {
             localDevices {

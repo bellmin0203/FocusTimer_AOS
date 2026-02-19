@@ -3,11 +3,11 @@ package com.jm.harufocus.designsystem.component
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.jm.harufocus.common.model.ThemeMode
 import com.jm.harufocus.designsystem.theme.BrandNavy
 import com.jm.harufocus.designsystem.theme.BrandPurple
 import com.jm.harufocus.designsystem.theme.BrandYellow
-import com.jm.harufocus.designsystem.theme.DarkBackground
-import com.jm.harufocus.designsystem.theme.DarkSurface
+import com.jm.harufocus.designsystem.theme.DarkBorder
 import com.jm.harufocus.designsystem.theme.LightPrimaryContainer
 
 /**
@@ -100,8 +100,8 @@ object TimerColorPresets {
      */
     val HaruDark = TimerColorScheme(
         progressColor = BrandYellow,      // Primary (#FAD79C)
-        knobColor = DarkBackground,       // Deep Navy
-        tickColor = DarkSurface,          // Navy (#252A4E)
+        knobColor = Color.White,
+        tickColor = DarkBorder,
         labelColor = BrandYellow
     )
 
@@ -179,7 +179,13 @@ object TimerColorPresets {
         GreenDark
     )
 
-    @get:Composable
-    val presetColors: List<TimerColorScheme>
-        get() = if (isSystemInDarkTheme()) darkPresets else lightPresets
+    @Composable
+    fun presetColors(themeMode: ThemeMode = ThemeMode.SYSTEM): List<TimerColorScheme> {
+        val useDarkTheme = when (themeMode) {
+            ThemeMode.DARK -> true
+            ThemeMode.LIGHT -> false
+            ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        }
+        return if (useDarkTheme) darkPresets else lightPresets
+    }
 }

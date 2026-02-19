@@ -121,9 +121,8 @@ fun CircularTimerProgress(
             )
         } else {
             modifier
-        }.then(
-            createDragModifierIfEnabled(enabled, onProgressChange)
-        ), contentAlignment = Alignment.Center
+        }.dragProgressInput(enabled, onProgressChange),
+        contentAlignment = Alignment.Center
     ) {
         // 타이머 원형 표시
         TimerCircleLayer(
@@ -186,15 +185,15 @@ private data class TimerColors(
 /**
  * 드래그 제스처 Modifier 생성
  */
-private fun createDragModifierIfEnabled(
+private fun Modifier.dragProgressInput(
     enabled: Boolean,
     onProgressChange: ((Float) -> Unit)?
 ): Modifier {
     if (!enabled || onProgressChange == null) {
-        return Modifier
+        return this
     }
 
-    return Modifier.pointerInput(Unit) {
+    return this.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
                 val down = awaitFirstDown()

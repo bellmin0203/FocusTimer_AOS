@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.impl.VariantOutputImpl
 
 plugins {
     alias(libs.plugins.my.android.application)
@@ -8,6 +9,10 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.play.services.oss.licenses)
+}
+
+configure<BasePluginExtension> {
+    archivesName.set("HaruFocus-v${libs.versions.projectVersionName.get()}")
 }
 
 configure<ApplicationExtension> {
@@ -23,6 +28,16 @@ configure<ApplicationExtension> {
         release {
             ndk {
                 debugSymbolLevel = "FULL"
+            }
+        }
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            if (output is VariantOutputImpl) {
+                output.outputFileName = "HaruFocus-v${output.versionName.get()}-${variant.buildType}.apk"
             }
         }
     }
@@ -45,6 +60,7 @@ dependencies {
     implementation(projects.feature.stats)
     implementation(projects.feature.setting)
     implementation(projects.feature.widget)
+    implementation(projects.feature.onboarding)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,8 +1,10 @@
+import com.android.build.api.dsl.LibraryExtension
+
 plugins {
     alias(libs.plugins.my.android.presentation.ui)
 }
 
-android {
+configure<LibraryExtension> {
     namespace = "com.jm.harufocus.timer"
 }
 

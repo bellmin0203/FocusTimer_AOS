@@ -162,7 +162,7 @@ private class PresetListProvider : PreviewParameterProvider<List<Preset>> {
 @ThemePreviews
 @Composable
 private fun PresetsBottomSheetPreview() {
-    HaruFocusTheme() {
+    HaruFocusTheme {
         PresetsBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},

@@ -19,4 +19,9 @@ sealed class Screen(val route: String) {
      * 통계 화면 (향후 구현 예정)
      */
     data object Stats : Screen("stats")
+
+    /**
+     * 온보딩 튜토리얼 화면
+     */
+    data object Onboarding : Screen("onboarding")
 }

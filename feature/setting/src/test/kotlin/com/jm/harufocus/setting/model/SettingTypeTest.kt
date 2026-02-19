@@ -290,7 +290,7 @@ class SettingTypeTest : BehaviorSpec({
     Given("복잡한 제네릭 타입의 Selector를 생성할 때") {
         When("nullable 타입을 사용하면") {
             Then("null 값이 정상적으로 처리되어야 한다") {
-                val selector = SettingType.Selector<String?>(
+                val selector = SettingType.Selector(
                     title = UiText.DynamicString("S"),
                     category = SettingCategory.APPEARANCE,
                     stateFlow = flowOf(null),

@@ -1,6 +1,7 @@
 package com.jm.harufocus.timer.util
 
 import androidx.compose.runtime.Composable
+import com.jm.harufocus.common.model.ThemeMode
 import com.jm.harufocus.designsystem.component.TimerColorPresets
 import com.jm.harufocus.designsystem.component.TimerColorScheme
 
@@ -14,20 +15,8 @@ import com.jm.harufocus.designsystem.component.TimerColorScheme
  * @return 해당 인덱스의 TimerColorScheme 또는 기본 색상
  */
 @Composable
-fun getPresetColorScheme(colorIndex: Int?): TimerColorScheme {
-    val presets = TimerColorPresets.presetColors
+fun getPresetColorScheme(colorIndex: Int?, themeMode: ThemeMode): TimerColorScheme {
+    val presets = TimerColorPresets.presetColors(themeMode)
     val safeIndex = (colorIndex ?: 0).coerceIn(0, presets.lastIndex)
     return presets[safeIndex]
-}
-
-/**
- * colorIndex를 안전한 범위로 보정합니다.
- *
- * @param colorIndex 원본 색상 인덱스 (nullable)
- * @return 유효한 범위 내의 인덱스 (0 ~ lastIndex)
- */
-@Composable
-fun getSafeColorIndex(colorIndex: Int?): Int {
-    val presets = TimerColorPresets.presetColors
-    return (colorIndex ?: 0).coerceIn(0, presets.lastIndex)
 }

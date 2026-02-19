@@ -2,6 +2,7 @@ package com.jm.harufocus.timer.model
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Immutable
+import com.jm.harufocus.common.model.ThemeMode
 import com.jm.harufocus.domain.model.preset.Preset
 import com.jm.harufocus.timer.usecase.TimerStatus
 import java.time.Instant
@@ -19,7 +20,7 @@ import kotlin.time.Duration
  * @property progress 타이머 진행률 (0.0 ~ 1.0)
  * @property error 에러 메시지 (에러가 없으면 null)
  * @property presets 저장된 프리셋 목록
- * @property selectedPresetId 현재 선택된 프리셋 ID (선택되지 않았으면 null)
+ * @property selectedPreset 현재 선택된 프리셋 (선택되지 않았으면 null)
  * @property initialTime 처음 설정된 타이머 시간 (완료 후 총 시간 계산용)
  * @property isScreenOnEnabled 화면 켜짐 유지 기능이 활성화되었는지 여부 (설정값)
  */
@@ -41,6 +42,7 @@ data class TimerUiState(
     val isMinimizedControlsEnabled: Boolean = false, // 최소화된 컨트롤 표시 활성화 여부
     val isPulseAnimationEnabled: Boolean = true, // 펄스 애니메이션 활성화 여부
     val isScreenRotationEnabled: Boolean = true, // 화면 회전 허용 여부
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
 ) {
 
     /**

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.my.android.presentation.ui)
 }
 
+@Suppress("UnstableApiUsage")
 configure<LibraryExtension> {
     namespace = "com.jm.harufocus.setting"
 

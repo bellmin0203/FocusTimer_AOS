@@ -18,14 +18,14 @@ import kotlin.time.Duration.Companion.seconds
  */
 class AddPresetUseCaseTest : BehaviorSpec({
 
-    val MAX_PRESET = 5
+    val max_presets = 5
 
     // Mock 객체와 SUT(System Under Test) 선언
     val presetRepository = mockk<PresetRepository>()
     val useCase = AddPresetUseCase(presetRepository)
 
-    Given("프리셋이 ${MAX_PRESET}개 존재하는 경우") {
-        every { runBlocking { presetRepository.getTotalPresetCount() } } returns MAX_PRESET
+    Given("프리셋이 ${max_presets}개 존재하는 경우") {
+        every { runBlocking { presetRepository.getTotalPresetCount() } } returns max_presets
 
         When("새로운 프리셋을 추가 시도하면") {
             var result: Result<Long>? = null
@@ -37,7 +37,7 @@ class AddPresetUseCaseTest : BehaviorSpec({
 
             Then("예외(최대 개수 초과)로 추가에 실패해야 한다") {
                 result?.isFailure shouldBe true
-                result?.exceptionOrNull() shouldBe IllegalStateException("프리셋은 최대 ${MAX_PRESET}개까지 저장할 수 있습니다.")
+                result?.exceptionOrNull() shouldBe IllegalStateException("프리셋은 최대 ${max_presets}개까지 저장할 수 있습니다.")
             }
         }
     }

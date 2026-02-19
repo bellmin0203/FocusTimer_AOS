@@ -52,6 +52,10 @@ internal fun Project.configureBuildTypes(
                             getDefaultProguardFile("proguard-android-optimize.txt"),
                             "proguard-rules.pro"
                         )
+
+                        ndk {
+                            debugSymbolLevel = "FULL"
+                        }
                     }
 
                     create("benchmark") {

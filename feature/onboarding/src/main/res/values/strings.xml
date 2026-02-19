@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_timer_title">원형 타이머로 간편하게</string>
+    <string name="onboarding_timer_desc">타이머를 드래그하여 원하는 시간을 쉽고 빠르게 설정하세요.</string>
+    <string name="onboarding_time_setting_title">정확한 시간 설정</string>
+    <string name="onboarding_time_setting_desc">타이머 안 시간을 클릭하여 시, 분, 초 단위로 정확하게 타이머를 설정할 수 있습니다.</string>
+    <string name="onboarding_my_setting_title">나만의 설정</string>
+    <string name="onboarding_my_setting_desc">알림, 테마, 타이머 관련 설정을 자유롭게 관리하여 나만의 타이머를 만들어보세요.</string>
+    <string name="onboarding_statistics_title">사용 기록 통계</string>
+    <string name="onboarding_statistics_desc">일간, 주간, 월간으로 타이머 사용 기록을 확인하고 생산성을 높여보세요.</string>
+    <string name="onboarding_skip">건너뛰기</string>
+    <string name="onboarding_start">시작하기</string>
+    <string name="onboarding_next">다음</string>
+</resources>

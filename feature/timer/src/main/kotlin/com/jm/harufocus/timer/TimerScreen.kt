@@ -279,7 +279,10 @@ private fun TimerScreenContent(
                     }
             ) {
                 // 선택된 프리셋의 색상 가져오기 (안전한 범위 검증 적용)
-                val presetColors = getPresetColorScheme(uiState.selectedPreset?.colorIndex)
+                val presetColors = getPresetColorScheme(
+                    colorIndex = uiState.selectedPreset?.colorIndex,
+                    themeMode = uiState.themeMode
+                )
 
                 // UI 컨트롤 표시 여부
                 val shouldShowUiControls = !uiState.shouldHideUi(minimizedControlsState.isControlsVisible)

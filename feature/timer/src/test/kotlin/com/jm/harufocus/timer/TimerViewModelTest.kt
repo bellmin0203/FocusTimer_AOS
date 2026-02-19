@@ -420,7 +420,7 @@ class TimerViewModelTest : BehaviorSpec({
             Then("저장에 실패하면 에러를 보여준다") {
                 runTest {
                     val managePresetUseCase = mockk<ManagePresetUseCase>(relaxed = true) {
-                        coEvery { addPreset(any(), any(), any()) } returns Result.failure<Long>(
+                        coEvery { addPreset(any(), any(), any()) } returns Result.failure(
                             PresetException.InvalidName()
                         )
                     }

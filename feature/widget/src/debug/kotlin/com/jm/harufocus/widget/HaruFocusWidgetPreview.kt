@@ -243,7 +243,7 @@ private class ColorProvider2(val color: Color) : androidx.glance.unit.ColorProvi
 private fun PreviewIdleContent() {
     HaruFocusGlanceTheme {
         IdleContent(
-            presetColor = TimerColorPresets.presetColors[1].progressColor,
+            presetColor = TimerColorPresets.presetColors()[1].progressColor,
             onStartClick = {})
     }
 }
@@ -254,7 +254,7 @@ private fun PreviewIdleContent() {
 private fun PreviewRunningContent() {
     HaruFocusGlanceTheme {
         RunningContent(
-            presetColor = TimerColorPresets.presetColors[1].progressColor,
+            presetColor = TimerColorPresets.presetColors()[1].progressColor,
             remainingTime = 25.minutes,
             onPauseClick = {}
         )
@@ -267,7 +267,7 @@ private fun PreviewRunningContent() {
 private fun PreviewPausedContent() {
     HaruFocusGlanceTheme {
         PausedContent(
-            presetColor = TimerColorPresets.presetColors[2].progressColor,
+            presetColor = TimerColorPresets.presetColors()[2].progressColor,
             remainingTime = 20.minutes,
             onResumeClick = {}
         )
@@ -280,7 +280,7 @@ private fun PreviewPausedContent() {
 private fun PreviewCompletedContent() {
     HaruFocusGlanceTheme {
         CompletedContent(
-            presetColor = TimerColorPresets.presetColors[3].progressColor,
+            presetColor = TimerColorPresets.presetColors()[3].progressColor,
             overtime = 1.minutes + 30.seconds,
             onStopClick = {}
         )

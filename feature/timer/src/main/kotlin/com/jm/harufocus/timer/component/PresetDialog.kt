@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.jm.harufocus.common.model.ThemeMode
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.component.TimerColorPresets
 import com.jm.harufocus.designsystem.icon.HaruFocusIcons
@@ -60,6 +61,7 @@ fun AddPresetDialog(
     initialMinutes: Int = 25,
     initialSeconds: Int = 0,
     initialColorIndex: Int = 0,
+    themeMode: ThemeMode,
     onDismiss: () -> Unit,
     onConfirm: (name: String, minutes: Int, seconds: Int, colorIndex: Int) -> Unit
 ) {
@@ -179,7 +181,8 @@ fun AddPresetDialog(
 
                 ColorSelector(
                     selectedIndex = selectedColorIndex,
-                    onColorSelected = { selectedColorIndex = it }
+                    onColorSelected = { selectedColorIndex = it },
+                    themeMode = themeMode,
                 )
             }
         },
@@ -232,9 +235,10 @@ fun AddPresetDialog(
 private fun ColorSelector(
     selectedIndex: Int,
     onColorSelected: (Int) -> Unit,
+    themeMode: ThemeMode,
     modifier: Modifier = Modifier
 ) {
-    val presetColors = TimerColorPresets.presetColors
+    val presetColors = TimerColorPresets.presetColors(themeMode)
 
     LazyRow(
         modifier = modifier.fillMaxWidth(),
@@ -242,7 +246,7 @@ private fun ColorSelector(
     ) {
         items(presetColors.size) { index ->
             ColorOption(
-                color = TimerColorPresets.presetColors[index].progressColor,
+                color = TimerColorPresets.presetColors(themeMode)[index].progressColor,
                 isSelected = index == selectedIndex,
                 onClick = { onColorSelected(index) }
             )
@@ -298,6 +302,7 @@ private fun ColorOption(
 @Composable
 fun EditPresetDialog(
     preset: Preset,
+    themeMode: ThemeMode,
     onDismiss: () -> Unit,
     onConfirm: (name: String, minutes: Int, seconds: Int, colorIndex: Int) -> Unit
 ) {
@@ -416,7 +421,8 @@ fun EditPresetDialog(
 
                 ColorSelector(
                     selectedIndex = selectedColorIndex,
-                    onColorSelected = { selectedColorIndex = it }
+                    onColorSelected = { selectedColorIndex = it },
+                    themeMode = themeMode
                 )
             }
         },
@@ -512,6 +518,7 @@ fun DeletePresetDialog(
 private fun AddPresetDialogPreview() {
     HaruFocusTheme {
         AddPresetDialog(
+            themeMode = ThemeMode.SYSTEM,
             onDismiss = {},
             onConfirm = { _, _, _, _ -> }
         )
@@ -532,6 +539,7 @@ private fun EditPresetDialogPreview() {
                 duration = 25.minutes,
                 createdAt = Instant.now()
             ),
+            themeMode = ThemeMode.SYSTEM,
             onDismiss = {},
             onConfirm = { _, _, _, _ -> }
         )

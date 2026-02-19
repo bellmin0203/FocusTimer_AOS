@@ -9,6 +9,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.jm.harufocus.common.TimerServiceAction
 import com.jm.harufocus.timer.R
+import java.util.Locale
 import kotlin.time.Duration
 
 /**
@@ -189,9 +190,9 @@ class TimerNotificationHelper(private val context: Context) {
         val seconds = (inWholeSeconds % 60)
 
         return if (hours > 0) {
-            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds)
         } else {
-            String.format("%02d:%02d", minutes, seconds)
+            String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
         }
     }
 }

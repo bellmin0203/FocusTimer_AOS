@@ -110,7 +110,7 @@ class DefaultSettingsPreferencesDataSource @Inject constructor(
         }
     }
 
-    override suspend fun updateDefaultSessionDuration(duration: kotlin.time.Duration) {
+    override suspend fun updateDefaultSessionDuration(duration: Duration) {
         dataStore.edit { preferences ->
             preferences[KEY_DEFAULT_SESSION_DURATION] = duration.inWholeMilliseconds
         }
