@@ -4,15 +4,15 @@ projectApplicationId = "com.jm.harufocus"
 
 # App Version Name (Manual Management)
 # This allows flexible naming like "1.0.0-beta01", "1.0.0-rc01", "1.0.0"
-projectVersionName = "1.0.0-beta02"
+projectVersionName = "1.1.0"
 
 # App Version Code Components (Automated Calculation)
 # Rule: Major(2) + Minor(2) + Patch(2) + Build(2) -> XXYYZZBB
 # Example: 1.0.0 (Build 1) -> 1000001
 appVersion-major = "1"
-appVersion-minor = "0"
+appVersion-minor = "1"
 appVersion-patch = "0"
-appVersion-build = "2"
+appVersion-build = "1"
 
 projectMinSdkVersion = "26"
 projectTargetSdkVersion = "36"
