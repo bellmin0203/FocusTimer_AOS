@@ -29,12 +29,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.statistics.MonthlyStats
 import com.jm.harufocus.domain.model.statistics.WeeklyFocusTime
 import com.jm.harufocus.stats.R
 import com.jm.harufocus.stats.StatsCard
+import com.jm.harufocus.stats.util.ChartPatterns
+import com.jm.harufocus.stats.util.formatDetailedMarker
+import com.jm.harufocus.stats.util.formatDurationKo
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -53,6 +57,7 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Insets
+import com.patrykandpatrick.vico.core.common.shader.toShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.rounded
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -135,9 +140,9 @@ fun MonthlyStatsContent(
             }
             // 세션 정보 표시 (완전 완료 / 부분 완료)
             if (stats.totalSessions > 0) {
-                SessionBreakdownItem(
-                    fullCompleted = stats.totalFullCompletedSessions,
-                    partial = stats.totalPartialSessions,
+                SessionTimeBreakdownItem(
+                    fullCompletedTime = stats.totalFullCompletedTime,
+                    partialCompletedTime = stats.totalPartialTime,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -211,6 +216,13 @@ private fun WeeklyChart(stats: MonthlyStats) {
     val partialColor = MaterialTheme.colorScheme.secondary
     val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
     val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+    val partialPatternFill = remember(partialColor) {
+        fill(
+            ChartPatterns.createDiagonalStripedPattern(
+                baseColor = partialColor
+            ).toShaderProvider()
+        )
+    }
 
     // 누적 막대 차트 데이터 준비
     LaunchedEffect(stats) {
@@ -232,47 +244,56 @@ private fun WeeklyChart(stats: MonthlyStats) {
         }
     }
 
-    // 누적 막대용 컬럼 프로바이더 - 두 가지 색상 제공
+    // 누적 막대용 컬럼 프로바이더 - 접근성을 위한 시각적 구분
     val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
         listOf(
+            // 완전 완료: 솔리드 색상 (진한 파랑)
             rememberLineComponent(
                 fill = fill(fullCompletedColor),
                 thickness = 20.dp,
                 shape = rounded(allPercent = 40)
             ),
+            // 부분 완료: 투명도 적용 (접근성 개선)
             rememberLineComponent(
-                fill = fill(partialColor),
+                fill = partialPatternFill,
                 thickness = 20.dp,
-                shape = rounded(allPercent = 40)
+                shape = rounded(allPercent = 40),
+                strokeFill = fill(partialColor),
+                strokeThickness = 1.dp
             )
         )
     )
 
+    // 상세 마커 - 완전/부분 완료 시간 모두 표시
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
             color = markerTextColor,
+            textSize = 11.sp,
+            lineCount = 3,
             background = rememberShapeComponent(
                 fill = fill(markerBackgroundColor)
             ),
-            padding = Insets(horizontalDp = 8f, verticalDp = 4f),
+            padding = Insets(horizontalDp = 10f, verticalDp = 6f),
         ),
         labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint,
-        valueFormatter = remember {
+        valueFormatter = remember(stats, context) {
             DefaultCartesianMarker.ValueFormatter { _, targets ->
-                targets.filterIsInstance<ColumnCartesianLayerMarkerTarget>()
-                    .flatMap { it.columns }
-                    .joinToString("\n") { column ->
-                        val minutes = column.entry.y.toInt()
-                        val hours = minutes / 60
-                        val remainingMinutes = minutes % 60
-                        val timeText = when {
-                            hours > 0 && remainingMinutes > 0 -> context.getString(R.string.format_hours_minutes, hours, remainingMinutes)
-                            hours > 0 -> context.getString(R.string.format_hours, hours)
-                            remainingMinutes > 0 -> context.getString(R.string.format_minutes, remainingMinutes)
-                            else -> context.getString(R.string.format_zero_minutes)
-                        }
-                        timeText
-                    }
+                // 두 시리즈(완전/부분)의 값을 모두 수집
+                val columnTargets = targets.filterIsInstance<ColumnCartesianLayerMarkerTarget>()
+
+                // 각 시리즈의 총합 계산 (index 0: 완전 완료, index 1: 부분 완료)
+                val fullCompletedMinutes = columnTargets
+                    .getOrNull(0)?.columns?.sumOf { it.entry.y.toInt() } ?: 0
+                val partialMinutes = columnTargets
+                    .getOrNull(1)?.columns?.sumOf { it.entry.y.toInt() } ?: 0
+                val totalMinutes = fullCompletedMinutes + partialMinutes
+
+                formatDetailedMarker(
+                    context = context,
+                    totalMinutes = totalMinutes,
+                    fullCompletedMinutes = fullCompletedMinutes,
+                    partialMinutes = partialMinutes
+                )
             }
         }
     )
@@ -309,15 +330,7 @@ private fun WeeklyChart(stats: MonthlyStats) {
  */
 @Composable
 private fun formatDuration(duration: kotlin.time.Duration): String {
-    val hours = duration.inWholeHours
-    val minutes = (duration.inWholeMinutes % 60)
-
-    return when {
-        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
-        hours > 0 -> stringResource(R.string.format_hours, hours)
-        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
-        else -> stringResource(R.string.format_zero_minutes)
-    }
+    return formatDurationKo(duration)
 }
 
 /**

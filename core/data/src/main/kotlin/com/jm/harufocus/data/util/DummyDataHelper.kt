@@ -68,9 +68,26 @@ class DummyDataHelper @Inject constructor(
     
     /**
      * 완료된 세션 개수를 조회합니다.
+     * (완전 완료 + 부분 완료)
      * @return 완료된 세션 개수
      */
     suspend fun getCompletedSessionCount(): Int {
         return timerSessionDao.getCompletedSessionCount()
+    }
+
+    /**
+     * 완전 완료된 세션 개수를 조회합니다.
+     * @return 완전 완료된 세션 개수
+     */
+    suspend fun getFullCompletedSessionCount(): Int {
+        return timerSessionDao.getFullCompletedSessionCount()
+    }
+
+    /**
+     * 부분 완료된 세션 개수를 조회합니다.
+     * @return 부분 완료된 세션 개수
+     */
+    suspend fun getPartialSessionCount(): Int {
+        return timerSessionDao.getPartialSessionCount()
     }
 }

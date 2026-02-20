@@ -92,8 +92,15 @@
     <!-- Session Completion Types -->
     <string name="session_full_completed">완전 완료</string>
     <string name="session_partial">부분 완료</string>
+    <string name="session_full_completed_time">완전 완료 시간</string>
+    <string name="session_partial_time">부분 완료 시간</string>
 
     <!-- Chart Legend -->
     <string name="legend_full_completed">완전 완료</string>
     <string name="legend_partial">부분 완료</string>
+
+    <!-- Chart Marker -->
+    <string name="marker_total">총 %s</string>
+    <string name="marker_full">완전: %s</string>
+    <string name="marker_partial">부분: %s</string>
 </resources>

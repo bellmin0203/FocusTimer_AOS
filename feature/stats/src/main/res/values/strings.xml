@@ -92,8 +92,15 @@
     <!-- Session Completion Types -->
     <string name="session_full_completed">Full Completed</string>
     <string name="session_partial">Partial</string>
+    <string name="session_full_completed_time">Full Completed Time</string>
+    <string name="session_partial_time">Partial Completed Time</string>
 
     <!-- Chart Legend -->
     <string name="legend_full_completed">Full Complete</string>
     <string name="legend_partial">Partial</string>
+
+    <!-- Chart Marker -->
+    <string name="marker_total">Total: %s</string>
+    <string name="marker_full">Full: %s</string>
+    <string name="marker_partial">Partial: %s</string>
 </resources>

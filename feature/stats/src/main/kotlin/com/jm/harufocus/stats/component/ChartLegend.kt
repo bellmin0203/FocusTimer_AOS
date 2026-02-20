@@ -15,9 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.stats.R
+import com.jm.harufocus.stats.util.ChartPatterns
 
 /**
  * 차트 범례 컴포넌트
@@ -55,7 +60,7 @@ fun ChartLegend(
 
 @Composable
 private fun LegendItem(
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     label: String,
     isPartial: Boolean
 ) {
@@ -66,13 +71,19 @@ private fun LegendItem(
         Box(
             modifier = Modifier
                 .size(16.dp)
-                .background(
-                    color = color,
-                    shape = RoundedCornerShape(4.dp)
+                .then(
+                    if (isPartial) {
+                        Modifier.partialPatternBackground(color)
+                    } else {
+                        Modifier.background(
+                            color = color,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                    }
                 )
                 .border(
-                    width = if (isPartial) 2.dp else 0.dp,
-                    color = if (isPartial) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Transparent,
+                    width = if (isPartial) 1.dp else 0.dp,
+                    color = if (isPartial) color else Color.Transparent,
                     shape = RoundedCornerShape(4.dp)
                 )
         )
@@ -87,3 +98,30 @@ private fun LegendItem(
         )
     }
 }
+
+private fun Modifier.partialPatternBackground(baseColor: Color): Modifier =
+    this.drawWithCache {
+        val cornerRadius = 4.dp.toPx()
+        val shader = ChartPatterns.createDiagonalStripedPattern(
+            baseColor = baseColor.copy(alpha = 0.9f),
+            stripeColor = baseColor.copy(alpha = 0.45f)
+        )
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            style = android.graphics.Paint.Style.FILL
+            this.shader = shader
+        }
+
+        onDrawBehind {
+            drawIntoCanvas { canvas ->
+                canvas.nativeCanvas.drawRoundRect(
+                    0f,
+                    0f,
+                    size.width,
+                    size.height,
+                    cornerRadius,
+                    cornerRadius,
+                    paint
+                )
+            }
+        }
+    }

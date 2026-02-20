@@ -406,8 +406,8 @@ private object StatsPreviewData {
         date = LocalDate.of(2024, 3, 15),
         totalFocusTime = 150.minutes,
         completedSessions = 6,
-        fullCompletedSessions = 4,
-        partialSessions = 2,
+        fullCompletedTime = 100.minutes,
+        partialCompletedTime = 50.minutes,
         hourlyBreakdown = (0..23).map { hour ->
             HourlyStats(
                 hour = hour,

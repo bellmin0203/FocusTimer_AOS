@@ -82,18 +82,20 @@ class GetDailyStatsUseCase @Inject constructor(
             .maxByOrNull { it.focusTime }
             ?.hour
 
-        // 총 집중 시간과 세션 수 계산
+        // 총 집중 시간과 완료 유형별 시간 계산
         val totalFocusTime = sessions.sumOf { it.duration.inWholeMilliseconds }.milliseconds
         val completedSessions = sessions.size
-        val fullCompletedSessions = sessions.count { !it.isPartial }
-        val partialSessions = sessions.count { it.isPartial }
+        val fullCompletedTime =
+            sessions.filter { !it.isPartial }.sumOf { it.duration.inWholeMilliseconds }.milliseconds
+        val partialCompletedTime =
+            sessions.filter { it.isPartial }.sumOf { it.duration.inWholeMilliseconds }.milliseconds
 
         return DailyStats(
             date = date,
             totalFocusTime = totalFocusTime,
             completedSessions = completedSessions,
-            fullCompletedSessions = fullCompletedSessions,
-            partialSessions = partialSessions,
+            fullCompletedTime = fullCompletedTime,
+            partialCompletedTime = partialCompletedTime,
             hourlyBreakdown = hourlyBreakdown,
             mostProductiveHour = mostProductiveHour
         )

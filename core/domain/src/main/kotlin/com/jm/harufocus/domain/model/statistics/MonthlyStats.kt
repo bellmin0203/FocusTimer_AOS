@@ -66,6 +66,18 @@ data class MonthlyStats(
         get() = weeklyBreakdown.sumOf { it.partialSessionCount }
 
     /**
+     * 총 완전 완료 시간을 계산합니다.
+     */
+    val totalFullCompletedTime: Duration
+        get() = weeklyBreakdown.fold(Duration.ZERO) { acc, week -> acc + week.fullCompletedTime }
+
+    /**
+     * 총 부분 완료 시간을 계산합니다.
+     */
+    val totalPartialTime: Duration
+        get() = weeklyBreakdown.fold(Duration.ZERO) { acc, week -> acc + week.partialTime }
+
+    /**
      * 주평균 집중 시간을 계산합니다
      */
     val averageWeeklyFocusTime: Duration
