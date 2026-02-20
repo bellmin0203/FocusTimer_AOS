@@ -10,6 +10,11 @@
     <string name="stats_tab_weekly">주간</string>
     <string name="stats_tab_monthly">월간</string>
 
+    <!-- Navigation -->
+    <string name="stats_today">오늘</string>
+    <string name="stats_this_week">이번 주</string>
+    <string name="stats_this_month">이번 달</string>
+
     <!-- Loading/Empty -->
     <string name="stats_loading">통계를 불러오는 중...</string>
     <string name="stats_no_achievements">아직 기록된 성취가 없습니다.</string>

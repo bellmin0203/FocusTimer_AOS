@@ -10,6 +10,11 @@
     <string name="stats_tab_weekly">Weekly</string>
     <string name="stats_tab_monthly">Monthly</string>
 
+    <!-- Navigation -->
+    <string name="stats_today">Today</string>
+    <string name="stats_this_week">This Week</string>
+    <string name="stats_this_month">This Month</string>
+
     <!-- Loading/Empty -->
     <string name="stats_loading">Loading stats...</string>
     <string name="stats_no_achievements">No achievements yet.</string>

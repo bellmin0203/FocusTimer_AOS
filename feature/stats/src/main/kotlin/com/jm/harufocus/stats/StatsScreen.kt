@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,6 +23,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -113,10 +113,13 @@ private fun StatsScreen(
                             contentDescription = stringResource(R.string.content_description_achievements)
                         )
                     }
-                    IconButton(onClick = onToday) {
-                        Icon(
-                            imageVector = Icons.Default.Today,
-                            contentDescription = stringResource(R.string.content_description_today)
+                    TextButton(onClick = onToday) {
+                        Text(
+                            text = when (uiState.selectedPeriod) {
+                                StatsPeriod.DAILY -> stringResource(R.string.stats_today)
+                                StatsPeriod.WEEKLY -> stringResource(R.string.stats_this_week)
+                                StatsPeriod.MONTHLY -> stringResource(R.string.stats_this_month)
+                            }
                         )
                     }
                 }
@@ -169,7 +172,8 @@ private fun StatsScreen(
             if (uiState.isLoading) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
@@ -185,7 +189,8 @@ private fun StatsScreen(
             } else {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp)
@@ -398,7 +403,7 @@ private object StatsPreviewData {
     )
 
     val dailyStats = DailyStats(
-        date = LocalDate.now(),
+        date = LocalDate.of(2024, 3, 15),
         totalFocusTime = 150.minutes,
         completedSessions = 6,
         hourlyBreakdown = (0..23).map { hour ->
@@ -412,13 +417,14 @@ private object StatsPreviewData {
     )
 
     val weeklyStats = WeeklyStats(
-        weekStartDate = LocalDate.now().minusDays(3),
-        weekEndDate = LocalDate.now().plusDays(3),
+        weekStartDate = LocalDate.of(2024, 3, 11),
+        weekEndDate = LocalDate.of(2024, 3, 17),
         totalFocusTime = 15.hours,
         dailyBreakdown = (0..6).map { day ->
+            val date = LocalDate.of(2024, 3, 11).plusDays(day.toLong())
             DailyFocusTime(
-                date = LocalDate.now().minusDays(3L - day),
-                dayOfWeek = LocalDate.now().minusDays(3L - day).dayOfWeek,
+                date = date,
+                dayOfWeek = date.dayOfWeek,
                 focusTime = 2.hours,
                 sessionCount = 4
             )
@@ -429,13 +435,13 @@ private object StatsPreviewData {
     )
 
     val monthlyStats = MonthlyStats(
-        yearMonth = YearMonth.now(),
+        yearMonth = YearMonth.of(2024, 3),
         totalFocusTime = 60.hours,
         weeklyBreakdown = (1..4).map { week ->
             WeeklyFocusTime(
                 weekOfMonth = week,
-                weekStartDate = LocalDate.now(),
-                weekEndDate = LocalDate.now(),
+                weekStartDate = LocalDate.of(2024, 3, 1).plusWeeks(week.toLong() - 1),
+                weekEndDate = LocalDate.of(2024, 3, 7).plusWeeks(week.toLong() - 1),
                 focusTime = 15.hours,
                 sessionCount = 20
             )
