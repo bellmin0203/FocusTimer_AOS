@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -78,7 +79,8 @@ import kotlin.time.Duration.Companion.minutes
 fun DailyStatsContent(
     stats: DailyStats,
     onPrevious: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    canNavigateNext: Boolean = true
 ) {
     val locale = Locale.getDefault()
     val pattern = if (locale.language == "ko") {
@@ -110,11 +112,15 @@ fun DailyStatsContent(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        IconButton(onClick = onNext) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = stringResource(R.string.content_description_next_day)
-            )
+        if (canNavigateNext) {
+            IconButton(onClick = onNext) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.content_description_next_day)
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 
@@ -468,7 +474,8 @@ private fun DailyStatsContentPreview(
             DailyStatsContent(
                 stats = stats,
                 onPrevious = {},
-                onNext = {}
+                onNext = {},
+                canNavigateNext = true
             )
         }
     }

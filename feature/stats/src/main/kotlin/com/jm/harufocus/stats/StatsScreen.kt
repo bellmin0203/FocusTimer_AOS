@@ -201,7 +201,8 @@ private fun StatsScreen(
                                 DailyStatsContent(
                                     stats = stats,
                                     onPrevious = onPreviousPeriod,
-                                    onNext = onNextPeriod
+                                    onNext = onNextPeriod,
+                                    canNavigateNext = stats.date.isBefore(LocalDate.now())
                                 )
                             }
                         }
@@ -211,7 +212,8 @@ private fun StatsScreen(
                                 WeeklyStatsContent(
                                     stats = stats,
                                     onPrevious = onPreviousPeriod,
-                                    onNext = onNextPeriod
+                                    onNext = onNextPeriod,
+                                    canNavigateNext = !stats.weekStartDate.plusWeeks(1).isAfter(LocalDate.now())
                                 )
                             }
                         }
@@ -221,7 +223,8 @@ private fun StatsScreen(
                                 MonthlyStatsContent(
                                     stats = stats,
                                     onPrevious = onPreviousPeriod,
-                                    onNext = onNextPeriod
+                                    onNext = onNextPeriod,
+                                    canNavigateNext = stats.yearMonth.isBefore(YearMonth.now())
                                 )
                             }
                         }

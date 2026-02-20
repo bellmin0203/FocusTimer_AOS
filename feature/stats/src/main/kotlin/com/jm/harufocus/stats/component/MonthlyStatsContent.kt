@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -71,7 +72,8 @@ import kotlin.time.Duration.Companion.minutes
 fun MonthlyStatsContent(
     stats: MonthlyStats,
     onPrevious: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    canNavigateNext: Boolean = true
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월")
 
@@ -97,11 +99,15 @@ fun MonthlyStatsContent(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        IconButton(onClick = onNext) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = stringResource(R.string.content_description_next_month)
-            )
+        if (canNavigateNext) {
+            IconButton(onClick = onNext) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.content_description_next_month)
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 
@@ -423,7 +429,8 @@ private fun MonthlyStatsContentPreview(
             MonthlyStatsContent(
                 stats = stats,
                 onPrevious = {},
-                onNext = {}
+                onNext = {},
+                canNavigateNext = true
             )
         }
     }
