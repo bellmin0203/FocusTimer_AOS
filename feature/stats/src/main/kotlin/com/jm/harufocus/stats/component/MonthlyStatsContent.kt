@@ -133,6 +133,14 @@ fun MonthlyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+            // 세션 정보 표시 (완전 완료 / 부분 완료)
+            if (stats.totalSessions > 0) {
+                SessionBreakdownItem(
+                    fullCompleted = stats.totalFullCompletedSessions,
+                    partial = stats.totalPartialSessions,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 
@@ -154,7 +162,12 @@ fun MonthlyStatsContent(
                 )
             }
         } else {
-            WeeklyChart(stats = stats)
+            Column {
+                WeeklyChart(stats = stats)
+                ChartLegend(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -193,21 +206,47 @@ private fun WeeklyChart(stats: MonthlyStats) {
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    val barColor = MaterialTheme.colorScheme.primary
+    // 누적 막대 차트 색상 - 완전 완료(Primary), 부분 완료(Secondary)
+    val fullCompletedColor = MaterialTheme.colorScheme.primary
+    val partialColor = MaterialTheme.colorScheme.secondary
     val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
     val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
 
-    // 차트 데이터 준비
+    // 누적 막대 차트 데이터 준비
     LaunchedEffect(stats) {
         val weeks = stats.weeklyBreakdown.map { it.weekOfMonth.toFloat() }
-        val focusTimes = stats.weeklyBreakdown.map {
-            it.focusTime.inWholeMinutes.toFloat()
-        }
 
         modelProducer.runTransaction {
-            columnSeries { series(weeks, focusTimes) }
+            columnSeries {
+                // 첫 번째 시리즈: 완전 완료 시간 (막대 아래쪽)
+                series(
+                    x = weeks,
+                    y = stats.weeklyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
+                )
+                // 두 번째 시리즈: 부분 완료 시간 (막대 위쪽에 쌓임)
+                series(
+                    x = weeks,
+                    y = stats.weeklyBreakdown.map { it.partialTime.inWholeMinutes.toFloat() }
+                )
+            }
         }
     }
+
+    // 누적 막대용 컬럼 프로바이더 - 두 가지 색상 제공
+    val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+        listOf(
+            rememberLineComponent(
+                fill = fill(fullCompletedColor),
+                thickness = 20.dp,
+                shape = rounded(allPercent = 40)
+            ),
+            rememberLineComponent(
+                fill = fill(partialColor),
+                thickness = 20.dp,
+                shape = rounded(allPercent = 40)
+            )
+        )
+    )
 
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
@@ -241,13 +280,7 @@ private fun WeeklyChart(stats: MonthlyStats) {
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberColumnCartesianLayer(
-                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(barColor),
-                        thickness = 20.dp,
-                        shape = rounded(allPercent = 40)
-                    )
-                ),
+                columnProvider = columnProvider
             ),
             startAxis = VerticalAxis.rememberStart(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
@@ -323,28 +356,44 @@ class MonthlyStatsProvider : PreviewParameterProvider<MonthlyStats> {
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 100.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 80.minutes,
+                    partialTime = 20.minutes,
+                    sessionCount = 2,
+                    fullCompletedSessionCount = 1,
+                    partialSessionCount = 1
                 ),
                 WeeklyFocusTime(
                     weekOfMonth = 2,
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 400.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 350.minutes,
+                    partialTime = 50.minutes,
+                    sessionCount = 6,
+                    fullCompletedSessionCount = 5,
+                    partialSessionCount = 1
                 ),
                 WeeklyFocusTime(
                     weekOfMonth = 3,
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 120.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 90.minutes,
+                    partialTime = 30.minutes,
+                    sessionCount = 2,
+                    fullCompletedSessionCount = 1,
+                    partialSessionCount = 1
                 ),
                 WeeklyFocusTime(
                     weekOfMonth = 4,
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 300.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 250.minutes,
+                    partialTime = 50.minutes,
+                    sessionCount = 5,
+                    fullCompletedSessionCount = 4,
+                    partialSessionCount = 1
                 ),
             )
         )

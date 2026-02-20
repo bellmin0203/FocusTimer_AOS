@@ -406,6 +406,8 @@ private object StatsPreviewData {
         date = LocalDate.of(2024, 3, 15),
         totalFocusTime = 150.minutes,
         completedSessions = 6,
+        fullCompletedSessions = 4,
+        partialSessions = 2,
         hourlyBreakdown = (0..23).map { hour ->
             HourlyStats(
                 hour = hour,
@@ -426,7 +428,9 @@ private object StatsPreviewData {
                 date = date,
                 dayOfWeek = date.dayOfWeek,
                 focusTime = 2.hours,
-                sessionCount = 4
+                sessionCount = 4,
+                fullCompletedSessionCount = 3,
+                partialSessionCount = 1
             )
         },
         averageSessionsPerDay = 4.5,
@@ -443,7 +447,9 @@ private object StatsPreviewData {
                 weekStartDate = LocalDate.of(2024, 3, 1).plusWeeks(week.toLong() - 1),
                 weekEndDate = LocalDate.of(2024, 3, 7).plusWeeks(week.toLong() - 1),
                 focusTime = 15.hours,
-                sessionCount = 20
+                sessionCount = 20,
+                fullCompletedSessionCount = 15,
+                partialSessionCount = 5
             )
         },
         averageSessionsPerWeek = 25.0,

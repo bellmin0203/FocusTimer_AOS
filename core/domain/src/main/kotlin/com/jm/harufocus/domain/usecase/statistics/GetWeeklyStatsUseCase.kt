@@ -36,7 +36,7 @@ class GetWeeklyStatsUseCase @Inject constructor(
         // 해당 주의 완료된 세션들 조회
         val sessions = timerSessionRepository.getCompletedSessionsBetween(startOfWeek, endOfWeek).first()
 
-        // 일별 집계 (월~일)
+        // 일별 집계 (월~일) - 완전/부분 완료 시간 분리
         val dailyStatsMap = mutableMapOf<LocalDate, DailyFocusTime>()
         var currentDate = weekStartDate
         while (!currentDate.isAfter(weekEndDate)) {
@@ -44,7 +44,11 @@ class GetWeeklyStatsUseCase @Inject constructor(
                 date = currentDate,
                 dayOfWeek = currentDate.dayOfWeek,
                 focusTime = 0.milliseconds,
-                sessionCount = 0
+                fullCompletedTime = 0.milliseconds,
+                partialTime = 0.milliseconds,
+                sessionCount = 0,
+                fullCompletedSessionCount = 0,
+                partialSessionCount = 0
             )
             currentDate = currentDate.plusDays(1)
         }
@@ -56,7 +60,11 @@ class GetWeeklyStatsUseCase @Inject constructor(
             if (currentStats != null) {
                 dailyStatsMap[sessionDate] = currentStats.copy(
                     focusTime = currentStats.focusTime + session.duration,
-                    sessionCount = currentStats.sessionCount + 1
+                    fullCompletedTime = currentStats.fullCompletedTime + if (session.isPartial) 0.milliseconds else session.duration,
+                    partialTime = currentStats.partialTime + if (session.isPartial) session.duration else 0.milliseconds,
+                    sessionCount = currentStats.sessionCount + 1,
+                    fullCompletedSessionCount = currentStats.fullCompletedSessionCount + if (session.isPartial) 0 else 1,
+                    partialSessionCount = currentStats.partialSessionCount + if (session.isPartial) 1 else 0
                 )
             }
         }

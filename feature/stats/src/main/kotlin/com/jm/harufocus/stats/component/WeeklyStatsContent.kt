@@ -146,6 +146,14 @@ fun WeeklyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+            // 세션 정보 표시 (완전 완료 / 부분 완료)
+            if (stats.totalSessions > 0) {
+                SessionBreakdownItem(
+                    fullCompleted = stats.totalFullCompletedSessions,
+                    partial = stats.totalPartialSessions,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 
@@ -167,7 +175,12 @@ fun WeeklyStatsContent(
                 )
             }
         } else {
-            DailyChart(stats = stats)
+            Column {
+                DailyChart(stats = stats)
+                ChartLegend(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -206,23 +219,47 @@ private fun DailyChart(stats: WeeklyStats) {
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    val barColor = MaterialTheme.colorScheme.primary
+    // 누적 막대 차트 색상 - 완전 완료(Primary), 부분 완료(Secondary)
+    val fullCompletedColor = MaterialTheme.colorScheme.primary
+    val partialColor = MaterialTheme.colorScheme.secondary
     val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
     val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
 
-    // 차트 데이터 준비
+    // 누적 막대 차트 데이터 준비
     LaunchedEffect(stats) {
         val days = stats.dailyBreakdown.mapIndexed { index, _ -> index.toFloat() }
-        val focusTimes = stats.dailyBreakdown.map {
-            it.focusTime.inWholeMinutes.toFloat()
-        }
 
         modelProducer.runTransaction {
             columnSeries {
-                series(x = days, y = focusTimes)
+                // 첫 번째 시리즈: 완전 완료 시간 (막대 아래쪽)
+                series(
+                    x = days,
+                    y = stats.dailyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
+                )
+                // 두 번째 시리즈: 부분 완료 시간 (막대 위쪽에 쌓임)
+                series(
+                    x = days,
+                    y = stats.dailyBreakdown.map { it.partialTime.inWholeMinutes.toFloat() }
+                )
             }
         }
     }
+
+    // 누적 막대용 컬럼 프로바이더 - 두 가지 색상 제공
+    val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+        listOf(
+            rememberLineComponent(
+                fill = fill(fullCompletedColor),
+                thickness = 16.dp,
+                shape = rounded(allPercent = 40)
+            ),
+            rememberLineComponent(
+                fill = fill(partialColor),
+                thickness = 16.dp,
+                shape = rounded(allPercent = 40)
+            )
+        )
+    )
 
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
@@ -256,13 +293,7 @@ private fun DailyChart(stats: WeeklyStats) {
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberColumnCartesianLayer(
-                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(barColor),
-                        thickness = 16.dp,
-                        shape = rounded(allPercent = 40)
-                    )
-                ),
+                columnProvider = columnProvider
             ),
             startAxis = VerticalAxis.rememberStart(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
@@ -368,19 +399,31 @@ class WeeklyStatsProvider : PreviewParameterProvider<WeeklyStats> {
                     date = LocalDate.now(),
                     dayOfWeek = DayOfWeek.MONDAY,
                     focusTime = 80.minutes,
-                    sessionCount = 12
+                    fullCompletedTime = 60.minutes,
+                    partialTime = 20.minutes,
+                    sessionCount = 2,
+                    fullCompletedSessionCount = 1,
+                    partialSessionCount = 1
                 ),
                 DailyFocusTime(
                     date = LocalDate.now(),
                     dayOfWeek = DayOfWeek.TUESDAY,
                     focusTime = 30.minutes,
-                    sessionCount = 12
+                    fullCompletedTime = 30.minutes,
+                    partialTime = 0.minutes,
+                    sessionCount = 1,
+                    fullCompletedSessionCount = 1,
+                    partialSessionCount = 0
                 ),
                 DailyFocusTime(
                     date = LocalDate.now(),
                     dayOfWeek = DayOfWeek.WEDNESDAY,
                     focusTime = 200.minutes,
-                    sessionCount = 12
+                    fullCompletedTime = 150.minutes,
+                    partialTime = 50.minutes,
+                    sessionCount = 4,
+                    fullCompletedSessionCount = 3,
+                    partialSessionCount = 1
                 ),
             ),
             growthRate = 0.15

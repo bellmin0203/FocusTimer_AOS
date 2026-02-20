@@ -88,4 +88,12 @@
     <string name="day_short_friday">Fri</string>
     <string name="day_short_saturday">Sat</string>
     <string name="day_short_sunday">Sun</string>
+
+    <!-- Session Completion Types -->
+    <string name="session_full_completed">Full Completed</string>
+    <string name="session_partial">Partial</string>
+
+    <!-- Chart Legend -->
+    <string name="legend_full_completed">Full Complete</string>
+    <string name="legend_partial">Partial</string>
 </resources>

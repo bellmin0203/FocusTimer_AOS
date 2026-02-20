@@ -130,6 +130,14 @@ fun DailyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+            // 세션 정보 표시 (완전 완료 / 부분 완료)
+            if (stats.completedSessions > 0) {
+                SessionBreakdownItem(
+                    fullCompleted = stats.fullCompletedSessions,
+                    partial = stats.partialSessions,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 
@@ -151,7 +159,12 @@ fun DailyStatsContent(
                 )
             }
         } else {
-            HourlyChart(stats = stats)
+            Column {
+                HourlyChart(stats = stats)
+                ChartLegend(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -189,17 +202,25 @@ private fun HourlyChart(stats: DailyStats) {
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    // UX 개선 1: 테마 색상 적용
-    val barColor = MaterialTheme.colorScheme.primary
+    // 누적 막대 차트 색상 - 완전 완료(Primary), 부분 완료(Secondary)
+    val fullCompletedColor = MaterialTheme.colorScheme.primary
+    val partialColor = MaterialTheme.colorScheme.secondary
     val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
     val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
 
+    // 누적 막대 차트 데이터 준비
     LaunchedEffect(stats) {
         modelProducer.runTransaction {
             columnSeries {
+                // 첫 번째 시리즈: 완전 완료 시간 (막대 아래쪽)
                 series(
                     x = stats.hourlyBreakdown.map { it.hour.toFloat() },
-                    y = stats.hourlyBreakdown.map { it.focusTime.inWholeMinutes.toFloat() }
+                    y = stats.hourlyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
+                )
+                // 두 번째 시리즈: 부분 완료 시간 (막대 위쪽에 쌓임)
+                series(
+                    x = stats.hourlyBreakdown.map { it.hour.toFloat() },
+                    y = stats.hourlyBreakdown.map { it.partialTime.inWholeMinutes.toFloat() }
                 )
             }
         }
@@ -213,23 +234,31 @@ private fun HourlyChart(stats: DailyStats) {
 
     // 현재 시간 기준으로 초기 스크롤 위치 설정
     val currentHour = remember { LocalTime.now().hour }
-    val scrollAdjustment = 4 // 화면에 8개 정도 보일 때 중앙 정렬을 위해 (8/2)
+    val scrollAdjustment = 4
     val initialScroll = remember { Scroll.Absolute.x(currentHour - scrollAdjustment.toDouble()) }
 
-    // UX 개선 3: 스크롤 및 줌 상태 추가
     val zoomState = rememberVicoZoomState(
         zoomEnabled = true,
         initialZoom = Zoom.fixed(1.2f)
     )
     val scrollState = rememberVicoScrollState(initialScroll = initialScroll)
 
-    // UX 개선 1: 인터랙티브 마커 추가
-    // Vico 2.1.0 호환성: rememberDefaultCartesianMarker가 없을 경우를 대비하여 간단한 구현 사용 고려
-    // 하지만 일단 컴파일 에러를 피하기 위해 Marker를 잠시 주석 처리하고 기본 차트만 표시
-    // 사용자의 요청 사항이므로 추후 Vico 2.1.0의 정확한 Marker API를 확인 후 적용 권장
-    // 현재는 import 에러를 해결하는 것이 우선.
+    // 누적 막대용 컬럼 프로바이더 - 두 가지 색상 제공
+    val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+        listOf(
+            rememberLineComponent(
+                fill = fill(fullCompletedColor),
+                thickness = 12.dp,
+                shape = rounded(allPercent = 40)
+            ),
+            rememberLineComponent(
+                fill = fill(partialColor),
+                thickness = 12.dp,
+                shape = rounded(allPercent = 40)
+            )
+        )
+    )
 
-    // Marker 구현 (Vico 2.1.0 API 호환성 문제로 주석 처리)
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
             color = markerTextColor,
@@ -262,13 +291,7 @@ private fun HourlyChart(stats: DailyStats) {
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberColumnCartesianLayer(
-                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(barColor), // Fill 생성자 대신 helper 사용
-                        thickness = 12.dp,
-                        shape = rounded(allPercent = 40)
-                    )
-                )
+                columnProvider = columnProvider
             ),
             startAxis = VerticalAxis.rememberStart(
                 guideline = null,
@@ -323,12 +346,22 @@ class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
             date = LocalDate.now(),
             totalFocusTime = 120.minutes,
             completedSessions = 4,
+            fullCompletedSessions = 3,
+            partialSessions = 1,
             mostProductiveHour = 14,
             hourlyBreakdown = (0..23).map { hour ->
+                val isPeakHour = hour in 13..15
+                val isNormalHour = hour in 9..11
+                val hasFullComplete = isPeakHour || isNormalHour
+                val hasPartial = isPeakHour // 13-15시에만 부분 완료 추가
                 HourlyStats(
                     hour = hour,
-                    focusTime = if (hour in 13..15) 30.minutes else if (hour in 9..11) 15.minutes else 0.minutes,
-                    sessionCount = if (hour in 13..15) 1 else 0
+                    focusTime = if (isPeakHour) 45.minutes else if (isNormalHour) 15.minutes else 0.minutes,
+                    fullCompletedTime = if (hasFullComplete) 30.minutes else 0.minutes,
+                    partialTime = if (hasPartial) 15.minutes else 0.minutes,
+                    sessionCount = if (isPeakHour) 2 else if (isNormalHour) 1 else 0,
+                    fullCompletedCount = if (hasFullComplete) 1 else 0,
+                    partialCount = if (hasPartial) 1 else 0
                 )
             }
         ),
@@ -336,12 +369,18 @@ class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
             date = LocalDate.now().minusDays(1),
             totalFocusTime = 0.minutes,
             completedSessions = 0,
+            fullCompletedSessions = 0,
+            partialSessions = 0,
             mostProductiveHour = null,
             hourlyBreakdown = (0..23).map { hour ->
                 HourlyStats(
                     hour = hour,
                     focusTime = 0.minutes,
-                    sessionCount = 0
+                    fullCompletedTime = 0.minutes,
+                    partialTime = 0.minutes,
+                    sessionCount = 0,
+                    fullCompletedCount = 0,
+                    partialCount = 0
                 )
             }
         )

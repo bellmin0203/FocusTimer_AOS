@@ -13,6 +13,7 @@ import kotlin.time.Duration
  * @param duration 세션 지속 시간
  * @param completed 세션 완료 여부
  * @param overrunTime 초과 시간 (nullable - 초과하지 않은 경우 null)
+ * @param isPartial 부분 완료 여부 (타이머 중간 중단 시 true)
  */
 data class TimerSession(
     val id: Long = 0,
@@ -21,5 +22,6 @@ data class TimerSession(
     val endTime: Instant?,
     val duration: Duration,
     val completed: Boolean,
-    val overrunTime: Duration?
+    val overrunTime: Duration?,
+    val isPartial: Boolean = false // 부분 완료 여부 (타이머 중간 중단 시 true)
 )

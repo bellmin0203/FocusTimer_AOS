@@ -88,4 +88,12 @@
     <string name="day_short_friday">금</string>
     <string name="day_short_saturday">토</string>
     <string name="day_short_sunday">일</string>
+
+    <!-- Session Completion Types -->
+    <string name="session_full_completed">완전 완료</string>
+    <string name="session_partial">부분 완료</string>
+
+    <!-- Chart Legend -->
+    <string name="legend_full_completed">완전 완료</string>
+    <string name="legend_partial">부분 완료</string>
 </resources>
