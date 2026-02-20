@@ -42,6 +42,7 @@ import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.stacked
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
@@ -278,15 +279,15 @@ private fun HourlyChart(stats: DailyStats) {
     LaunchedEffect(stats) {
         modelProducer.runTransaction {
             columnSeries {
-                // 첫 번째 시리즈: 완전 완료 시간 (막대 아래쪽)
-                series(
-                    x = stats.hourlyBreakdown.map { it.hour.toFloat() },
-                    y = stats.hourlyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
-                )
-                // 두 번째 시리즈: 부분 완료 시간 (막대 위쪽에 쌓임)
+                // 첫 번째 시리즈: 부분 완료 시간 (막대 아래쪽)
                 series(
                     x = stats.hourlyBreakdown.map { it.hour.toFloat() },
                     y = stats.hourlyBreakdown.map { it.partialTime.inWholeMinutes.toFloat() }
+                )
+                // 두 번째 시리즈: 완전 완료 시간 (막대 위쪽에 쌓임)
+                series(
+                    x = stats.hourlyBreakdown.map { it.hour.toFloat() },
+                    y = stats.hourlyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
                 )
             }
         }
@@ -312,19 +313,18 @@ private fun HourlyChart(stats: DailyStats) {
     // 누적 막대용 컬럼 프로바이더 - 접근성을 위한 시각적 구분
     val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
         listOf(
-            // 완전 완료: 솔리드 색상 (진한 파랑)
-            rememberLineComponent(
-                fill = fill(fullCompletedColor),
-                thickness = 12.dp,
-                shape = rounded(allPercent = 40)
-            ),
             // 부분 완료: 투명도 + 테두리 (접근성 개선)
             rememberLineComponent(
                 fill = partialPatternFill,
                 thickness = 12.dp,
-                shape = rounded(allPercent = 40),
                 strokeFill = fill(partialColor),
                 strokeThickness = 1.dp
+            ),
+            // 완전 완료: 솔리드 색상 (진한 파랑)
+            rememberLineComponent(
+                fill = fill(fullCompletedColor),
+                thickness = 12.dp,
+                shape = rounded(topLeftPercent = 40, topRightPercent = 40)
             )
         )
     )
@@ -343,14 +343,14 @@ private fun HourlyChart(stats: DailyStats) {
         labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint,
         valueFormatter = remember(stats, context) {
             DefaultCartesianMarker.ValueFormatter { _, targets ->
-                // 두 시리즈(완전/부분)의 값을 모두 수집
-                val columnTargets = targets.filterIsInstance<ColumnCartesianLayerMarkerTarget>()
+                // 누적/비누적 모드 모두 대응: target 단위가 아니라 column 목록 기준으로 계산
+                val columns = targets
+                    .filterIsInstance<ColumnCartesianLayerMarkerTarget>()
+                    .flatMap { it.columns }
 
-                // 각 시리즈의 총합 계산 (index 0: 완전 완료, index 1: 부분 완료)
-                val fullCompletedMinutes = columnTargets
-                    .getOrNull(0)?.columns?.sumOf { it.entry.y.toInt() } ?: 0
-                val partialMinutes = columnTargets
-                    .getOrNull(1)?.columns?.sumOf { it.entry.y.toInt() } ?: 0
+                // 누적 순서: 0=부분 완료(아래), 1=완전 완료(위)
+                val partialMinutes = columns.getOrNull(0)?.entry?.y?.toInt() ?: 0
+                val fullCompletedMinutes = columns.getOrNull(1)?.entry?.y?.toInt() ?: 0
                 val totalMinutes = fullCompletedMinutes + partialMinutes
 
                 formatDetailedMarker(
@@ -366,7 +366,8 @@ private fun HourlyChart(stats: DailyStats) {
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberColumnCartesianLayer(
-                columnProvider = columnProvider
+                columnProvider = columnProvider,
+                mergeMode = { ColumnCartesianLayer.MergeMode.stacked() }
             ),
             startAxis = VerticalAxis.rememberStart(
                 guideline = null,
@@ -403,7 +404,7 @@ private fun HourlyChart(stats: DailyStats) {
  * Duration을 "X시간 Y분" 형식으로 변환
  */
 @Composable
-private fun formatDuration(duration: kotlin.time.Duration): String {
+private fun formatDuration(duration: Duration): String {
     return formatDurationKo(duration)
 }
 
