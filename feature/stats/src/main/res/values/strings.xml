@@ -37,7 +37,7 @@
     <string name="content_description_next_day">Next Day</string>
     <string name="daily_summary_title">Daily Summary</string>
     <string name="daily_most_productive_hour">Most Productive Hour</string>
-    <string name="daily_chart_title">24h Focus Time</string>
+    <string name="daily_chart_title">24h Focus Time Full/Partial Completion</string>
     <string name="daily_no_data">No focus records.</string>
 
     <!-- Weekly -->

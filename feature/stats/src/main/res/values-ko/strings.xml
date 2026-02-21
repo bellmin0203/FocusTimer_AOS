@@ -37,7 +37,7 @@
     <string name="content_description_next_day">다음 날짜</string>
     <string name="daily_summary_title">하루 요약</string>
     <string name="daily_most_productive_hour">가장 집중한 시간</string>
-    <string name="daily_chart_title">24시간 집중 시간</string>
+    <string name="daily_chart_title">24시간 집중 시간 완전/부분 완료</string>
     <string name="daily_no_data">집중 기록이 없습니다.</string>
 
     <!-- Weekly -->
