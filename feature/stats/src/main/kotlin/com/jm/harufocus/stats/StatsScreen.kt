@@ -1,6 +1,7 @@
 package com.jm.harufocus.stats
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -74,6 +75,7 @@ fun StatsScreen(
         onPreviousPeriod = viewModel::navigateToPreviousPeriod,
         onNextPeriod = viewModel::navigateToNextPeriod,
         onToday = viewModel::navigateToToday,
+        onDismissChartTooltip = viewModel::dismissChartTooltip,
         onBackClick = onBackClick
     )
 }
@@ -86,6 +88,7 @@ private fun StatsScreen(
     onPreviousPeriod: () -> Unit,
     onNextPeriod: () -> Unit,
     onToday: () -> Unit,
+    onDismissChartTooltip: () -> Unit,
     onBackClick: () -> Unit
 ) {
 
@@ -202,7 +205,9 @@ private fun StatsScreen(
                                     stats = stats,
                                     onPrevious = onPreviousPeriod,
                                     onNext = onNextPeriod,
-                                    canNavigateNext = stats.date.isBefore(LocalDate.now())
+                                    canNavigateNext = stats.date.isBefore(LocalDate.now()),
+                                    showChartTooltip = uiState.showChartTooltip,
+                                    onDismissChartTooltip = onDismissChartTooltip
                                 )
                             }
                         }
@@ -213,7 +218,9 @@ private fun StatsScreen(
                                     stats = stats,
                                     onPrevious = onPreviousPeriod,
                                     onNext = onNextPeriod,
-                                    canNavigateNext = !stats.weekStartDate.plusWeeks(1).isAfter(LocalDate.now())
+                                    canNavigateNext = !stats.weekStartDate.plusWeeks(1).isAfter(LocalDate.now()),
+                                    showChartTooltip = uiState.showChartTooltip,
+                                    onDismissChartTooltip = onDismissChartTooltip
                                 )
                             }
                         }
@@ -224,7 +231,9 @@ private fun StatsScreen(
                                     stats = stats,
                                     onPrevious = onPreviousPeriod,
                                     onNext = onNextPeriod,
-                                    canNavigateNext = stats.yearMonth.isBefore(YearMonth.now())
+                                    canNavigateNext = stats.yearMonth.isBefore(YearMonth.now()),
+                                    showChartTooltip = uiState.showChartTooltip,
+                                    onDismissChartTooltip = onDismissChartTooltip
                                 )
                             }
                         }
@@ -315,6 +324,7 @@ private fun StatsScreenLoadingPreview() {
             onPreviousPeriod = {},
             onNextPeriod = {},
             onToday = {},
+            onDismissChartTooltip = {},
             onBackClick = {}
         )
     }
@@ -334,6 +344,7 @@ private fun StatsScreenDailyPreview() {
             onPreviousPeriod = {},
             onNextPeriod = {},
             onToday = {},
+            onDismissChartTooltip = {},
             onBackClick = {}
         )
     }
@@ -353,6 +364,7 @@ private fun StatsScreenWeeklyPreview() {
             onPreviousPeriod = {},
             onNextPeriod = {},
             onToday = {},
+            onDismissChartTooltip = {},
             onBackClick = {}
         )
     }
@@ -372,6 +384,7 @@ private fun StatsScreenMonthlyPreview() {
             onPreviousPeriod = {},
             onNextPeriod = {},
             onToday = {},
+            onDismissChartTooltip = {},
             onBackClick = {}
         )
     }
@@ -389,6 +402,7 @@ private fun StatsScreenErrorPreview() {
             onPreviousPeriod = {},
             onNextPeriod = {},
             onToday = {},
+            onDismissChartTooltip = {},
             onBackClick = {}
         )
     }

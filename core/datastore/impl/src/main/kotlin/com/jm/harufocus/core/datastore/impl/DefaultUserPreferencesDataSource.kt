@@ -26,7 +26,20 @@ class DefaultUserPreferencesDataSource @Inject constructor(
         }
     }
 
+    override val isStatsChartTooltipShownFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_IS_STATS_CHART_TOOLTIP_SHOWN]
+            ?: UserPreferencesDataSource.DEFAULT_IS_STATS_CHART_TOOLTIP_SHOWN
+    }
+
+    override suspend fun updateIsStatsChartTooltipShown(shown: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_IS_STATS_CHART_TOOLTIP_SHOWN] = shown
+        }
+    }
+
     companion object {
         private val KEY_IS_TUTORIAL_COMPLETED = booleanPreferencesKey("is_tutorial_completed")
+        private val KEY_IS_STATS_CHART_TOOLTIP_SHOWN =
+            booleanPreferencesKey("is_stats_chart_tooltip_shown")
     }
 }

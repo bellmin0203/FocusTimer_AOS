@@ -3,6 +3,7 @@ package com.jm.harufocus.stats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jm.harufocus.data.util.DummyDataHelper
+import com.jm.harufocus.domain.repository.UserPreferencesRepository
 import com.jm.harufocus.domain.usecase.statistics.GetAchievementMetricsUseCase
 import com.jm.harufocus.domain.usecase.statistics.GetDailyStatsUseCase
 import com.jm.harufocus.domain.usecase.statistics.GetMonthlyStatsUseCase
@@ -16,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -31,6 +33,7 @@ class StatsViewModel @Inject constructor(
     private val getWeeklyStatsUseCase: GetWeeklyStatsUseCase,
     private val getMonthlyStatsUseCase: GetMonthlyStatsUseCase,
     private val getAchievementMetricsUseCase: GetAchievementMetricsUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val dummyDataHelper: DummyDataHelper,
     private val analyticsHelper: AnalyticsHelper,
 ) : ViewModel() {
@@ -49,8 +52,22 @@ class StatsViewModel @Inject constructor(
         analyticsHelper.logScreenView("stats_screen", "StatsScreen")
 
         generateDummyData() // 릴리즈 빌드에서는 더미 데이터 생성하지 않음
+        loadChartTooltipState()
         loadAchievementMetrics()
         loadStats()
+    }
+
+    private fun loadChartTooltipState() {
+        viewModelScope.launch {
+            try {
+                val isShown = userPreferencesRepository.isStatsChartTooltipShown.first()
+                _uiState.update { it.copy(showChartTooltip = !isShown) }
+            } catch (e: Exception) {
+                LogUtil.e("Failed to load chart tooltip state", e)
+                CrashReporter.recordException(e, "차트 툴팁 상태 로드 실패")
+                _uiState.update { it.copy(showChartTooltip = false) }
+            }
+        }
     }
 
     // 디버그 전용 함수 - 테스트에서 사용
@@ -252,5 +269,23 @@ class StatsViewModel @Inject constructor(
      */
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    /**
+     * 차트 의미 설명 툴팁을 닫고, 다시 보지 않도록 상태를 저장합니다.
+     */
+    fun dismissChartTooltip() {
+        if (!_uiState.value.showChartTooltip) return
+
+        _uiState.update { it.copy(showChartTooltip = false) }
+
+        viewModelScope.launch {
+            try {
+                userPreferencesRepository.updateIsStatsChartTooltipShown(true)
+            } catch (e: Exception) {
+                LogUtil.e("Failed to update chart tooltip state", e)
+                CrashReporter.recordException(e, "차트 툴팁 상태 저장 실패")
+            }
+        }
     }
 }

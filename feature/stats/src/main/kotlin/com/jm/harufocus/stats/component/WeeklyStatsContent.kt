@@ -75,7 +75,9 @@ fun WeeklyStatsContent(
     stats: WeeklyStats,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
-    canNavigateNext: Boolean = true
+    canNavigateNext: Boolean = true,
+    showChartTooltip: Boolean = false,
+    onDismissChartTooltip: () -> Unit = {}
 ) {
     val locale = Locale.getDefault()
     val pattern = if (locale.language == "ko") {

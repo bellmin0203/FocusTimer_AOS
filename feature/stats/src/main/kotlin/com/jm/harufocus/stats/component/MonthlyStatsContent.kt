@@ -73,7 +73,9 @@ fun MonthlyStatsContent(
     stats: MonthlyStats,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
-    canNavigateNext: Boolean = true
+    canNavigateNext: Boolean = true,
+    showChartTooltip: Boolean = false,
+    onDismissChartTooltip: () -> Unit = {}
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월")
 

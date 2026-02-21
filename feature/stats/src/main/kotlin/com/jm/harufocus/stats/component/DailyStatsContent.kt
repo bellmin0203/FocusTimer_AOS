@@ -80,7 +80,9 @@ fun DailyStatsContent(
     stats: DailyStats,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
-    canNavigateNext: Boolean = true
+    canNavigateNext: Boolean = true,
+    showChartTooltip: Boolean = false,
+    onDismissChartTooltip: () -> Unit = {}
 ) {
     val locale = Locale.getDefault()
     val pattern = if (locale.language == "ko") {
