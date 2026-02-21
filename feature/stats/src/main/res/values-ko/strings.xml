@@ -103,4 +103,11 @@
     <string name="marker_total">총 %s</string>
     <string name="marker_full">완전: %s</string>
     <string name="marker_partial">부분: %s</string>
+
+    <!-- Chart Guidance -->
+    <string name="chart_ratio_badge_format">완전 완료 %1$d%% / 부분 완료 %2$d%%</string>
+    <string name="chart_tooltip_message">완전 완료는 %1$s색, 중간 중단은 %2$s색으로 표시됩니다.</string>
+    <string name="chart_color_main_name">메인</string>
+    <string name="chart_color_sub_name">보조</string>
+    <string name="content_description_close_tooltip">툴팁 닫기</string>
 </resources>

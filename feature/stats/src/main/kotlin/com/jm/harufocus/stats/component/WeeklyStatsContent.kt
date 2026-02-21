@@ -86,6 +86,10 @@ fun WeeklyStatsContent(
         "MMM d"
     }
     val dateFormatter = DateTimeFormatter.ofPattern(pattern, locale)
+    val completionRatio = calculateCompletionRatio(
+        fullCompletedTime = stats.totalFullCompletedTime,
+        partialCompletedTime = stats.totalPartialTime
+    )
 
     // 날짜 네비게이션 헤더
     Row(
@@ -174,7 +178,12 @@ fun WeeklyStatsContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // 일별 집중 시간 차트
-    StatsCard(title = stringResource(R.string.weekly_chart_title)) {
+    StatsCard(
+        title = stringResource(R.string.weekly_chart_title),
+        headerTrailingContent = {
+            CompletionRatioBadge(ratio = completionRatio)
+        }
+    ) {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
             Box(
                 modifier = Modifier
@@ -190,6 +199,14 @@ fun WeeklyStatsContent(
             }
         } else {
             Column {
+                if (showChartTooltip) {
+                    ChartMeaningTooltip(
+                        onDismiss = onDismissChartTooltip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
                 DailyChart(stats = stats)
                 ChartLegend(
                     modifier = Modifier.fillMaxWidth()

@@ -103,4 +103,11 @@
     <string name="marker_total">Total: %s</string>
     <string name="marker_full">Full: %s</string>
     <string name="marker_partial">Partial: %s</string>
+
+    <!-- Chart Guidance -->
+    <string name="chart_ratio_badge_format">Full %1$d%% / Partial %2$d%%</string>
+    <string name="chart_tooltip_message">Full completion is shown in %1$s, and interrupted sessions in %2$s.</string>
+    <string name="chart_color_main_name">primary</string>
+    <string name="chart_color_sub_name">secondary</string>
+    <string name="content_description_close_tooltip">Close tooltip</string>
 </resources>

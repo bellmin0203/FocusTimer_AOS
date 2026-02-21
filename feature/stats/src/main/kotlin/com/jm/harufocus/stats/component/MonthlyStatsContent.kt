@@ -78,6 +78,10 @@ fun MonthlyStatsContent(
     onDismissChartTooltip: () -> Unit = {}
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월")
+    val completionRatio = calculateCompletionRatio(
+        fullCompletedTime = stats.totalFullCompletedTime,
+        partialCompletedTime = stats.totalPartialTime
+    )
 
     // 날짜 네비게이션 헤더
     Row(
@@ -161,7 +165,12 @@ fun MonthlyStatsContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // 주별 집중 시간 차트
-    StatsCard(title = stringResource(R.string.monthly_chart_title)) {
+    StatsCard(
+        title = stringResource(R.string.monthly_chart_title),
+        headerTrailingContent = {
+            CompletionRatioBadge(ratio = completionRatio)
+        }
+    ) {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
             Box(
                 modifier = Modifier
@@ -177,6 +186,14 @@ fun MonthlyStatsContent(
             }
         } else {
             Column {
+                if (showChartTooltip) {
+                    ChartMeaningTooltip(
+                        onDismiss = onDismissChartTooltip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
                 WeeklyChart(stats = stats)
                 ChartLegend(
                     modifier = Modifier.fillMaxWidth()
