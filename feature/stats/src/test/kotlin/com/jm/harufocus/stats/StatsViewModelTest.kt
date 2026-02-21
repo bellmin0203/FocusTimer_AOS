@@ -304,4 +304,37 @@ class StatsViewModelTest : BehaviorSpec({
             }
         }
     }
+
+    Given("차트 툴팁 상태에서") {
+        When("저장된 툴팁 노출 상태가 false이면") {
+            Then("UI에 툴팁이 표시되어야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.setupChartTooltipShown(isShown = false)
+                    robot.createViewModel()
+
+                    robot.verifyState {
+                        showChartTooltip shouldBe true
+                    }
+                }
+            }
+        }
+
+        When("사용자가 툴팁을 닫으면") {
+            Then("툴팁이 숨겨지고 저장소에 노출 완료 상태가 저장되어야 한다") {
+                runTest {
+                    val robot = StatsViewModelRobot(this)
+                    robot.setupChartTooltipShown(isShown = false)
+                    robot.createViewModel()
+
+                    robot.dismissChartTooltip()
+
+                    robot.verifyState {
+                        showChartTooltip shouldBe false
+                    }
+                    robot.verifyChartTooltipStateSaved()
+                }
+            }
+        }
+    }
 })
