@@ -18,13 +18,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jm.harufocus.stats.R
-import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
@@ -79,13 +77,7 @@ fun CompletionRatioBadge(
 fun ChartMeaningTooltip(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    autoDismissMillis: Long = 6000L
 ) {
-    LaunchedEffect(Unit) {
-        delay(autoDismissMillis)
-        onDismiss()
-    }
-
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
