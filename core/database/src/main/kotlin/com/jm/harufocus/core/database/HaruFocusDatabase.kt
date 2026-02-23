@@ -25,7 +25,7 @@ import com.jm.harufocus.core.database.model.TimerSessionEntity
         PresetEntity::class,
         StatisticsEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class HaruFocusDatabase : RoomDatabase() {
@@ -51,6 +51,15 @@ abstract class HaruFocusDatabase : RoomDatabase() {
         }
 
         /**
+         * 버전 2 → 3 마이그레이션: timer_sessions 테이블에 is_partial 컬럼 추가
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE timer_sessions ADD COLUMN is_partial INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        /**
          * 테스트용 인메모리 데이터베이스를 생성합니다.
          *
          * @param context 테스트 컨텍스트
@@ -62,7 +71,7 @@ abstract class HaruFocusDatabase : RoomDatabase() {
                 HaruFocusDatabase::class.java
             )
                 .allowMainThreadQueries() // 테스트에서만 메인 스레드 쿼리 허용
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
         }
     }

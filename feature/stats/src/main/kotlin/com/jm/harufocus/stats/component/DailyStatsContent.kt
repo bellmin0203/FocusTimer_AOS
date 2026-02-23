@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -35,10 +36,14 @@ import com.jm.harufocus.domain.model.statistics.DailyStats
 import com.jm.harufocus.domain.model.statistics.HourlyStats
 import com.jm.harufocus.stats.R
 import com.jm.harufocus.stats.StatsCard
+import com.jm.harufocus.stats.util.ChartPatterns
+import com.jm.harufocus.stats.util.formatDetailedMarker
+import com.jm.harufocus.stats.util.formatDurationKo
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.stacked
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
@@ -58,11 +63,13 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Insets
+import com.patrykandpatrick.vico.core.common.shader.toShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.rounded
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -72,7 +79,10 @@ import kotlin.time.Duration.Companion.minutes
 fun DailyStatsContent(
     stats: DailyStats,
     onPrevious: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    canNavigateNext: Boolean = true,
+    showChartTooltip: Boolean = false,
+    onDismissChartTooltip: () -> Unit = {}
 ) {
     val locale = Locale.getDefault()
     val pattern = if (locale.language == "ko") {
@@ -81,6 +91,10 @@ fun DailyStatsContent(
         "EEE, MMM d, yyyy"
     }
     val dateFormatter = DateTimeFormatter.ofPattern(pattern, locale)
+    val completionRatio = calculateCompletionRatio(
+        fullCompletedTime = stats.fullCompletedTime,
+        partialCompletedTime = stats.partialCompletedTime
+    )
 
     // 날짜 네비게이션 헤더
     Row(
@@ -104,11 +118,15 @@ fun DailyStatsContent(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        IconButton(onClick = onNext) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = stringResource(R.string.content_description_next_day)
-            )
+        if (canNavigateNext) {
+            IconButton(onClick = onNext) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.content_description_next_day)
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 
@@ -130,13 +148,26 @@ fun DailyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+            // 세션 정보 표시 (완전 완료 / 부분 완료)
+            if (stats.completedSessions > 0) {
+                TimeBreakdownItem(
+                    fullCompletedTime = stats.fullCompletedTime,
+                    partialCompletedTime = stats.partialCompletedTime,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // 시간대별 집중 시간 차트
-    StatsCard(title = stringResource(R.string.daily_chart_title)) {
+    StatsCard(
+        title = stringResource(R.string.daily_chart_title),
+        headerTrailingContent = {
+            CompletionRatioBadge(ratio = completionRatio)
+        }
+    ) {
         if (stats.totalFocusTime.inWholeMilliseconds == 0L) {
             Box(
                 modifier = Modifier
@@ -151,7 +182,20 @@ fun DailyStatsContent(
                 )
             }
         } else {
-            HourlyChart(stats = stats)
+            Column {
+                if (showChartTooltip) {
+                    ChartMeaningTooltip(
+                        onDismiss = onDismissChartTooltip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
+                HourlyChart(stats = stats)
+                ChartLegend(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -185,21 +229,90 @@ private fun StatItem(
 }
 
 @Composable
+private fun TimeBreakdownItem(
+    fullCompletedTime: Duration,
+    partialCompletedTime: Duration,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = stringResource(R.string.session_full_completed_time),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = formatDuration(fullCompletedTime),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .height(24.dp)
+                .padding(horizontal = 16.dp)
+                .background(MaterialTheme.colorScheme.outlineVariant)
+        )
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = stringResource(R.string.session_partial_time),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = formatDuration(partialCompletedTime),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
+}
+
+@Composable
 private fun HourlyChart(stats: DailyStats) {
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    // UX 개선 1: 테마 색상 적용
-    val barColor = MaterialTheme.colorScheme.primary
+    // 누적 막대 차트 색상 - 완전 완료(Primary), 부분 완료(Secondary)
+    val fullCompletedColor = MaterialTheme.colorScheme.primary
+    val partialColor = MaterialTheme.colorScheme.secondary
     val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
     val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+    val partialPatternFill = remember(partialColor) {
+        fill(
+            ChartPatterns.createDiagonalStripedPattern(
+                baseColor = partialColor.copy(alpha = 0.9f),
+                stripeColor = partialColor.copy(alpha = 0.45f)
+            ).toShaderProvider()
+        )
+    }
 
+    // 누적 막대 차트 데이터 준비
     LaunchedEffect(stats) {
         modelProducer.runTransaction {
             columnSeries {
+                // 첫 번째 시리즈: 부분 완료 시간 (막대 아래쪽)
                 series(
                     x = stats.hourlyBreakdown.map { it.hour.toFloat() },
-                    y = stats.hourlyBreakdown.map { it.focusTime.inWholeMinutes.toFloat() }
+                    y = stats.hourlyBreakdown.map { it.partialTime.inWholeMinutes.toFloat() }
+                )
+                // 두 번째 시리즈: 완전 완료 시간 (막대 위쪽에 쌓임)
+                series(
+                    x = stats.hourlyBreakdown.map { it.hour.toFloat() },
+                    y = stats.hourlyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
                 )
             }
         }
@@ -213,62 +326,73 @@ private fun HourlyChart(stats: DailyStats) {
 
     // 현재 시간 기준으로 초기 스크롤 위치 설정
     val currentHour = remember { LocalTime.now().hour }
-    val scrollAdjustment = 4 // 화면에 8개 정도 보일 때 중앙 정렬을 위해 (8/2)
+    val scrollAdjustment = 4
     val initialScroll = remember { Scroll.Absolute.x(currentHour - scrollAdjustment.toDouble()) }
 
-    // UX 개선 3: 스크롤 및 줌 상태 추가
     val zoomState = rememberVicoZoomState(
         zoomEnabled = true,
         initialZoom = Zoom.fixed(1.2f)
     )
     val scrollState = rememberVicoScrollState(initialScroll = initialScroll)
 
-    // UX 개선 1: 인터랙티브 마커 추가
-    // Vico 2.1.0 호환성: rememberDefaultCartesianMarker가 없을 경우를 대비하여 간단한 구현 사용 고려
-    // 하지만 일단 컴파일 에러를 피하기 위해 Marker를 잠시 주석 처리하고 기본 차트만 표시
-    // 사용자의 요청 사항이므로 추후 Vico 2.1.0의 정확한 Marker API를 확인 후 적용 권장
-    // 현재는 import 에러를 해결하는 것이 우선.
+    // 누적 막대용 컬럼 프로바이더 - 접근성을 위한 시각적 구분
+    val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+        listOf(
+            // 부분 완료: 투명도 + 테두리 (접근성 개선)
+            rememberLineComponent(
+                fill = partialPatternFill,
+                thickness = 12.dp,
+                strokeFill = fill(partialColor),
+                strokeThickness = 1.dp
+            ),
+            // 완전 완료: 솔리드 색상 (진한 파랑)
+            rememberLineComponent(
+                fill = fill(fullCompletedColor),
+                thickness = 12.dp,
+                shape = rounded(topLeftPercent = 40, topRightPercent = 40)
+            )
+        )
+    )
 
-    // Marker 구현 (Vico 2.1.0 API 호환성 문제로 주석 처리)
+    // 상세 마커 - 완전/부분 완료 시간 모두 표시
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
             color = markerTextColor,
+            textSize = 11.sp,
+            lineCount = 3,
             background = rememberShapeComponent(
                 fill = fill(markerBackgroundColor)
             ),
-            padding = Insets(horizontalDp = 8f, verticalDp = 4f),
+            padding = Insets(horizontalDp = 10f, verticalDp = 6f),
         ),
         labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint,
-        valueFormatter = remember {
+        valueFormatter = remember(stats, context) {
             DefaultCartesianMarker.ValueFormatter { _, targets ->
-                targets.filterIsInstance<ColumnCartesianLayerMarkerTarget>()
+                // 누적/비누적 모드 모두 대응: target 단위가 아니라 column 목록 기준으로 계산
+                val columns = targets
+                    .filterIsInstance<ColumnCartesianLayerMarkerTarget>()
                     .flatMap { it.columns }
-                    .joinToString("\n") { column ->
-                        val minutes = column.entry.y.toInt()
-                        val hours = minutes / 60
-                        val remainingMinutes = minutes % 60
-                        val timeText = when {
-                            hours > 0 && remainingMinutes > 0 -> context.getString(R.string.format_hours_minutes, hours, remainingMinutes)
-                            hours > 0 -> context.getString(R.string.format_hours, hours)
-                            remainingMinutes > 0 -> context.getString(R.string.format_minutes, remainingMinutes)
-                            else -> context.getString(R.string.format_zero_minutes)
-                        }
-                        timeText
-                    }
+
+                // 누적 순서: 0=부분 완료(아래), 1=완전 완료(위)
+                val partialMinutes = columns.getOrNull(0)?.entry?.y?.toInt() ?: 0
+                val fullCompletedMinutes = columns.getOrNull(1)?.entry?.y?.toInt() ?: 0
+                val totalMinutes = fullCompletedMinutes + partialMinutes
+
+                formatDetailedMarker(
+                    context = context,
+                    totalMinutes = totalMinutes,
+                    fullCompletedMinutes = fullCompletedMinutes,
+                    partialMinutes = partialMinutes
+                )
             }
-        }
+        },
     )
 
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberColumnCartesianLayer(
-                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(barColor), // Fill 생성자 대신 helper 사용
-                        thickness = 12.dp,
-                        shape = rounded(allPercent = 40)
-                    )
-                )
+                columnProvider = columnProvider,
+                mergeMode = { ColumnCartesianLayer.MergeMode.stacked() }
             ),
             startAxis = VerticalAxis.rememberStart(
                 guideline = null,
@@ -305,16 +429,8 @@ private fun HourlyChart(stats: DailyStats) {
  * Duration을 "X시간 Y분" 형식으로 변환
  */
 @Composable
-private fun formatDuration(duration: kotlin.time.Duration): String {
-    val hours = duration.inWholeHours
-    val minutes = (duration.inWholeMinutes % 60)
-
-    return when {
-        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
-        hours > 0 -> stringResource(R.string.format_hours, hours)
-        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
-        else -> stringResource(R.string.format_zero_minutes)
-    }
+private fun formatDuration(duration: Duration): String {
+    return formatDurationKo(duration)
 }
 
 class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
@@ -323,12 +439,22 @@ class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
             date = LocalDate.now(),
             totalFocusTime = 120.minutes,
             completedSessions = 4,
+            fullCompletedTime = 90.minutes,
+            partialCompletedTime = 30.minutes,
             mostProductiveHour = 14,
             hourlyBreakdown = (0..23).map { hour ->
+                val isPeakHour = hour in 13..15
+                val isNormalHour = hour in 9..11
+                val hasFullComplete = isPeakHour || isNormalHour
+                val hasPartial = isPeakHour // 13-15시에만 부분 완료 추가
                 HourlyStats(
                     hour = hour,
-                    focusTime = if (hour in 13..15) 30.minutes else if (hour in 9..11) 15.minutes else 0.minutes,
-                    sessionCount = if (hour in 13..15) 1 else 0
+                    focusTime = if (isPeakHour) 45.minutes else if (isNormalHour) 15.minutes else 0.minutes,
+                    fullCompletedTime = if (hasFullComplete) 30.minutes else 0.minutes,
+                    partialTime = if (hasPartial) 15.minutes else 0.minutes,
+                    sessionCount = if (isPeakHour) 2 else if (isNormalHour) 1 else 0,
+                    fullCompletedCount = if (hasFullComplete) 1 else 0,
+                    partialCount = if (hasPartial) 1 else 0
                 )
             }
         ),
@@ -336,12 +462,18 @@ class DailyStatsProvider : PreviewParameterProvider<DailyStats> {
             date = LocalDate.now().minusDays(1),
             totalFocusTime = 0.minutes,
             completedSessions = 0,
+            fullCompletedTime = 0.minutes,
+            partialCompletedTime = 0.minutes,
             mostProductiveHour = null,
             hourlyBreakdown = (0..23).map { hour ->
                 HourlyStats(
                     hour = hour,
                     focusTime = 0.minutes,
-                    sessionCount = 0
+                    fullCompletedTime = 0.minutes,
+                    partialTime = 0.minutes,
+                    sessionCount = 0,
+                    fullCompletedCount = 0,
+                    partialCount = 0
                 )
             }
         )
@@ -361,7 +493,8 @@ private fun DailyStatsContentPreview(
             DailyStatsContent(
                 stats = stats,
                 onPrevious = {},
-                onNext = {}
+                onNext = {},
+                canNavigateNext = true
             )
         }
     }

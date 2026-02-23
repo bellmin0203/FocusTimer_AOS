@@ -67,6 +67,34 @@ class ManageTimerSessionUseCase @Inject constructor(
     }
 
     /**
+     * 타이머 세션을 중간에 중단한 경우, 부분 완료 상태로 저장합니다
+     * 실제 경과 시간만큼을 duration으로 저장합니다
+     */
+    suspend fun savePartialSession(
+        sessionId: Long,
+        presetId: Int? = null,
+        startTime: Instant?,
+        elapsedDuration: Duration,
+    ): Result<Unit> {
+        if (startTime == null) {
+            return Result.failure(SessionException.MissingStartTime())
+        }
+
+        val session = TimerSession(
+            id = sessionId,
+            presetId = presetId,
+            startTime = startTime,
+            endTime = Instant.now(),
+            duration = elapsedDuration,
+            completed = true, // 부분 완료도 완료로 표시하여 통계에 반영
+            overrunTime = null,
+            isPartial = true // 부분 완료 여부 표시
+        )
+
+        return updateTimerSessionUseCase(session)
+    }
+
+    /**
      * 세션을 미완료 상태로 종료합니다 (중도 정지)
      */
     suspend fun stopSession(

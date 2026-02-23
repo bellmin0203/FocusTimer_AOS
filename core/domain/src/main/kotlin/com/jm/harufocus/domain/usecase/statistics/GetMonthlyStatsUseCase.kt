@@ -120,7 +120,11 @@ class GetMonthlyStatsUseCase @Inject constructor(
                 weekStartDate = currentDate,
                 weekEndDate = actualWeekEndDate,
                 focusTime = Duration.ZERO,
-                sessionCount = 0
+                fullCompletedTime = Duration.ZERO,
+                partialTime = Duration.ZERO,
+                sessionCount = 0,
+                fullCompletedSessionCount = 0,
+                partialSessionCount = 0
             )
 
             currentDate = actualWeekEndDate.plusDays(1)
@@ -148,7 +152,11 @@ class GetMonthlyStatsUseCase @Inject constructor(
             weeklyStats[weekOfMonth]?.let { stats ->
                 weeklyStats[weekOfMonth] = stats.copy(
                     focusTime = stats.focusTime + session.duration,
-                    sessionCount = stats.sessionCount + 1
+                    fullCompletedTime = stats.fullCompletedTime + if (session.isPartial) 0.milliseconds else session.duration,
+                    partialTime = stats.partialTime + if (session.isPartial) session.duration else 0.milliseconds,
+                    sessionCount = stats.sessionCount + 1,
+                    fullCompletedSessionCount = stats.fullCompletedSessionCount + if (session.isPartial) 0 else 1,
+                    partialSessionCount = stats.partialSessionCount + if (session.isPartial) 1 else 0
                 )
             }
         }

@@ -32,10 +32,18 @@ class GetDailyStatsUseCase @Inject constructor(
         // 해당 날짜의 완료된 세션들 조회
         val sessions = timerSessionRepository.getCompletedSessionsBetween(startOfDay, endOfDay).first()
 
-        // 시간대별 집계 (0-23시)
+        // 시간대별 집계 (0-23시) - 완전/부분 완료 시간 분리
         val hourlyStatsMap = mutableMapOf<Int, HourlyStats>()
         for (hour in 0..23) {
-            hourlyStatsMap[hour] = HourlyStats(hour, 0.milliseconds, 0)
+            hourlyStatsMap[hour] = HourlyStats(
+                hour = hour,
+                focusTime = 0.milliseconds,
+                fullCompletedTime = 0.milliseconds,
+                partialTime = 0.milliseconds,
+                sessionCount = 0,
+                fullCompletedCount = 0,
+                partialCount = 0
+            )
         }
 
         // 세션들을 시간대별로 집계
@@ -46,11 +54,23 @@ class GetDailyStatsUseCase @Inject constructor(
 
             // null 안전 처리: 키가 없을 경우 기본값으로 초기화하여 업데이트
             val currentStats = hourlyStatsMap[sessionStartHour]
-                ?: HourlyStats(sessionStartHour, 0.milliseconds, 0)
+                ?: HourlyStats(
+                    hour = sessionStartHour,
+                    focusTime = 0.milliseconds,
+                    fullCompletedTime = 0.milliseconds,
+                    partialTime = 0.milliseconds,
+                    sessionCount = 0,
+                    fullCompletedCount = 0,
+                    partialCount = 0
+                )
 
             hourlyStatsMap[sessionStartHour] = currentStats.copy(
                 focusTime = currentStats.focusTime + session.duration,
-                sessionCount = currentStats.sessionCount + 1
+                fullCompletedTime = currentStats.fullCompletedTime + if (session.isPartial) 0.milliseconds else session.duration,
+                partialTime = currentStats.partialTime + if (session.isPartial) session.duration else 0.milliseconds,
+                sessionCount = currentStats.sessionCount + 1,
+                fullCompletedCount = currentStats.fullCompletedCount + if (session.isPartial) 0 else 1,
+                partialCount = currentStats.partialCount + if (session.isPartial) 1 else 0
             )
         }
 
@@ -62,14 +82,20 @@ class GetDailyStatsUseCase @Inject constructor(
             .maxByOrNull { it.focusTime }
             ?.hour
 
-        // 총 집중 시간과 세션 수 계산
+        // 총 집중 시간과 완료 유형별 시간 계산
         val totalFocusTime = sessions.sumOf { it.duration.inWholeMilliseconds }.milliseconds
         val completedSessions = sessions.size
+        val fullCompletedTime =
+            sessions.filter { !it.isPartial }.sumOf { it.duration.inWholeMilliseconds }.milliseconds
+        val partialCompletedTime =
+            sessions.filter { it.isPartial }.sumOf { it.duration.inWholeMilliseconds }.milliseconds
 
         return DailyStats(
             date = date,
             totalFocusTime = totalFocusTime,
             completedSessions = completedSessions,
+            fullCompletedTime = fullCompletedTime,
+            partialCompletedTime = partialCompletedTime,
             hourlyBreakdown = hourlyBreakdown,
             mostProductiveHour = mostProductiveHour
         )

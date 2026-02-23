@@ -18,7 +18,21 @@ interface UserPreferencesDataSource {
      */
     suspend fun updateIsTutorialCompleted(completed: Boolean)
 
+    /**
+     * 통계 차트 설명 툴팁 노출 여부 Flow
+     * true: 이미 노출됨
+     * false: 아직 노출되지 않음
+     */
+    val isStatsChartTooltipShownFlow: Flow<Boolean>
+
+    /**
+     * 통계 차트 설명 툴팁 노출 여부를 업데이트합니다.
+     * @param shown 노출 여부
+     */
+    suspend fun updateIsStatsChartTooltipShown(shown: Boolean)
+
     companion object {
         const val DEFAULT_IS_TUTORIAL_COMPLETED = false
+        const val DEFAULT_IS_STATS_CHART_TOOLTIP_SHOWN = false
     }
 }

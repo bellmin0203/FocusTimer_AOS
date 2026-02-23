@@ -10,6 +10,11 @@
     <string name="stats_tab_weekly">주간</string>
     <string name="stats_tab_monthly">월간</string>
 
+    <!-- Navigation -->
+    <string name="stats_today">오늘</string>
+    <string name="stats_this_week">이번 주</string>
+    <string name="stats_this_month">이번 달</string>
+
     <!-- Loading/Empty -->
     <string name="stats_loading">통계를 불러오는 중...</string>
     <string name="stats_no_achievements">아직 기록된 성취가 없습니다.</string>
@@ -32,7 +37,7 @@
     <string name="content_description_next_day">다음 날짜</string>
     <string name="daily_summary_title">하루 요약</string>
     <string name="daily_most_productive_hour">가장 집중한 시간</string>
-    <string name="daily_chart_title">24시간 집중 시간</string>
+    <string name="daily_chart_title">24시간 집중 시간 완전/부분 완료</string>
     <string name="daily_no_data">집중 기록이 없습니다.</string>
 
     <!-- Weekly -->
@@ -83,4 +88,26 @@
     <string name="day_short_friday">금</string>
     <string name="day_short_saturday">토</string>
     <string name="day_short_sunday">일</string>
+
+    <!-- Session Completion Types -->
+    <string name="session_full_completed">완전 완료</string>
+    <string name="session_partial">부분 완료</string>
+    <string name="session_full_completed_time">완전 완료 시간</string>
+    <string name="session_partial_time">부분 완료 시간</string>
+
+    <!-- Chart Legend -->
+    <string name="legend_full_completed">완전 완료</string>
+    <string name="legend_partial">부분 완료</string>
+
+    <!-- Chart Marker -->
+    <string name="marker_total">총 %s</string>
+    <string name="marker_full">완전: %s</string>
+    <string name="marker_partial">부분: %s</string>
+
+    <!-- Chart Guidance -->
+    <string name="chart_ratio_badge_format">완전 완료 %1$d%% / 부분 완료 %2$d%%</string>
+    <string name="chart_tooltip_message">완전 완료는 %1$s색, 중간 중단은 %2$s색으로 표시됩니다.</string>
+    <string name="chart_color_main_name">메인</string>
+    <string name="chart_color_sub_name">보조</string>
+    <string name="content_description_close_tooltip">툴팁 닫기</string>
 </resources>

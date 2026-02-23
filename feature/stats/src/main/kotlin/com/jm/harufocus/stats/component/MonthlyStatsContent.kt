@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -29,16 +30,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.jm.harufocus.designsystem.component.ThemePreviews
 import com.jm.harufocus.designsystem.theme.HaruFocusTheme
 import com.jm.harufocus.domain.model.statistics.MonthlyStats
 import com.jm.harufocus.domain.model.statistics.WeeklyFocusTime
 import com.jm.harufocus.stats.R
 import com.jm.harufocus.stats.StatsCard
+import com.jm.harufocus.stats.util.ChartPatterns
+import com.jm.harufocus.stats.util.formatDetailedMarker
+import com.jm.harufocus.stats.util.formatDurationKo
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.stacked
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
@@ -53,6 +59,7 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Insets
+import com.patrykandpatrick.vico.core.common.shader.toShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Companion.rounded
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -65,9 +72,16 @@ import kotlin.time.Duration.Companion.minutes
 fun MonthlyStatsContent(
     stats: MonthlyStats,
     onPrevious: () -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    canNavigateNext: Boolean = true,
+    showChartTooltip: Boolean = false,
+    onDismissChartTooltip: () -> Unit = {}
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월")
+    val completionRatio = calculateCompletionRatio(
+        fullCompletedTime = stats.totalFullCompletedTime,
+        partialCompletedTime = stats.totalPartialTime
+    )
 
     // 날짜 네비게이션 헤더
     Row(
@@ -91,11 +105,15 @@ fun MonthlyStatsContent(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        IconButton(onClick = onNext) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = stringResource(R.string.content_description_next_month)
-            )
+        if (canNavigateNext) {
+            IconButton(onClick = onNext) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.content_description_next_month)
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 
@@ -133,13 +151,26 @@ fun MonthlyStatsContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+            // 세션 정보 표시 (완전 완료 / 부분 완료)
+            if (stats.totalSessions > 0) {
+                SessionTimeBreakdownItem(
+                    fullCompletedTime = stats.totalFullCompletedTime,
+                    partialCompletedTime = stats.totalPartialTime,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // 주별 집중 시간 차트
-    StatsCard(title = stringResource(R.string.monthly_chart_title)) {
+    StatsCard(
+        title = stringResource(R.string.monthly_chart_title),
+        headerTrailingContent = {
+            CompletionRatioBadge(ratio = completionRatio)
+        }
+    ) {
         if (stats.totalFocusTime.inWholeMinutes == 0L) {
             Box(
                 modifier = Modifier
@@ -154,7 +185,20 @@ fun MonthlyStatsContent(
                 )
             }
         } else {
-            WeeklyChart(stats = stats)
+            Column {
+                if (showChartTooltip) {
+                    ChartMeaningTooltip(
+                        onDismiss = onDismissChartTooltip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
+                WeeklyChart(stats = stats)
+                ChartLegend(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -193,47 +237,87 @@ private fun WeeklyChart(stats: MonthlyStats) {
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    val barColor = MaterialTheme.colorScheme.primary
+    // 누적 막대 차트 색상 - 완전 완료(Primary), 부분 완료(Secondary)
+    val fullCompletedColor = MaterialTheme.colorScheme.primary
+    val partialColor = MaterialTheme.colorScheme.secondary
     val markerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
     val markerTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+    val partialPatternFill = remember(partialColor) {
+        fill(
+            ChartPatterns.createDiagonalStripedPattern(
+                baseColor = partialColor
+            ).toShaderProvider()
+        )
+    }
 
-    // 차트 데이터 준비
+    // 누적 막대 차트 데이터 준비
     LaunchedEffect(stats) {
         val weeks = stats.weeklyBreakdown.map { it.weekOfMonth.toFloat() }
-        val focusTimes = stats.weeklyBreakdown.map {
-            it.focusTime.inWholeMinutes.toFloat()
-        }
 
         modelProducer.runTransaction {
-            columnSeries { series(weeks, focusTimes) }
+            columnSeries {
+                // 첫 번째 시리즈: 부분 완료 시간 (막대 아래쪽)
+                series(
+                    x = weeks,
+                    y = stats.weeklyBreakdown.map { it.partialTime.inWholeMinutes.toFloat() }
+                )
+                // 두 번째 시리즈: 완전 완료 시간 (막대 위쪽에 쌓임)
+                series(
+                    x = weeks,
+                    y = stats.weeklyBreakdown.map { it.fullCompletedTime.inWholeMinutes.toFloat() }
+                )
+            }
         }
     }
 
+    // 누적 막대용 컬럼 프로바이더 - 접근성을 위한 시각적 구분
+    val columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+        listOf(
+            // 부분 완료: 투명도 적용 (접근성 개선)
+            rememberLineComponent(
+                fill = partialPatternFill,
+                thickness = 20.dp,
+                strokeFill = fill(partialColor),
+                strokeThickness = 1.dp
+            ),
+            // 완전 완료: 솔리드 색상 (진한 파랑)
+            rememberLineComponent(
+                fill = fill(fullCompletedColor),
+                thickness = 20.dp,
+                shape = rounded(topLeftPercent = 40, topRightPercent = 40)
+            )
+        )
+    )
+
+    // 상세 마커 - 완전/부분 완료 시간 모두 표시
     val marker = rememberDefaultCartesianMarker(
         label = rememberTextComponent(
             color = markerTextColor,
+            textSize = 11.sp,
+            lineCount = 3,
             background = rememberShapeComponent(
                 fill = fill(markerBackgroundColor)
             ),
-            padding = Insets(horizontalDp = 8f, verticalDp = 4f),
+            padding = Insets(horizontalDp = 10f, verticalDp = 6f),
         ),
         labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint,
-        valueFormatter = remember {
+        valueFormatter = remember(stats, context) {
             DefaultCartesianMarker.ValueFormatter { _, targets ->
-                targets.filterIsInstance<ColumnCartesianLayerMarkerTarget>()
+                val columns = targets
+                    .filterIsInstance<ColumnCartesianLayerMarkerTarget>()
                     .flatMap { it.columns }
-                    .joinToString("\n") { column ->
-                        val minutes = column.entry.y.toInt()
-                        val hours = minutes / 60
-                        val remainingMinutes = minutes % 60
-                        val timeText = when {
-                            hours > 0 && remainingMinutes > 0 -> context.getString(R.string.format_hours_minutes, hours, remainingMinutes)
-                            hours > 0 -> context.getString(R.string.format_hours, hours)
-                            remainingMinutes > 0 -> context.getString(R.string.format_minutes, remainingMinutes)
-                            else -> context.getString(R.string.format_zero_minutes)
-                        }
-                        timeText
-                    }
+
+                // 누적 순서: 0=부분 완료(아래), 1=완전 완료(위)
+                val partialMinutes = columns.getOrNull(0)?.entry?.y?.toInt() ?: 0
+                val fullCompletedMinutes = columns.getOrNull(1)?.entry?.y?.toInt() ?: 0
+                val totalMinutes = fullCompletedMinutes + partialMinutes
+
+                formatDetailedMarker(
+                    context = context,
+                    totalMinutes = totalMinutes,
+                    fullCompletedMinutes = fullCompletedMinutes,
+                    partialMinutes = partialMinutes
+                )
             }
         }
     )
@@ -241,13 +325,8 @@ private fun WeeklyChart(stats: MonthlyStats) {
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberColumnCartesianLayer(
-                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(barColor),
-                        thickness = 20.dp,
-                        shape = rounded(allPercent = 40)
-                    )
-                ),
+                columnProvider = columnProvider,
+                mergeMode = { ColumnCartesianLayer.MergeMode.stacked() }
             ),
             startAxis = VerticalAxis.rememberStart(
                 label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
@@ -276,15 +355,7 @@ private fun WeeklyChart(stats: MonthlyStats) {
  */
 @Composable
 private fun formatDuration(duration: kotlin.time.Duration): String {
-    val hours = duration.inWholeHours
-    val minutes = (duration.inWholeMinutes % 60)
-
-    return when {
-        hours > 0 && minutes > 0 -> stringResource(R.string.format_hours_minutes, hours, minutes)
-        hours > 0 -> stringResource(R.string.format_hours, hours)
-        minutes > 0 -> stringResource(R.string.format_minutes, minutes)
-        else -> stringResource(R.string.format_zero_minutes)
-    }
+    return formatDurationKo(duration)
 }
 
 /**
@@ -323,28 +394,44 @@ class MonthlyStatsProvider : PreviewParameterProvider<MonthlyStats> {
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 100.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 80.minutes,
+                    partialTime = 20.minutes,
+                    sessionCount = 2,
+                    fullCompletedSessionCount = 1,
+                    partialSessionCount = 1
                 ),
                 WeeklyFocusTime(
                     weekOfMonth = 2,
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 400.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 350.minutes,
+                    partialTime = 50.minutes,
+                    sessionCount = 6,
+                    fullCompletedSessionCount = 5,
+                    partialSessionCount = 1
                 ),
                 WeeklyFocusTime(
                     weekOfMonth = 3,
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 120.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 90.minutes,
+                    partialTime = 30.minutes,
+                    sessionCount = 2,
+                    fullCompletedSessionCount = 1,
+                    partialSessionCount = 1
                 ),
                 WeeklyFocusTime(
                     weekOfMonth = 4,
                     weekStartDate = YearMonth.now().atDay(1),
                     weekEndDate = YearMonth.now().atDay(7),
                     focusTime = 300.minutes,
-                    sessionCount = 2
+                    fullCompletedTime = 250.minutes,
+                    partialTime = 50.minutes,
+                    sessionCount = 5,
+                    fullCompletedSessionCount = 4,
+                    partialSessionCount = 1
                 ),
             )
         )
@@ -361,7 +448,8 @@ private fun MonthlyStatsContentPreview(
             MonthlyStatsContent(
                 stats = stats,
                 onPrevious = {},
-                onNext = {}
+                onNext = {},
+                canNavigateNext = true
             )
         }
     }

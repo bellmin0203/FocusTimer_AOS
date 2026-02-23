@@ -17,6 +17,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param duration 세션 지속 시간 (밀리초로 저장)
  * @param completed 세션 완료 여부
  * @param overrunTime 초과 시간 (nullable - 초과하지 않은 경우 null, 밀리초로 저장)
+ * @param isPartial 부분 완료 여부 (타이머 중간 중단 시 true)
  */
 @Entity(tableName = "timer_sessions")
 data class TimerSessionEntity(
@@ -39,7 +40,10 @@ data class TimerSessionEntity(
     val completed: Boolean,
 
     @ColumnInfo(name = "overrun_time")
-    val overrunTime: Long? // Duration을 밀리초로 저장
+    val overrunTime: Long?, // Duration을 밀리초로 저장
+
+    @ColumnInfo(name = "is_partial", defaultValue = "0")
+    val isPartial: Boolean = false // 부분 완료 여부 (타이머 중간 중단 시 true)
 )
 
 /**
@@ -53,7 +57,8 @@ fun TimerSessionEntity.toTimerSession(): TimerSession {
         endTime = this.endTime?.let { Instant.ofEpochMilli(it) },
         duration = this.duration.milliseconds,
         completed = this.completed,
-        overrunTime = this.overrunTime?.milliseconds
+        overrunTime = this.overrunTime?.milliseconds,
+        isPartial = this.isPartial
     )
 }
 
@@ -68,6 +73,7 @@ fun TimerSession.toTimerSessionEntity(): TimerSessionEntity {
         endTime = this.endTime?.toEpochMilli(),
         duration = this.duration.inWholeMilliseconds,
         completed = this.completed,
-        overrunTime = this.overrunTime?.inWholeMilliseconds
+        overrunTime = this.overrunTime?.inWholeMilliseconds,
+        isPartial = this.isPartial
     )
 }

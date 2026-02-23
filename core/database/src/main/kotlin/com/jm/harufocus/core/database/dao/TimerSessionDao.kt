@@ -204,6 +204,76 @@ interface TimerSessionDao {
         """)
     suspend fun getLongestDailyFocusTime(): Long?
     
+    /**
+     * 완전 완료된 세션만 조회합니다 (is_partial = 0).
+     * @return 완전 완료된 세션들의 Flow
+     */
+    @Query("SELECT * FROM timer_sessions WHERE completed = 1 AND is_partial = 0 ORDER BY start_time DESC")
+    fun getFullCompletedSessions(): Flow<List<TimerSessionEntity>>
+
+    /**
+     * 부분 완료된 세션만 조회합니다 (is_partial = 1).
+     * @return 부분 완료된 세션들의 Flow
+     */
+    @Query("SELECT * FROM timer_sessions WHERE completed = 1 AND is_partial = 1 ORDER BY start_time DESC")
+    fun getPartialSessions(): Flow<List<TimerSessionEntity>>
+
+    /**
+     * 특정 기간의 완전 완료된 세션만 조회합니다 (is_partial = 0).
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 해당 기간의 완전 완료된 세션들
+     */
+    @Query("SELECT * FROM timer_sessions WHERE completed = 1 AND is_partial = 0 AND start_time BETWEEN :startTime AND :endTime ORDER BY start_time ASC")
+    fun getFullCompletedSessionsBetween(
+        startTime: Long,
+        endTime: Long
+    ): Flow<List<TimerSessionEntity>>
+
+    /**
+     * 특정 기간의 부분 완료된 세션만 조회합니다 (is_partial = 1).
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 해당 기간의 부분 완료된 세션들
+     */
+    @Query("SELECT * FROM timer_sessions WHERE completed = 1 AND is_partial = 1 AND start_time BETWEEN :startTime AND :endTime ORDER BY start_time ASC")
+    fun getPartialSessionsBetween(
+        startTime: Long,
+        endTime: Long
+    ): Flow<List<TimerSessionEntity>>
+
+    /**
+     * 완전 완료된 세션 수를 조회합니다 (is_partial = 0).
+     * @return 완전 완료된 세션 개수
+     */
+    @Query("SELECT COUNT(*) FROM timer_sessions WHERE completed = 1 AND is_partial = 0")
+    suspend fun getFullCompletedSessionCount(): Int
+
+    /**
+     * 부분 완료된 세션 수를 조회합니다 (is_partial = 1).
+     * @return 부분 완료된 세션 개수
+     */
+    @Query("SELECT COUNT(*) FROM timer_sessions WHERE completed = 1 AND is_partial = 1")
+    suspend fun getPartialSessionCount(): Int
+
+    /**
+     * 특정 기간의 완전 완료된 세션 수를 조회합니다 (is_partial = 0).
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 완전 완료된 세션 개수
+     */
+    @Query("SELECT COUNT(*) FROM timer_sessions WHERE completed = 1 AND is_partial = 0 AND start_time BETWEEN :startTime AND :endTime")
+    suspend fun getFullCompletedSessionCountBetween(startTime: Long, endTime: Long): Int
+
+    /**
+     * 특정 기간의 부분 완료된 세션 수를 조회합니다 (is_partial = 1).
+     * @param startTime 시작 시간 (타임스탬프)
+     * @param endTime 종료 시간 (타임스탬프)
+     * @return 부분 완료된 세션 개수
+     */
+    @Query("SELECT COUNT(*) FROM timer_sessions WHERE completed = 1 AND is_partial = 1 AND start_time BETWEEN :startTime AND :endTime")
+    suspend fun getPartialSessionCountBetween(startTime: Long, endTime: Long): Int
+
     // ========== DEBUG/TEST 전용 메서드들 ==========
     
     /**

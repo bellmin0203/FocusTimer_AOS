@@ -180,7 +180,8 @@ class TimerService : Service() {
     /**
      * 타이머 정지 및 서비스 종료
      *
-     * 진행 중인 세션이 있으면 미완료 상태로 업데이트합니다.
+     * 진행 중인 세션이 있으면 부분 완료 상태로 업데이트하여
+     * 실제 경과 시간만큼 통계에 반영합니다.
      */
     private fun handleStop() {
         LogUtil.d("TimerService handleStop")
@@ -189,25 +190,33 @@ class TimerService : Service() {
         val state = timerManager.timerState.value
         val selectedPreset = state.selectedPreset
 
-        // 진행 중인 세션이 있으면 미완료 상태로 업데이트
+        // 진행 중인 세션이 있으면 부분 완료 상태로 업데이트
         state.currentSessionId?.let { sessionId ->
-            serviceScope.launch {
-                val updateResult = manageTimerSessionUseCase.stopSession(
-                    sessionId = sessionId,
-                    presetId = selectedPreset?.id,
-                    startTime = state.sessionStartTime,
-                    initialDuration = state.initialDuration
-                )
+            // 실제 경과 시간 계산: 초기 설정 시간 - 남은 시간
+            val elapsedDuration = state.initialDuration - state.remainingTime
+            
+            // 경과 시간이 0보다 크면 부분 완료로 저장
+            if (elapsedDuration > Duration.ZERO) {
+                serviceScope.launch {
+                    val updateResult = manageTimerSessionUseCase.savePartialSession(
+                        sessionId = sessionId,
+                        presetId = selectedPreset?.id,
+                        startTime = state.sessionStartTime,
+                        elapsedDuration = elapsedDuration
+                    )
 
-                updateResult.fold(
-                    onSuccess = {
-                        LogUtil.d("세션 업데이트 성공 (미완료), sessionId=$sessionId")
-                    },
-                    onFailure = { error ->
-                        LogUtil.e("세션 업데이트 실패", error)
-                        CrashReporter.recordException(error, "세션 업데이트 실패 (미완료)")
-                    }
-                )
+                    updateResult.fold(
+                        onSuccess = {
+                            LogUtil.d("세션 부분 완료로 저장 성공, sessionId=$sessionId, elapsed=$elapsedDuration")
+                        },
+                        onFailure = { error ->
+                            LogUtil.e("세션 부분 완료 저장 실패", error)
+                            CrashReporter.recordException(error, "세션 부분 완료 저장 실패")
+                        }
+                    )
+                }
+            } else {
+                LogUtil.d("경과 시간이 0이므로 세션 저장 건너뜀")
             }
         }
 

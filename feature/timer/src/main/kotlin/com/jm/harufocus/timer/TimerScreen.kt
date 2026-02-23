@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -246,6 +247,7 @@ private fun TimerScreenContent(
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,
+        scrimColor = Color.Black.copy(alpha = 0.3f),
         drawerContent = {
             NavigationDrawerContent(
                 drawerState = drawerState,

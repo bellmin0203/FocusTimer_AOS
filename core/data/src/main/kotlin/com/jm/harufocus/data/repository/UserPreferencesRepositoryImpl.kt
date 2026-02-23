@@ -10,8 +10,14 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 ) : UserPreferencesRepository {
 
     override val isTutorialCompleted: Flow<Boolean?> = userPreferencesDataSource.isTutorialCompletedFlow
+    override val isStatsChartTooltipShown: Flow<Boolean> =
+        userPreferencesDataSource.isStatsChartTooltipShownFlow
 
     override suspend fun updateIsTutorialCompleted(completed: Boolean) {
         userPreferencesDataSource.updateIsTutorialCompleted(completed)
+    }
+
+    override suspend fun updateIsStatsChartTooltipShown(shown: Boolean) {
+        userPreferencesDataSource.updateIsStatsChartTooltipShown(shown)
     }
 }

@@ -10,6 +10,11 @@
     <string name="stats_tab_weekly">Weekly</string>
     <string name="stats_tab_monthly">Monthly</string>
 
+    <!-- Navigation -->
+    <string name="stats_today">Today</string>
+    <string name="stats_this_week">This Week</string>
+    <string name="stats_this_month">This Month</string>
+
     <!-- Loading/Empty -->
     <string name="stats_loading">Loading stats...</string>
     <string name="stats_no_achievements">No achievements yet.</string>
@@ -32,7 +37,7 @@
     <string name="content_description_next_day">Next Day</string>
     <string name="daily_summary_title">Daily Summary</string>
     <string name="daily_most_productive_hour">Most Productive Hour</string>
-    <string name="daily_chart_title">24h Focus Time</string>
+    <string name="daily_chart_title">24h Focus Time Full/Partial Completion</string>
     <string name="daily_no_data">No focus records.</string>
 
     <!-- Weekly -->
@@ -83,4 +88,26 @@
     <string name="day_short_friday">Fri</string>
     <string name="day_short_saturday">Sat</string>
     <string name="day_short_sunday">Sun</string>
+
+    <!-- Session Completion Types -->
+    <string name="session_full_completed">Full Completed</string>
+    <string name="session_partial">Partial</string>
+    <string name="session_full_completed_time">Full Completed Time</string>
+    <string name="session_partial_time">Partial Completed Time</string>
+
+    <!-- Chart Legend -->
+    <string name="legend_full_completed">Full Complete</string>
+    <string name="legend_partial">Partial</string>
+
+    <!-- Chart Marker -->
+    <string name="marker_total">Total: %s</string>
+    <string name="marker_full">Full: %s</string>
+    <string name="marker_partial">Partial: %s</string>
+
+    <!-- Chart Guidance -->
+    <string name="chart_ratio_badge_format">Full %1$d%% / Partial %2$d%%</string>
+    <string name="chart_tooltip_message">Full completion is shown in %1$s, and interrupted sessions in %2$s.</string>
+    <string name="chart_color_main_name">primary</string>
+    <string name="chart_color_sub_name">secondary</string>
+    <string name="content_description_close_tooltip">Close tooltip</string>
 </resources>

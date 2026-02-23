@@ -22,6 +22,7 @@ data class StatsUiState(
     val weeklyStats: WeeklyStats? = null,
     val monthlyStats: MonthlyStats? = null,
     val achievementMetrics: AchievementMetrics? = null,
+    val showChartTooltip: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null
 )
